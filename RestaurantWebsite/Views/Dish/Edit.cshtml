@@ -99,7 +99,7 @@
                         </label>
                         <div class="col-sm-9">
                             <div class="input-group">
-                                @Html.TextBoxFor(m => m.Price, new {
+                                @Html.TextBox("Price", Model.Price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new {
                                     @class = "form-control",
                                     type = "number",
                                     step = "1000",

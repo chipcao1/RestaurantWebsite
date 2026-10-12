@@ -205,7 +205,7 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.CategoryId = new SelectList(db.Categories.OrderBy(c => c.Name).ToList(), "Id", "Name", dish.CategoryId);
+            ViewBag.CategoryList = new SelectList(db.Categories.OrderBy(c => c.Name).ToList(), "Id", "Name", dish.CategoryId);
 
             var primaryImg = dish.DishImages.FirstOrDefault(i => i.IsPrimary) ?? dish.DishImages.FirstOrDefault();
             ViewBag.PrimaryImageUrl = primaryImg != null ? primaryImg.ImageUrl : string.Empty;
@@ -260,7 +260,7 @@ namespace RestaurantWebsite.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.CategoryId = new SelectList(db.Categories.OrderBy(c => c.Name).ToList(), "Id", "Name", model.CategoryId);
+                ViewBag.CategoryList = new SelectList(db.Categories.OrderBy(c => c.Name).ToList(), "Id", "Name", model.CategoryId);
                 ViewBag.PrimaryImageUrl = primaryImageUrl;
                 model.DishImages = dish.DishImages;
                 return View(model);

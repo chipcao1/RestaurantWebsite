@@ -176,28 +176,33 @@ namespace RestaurantWebsite.Controllers
             }
 
             // -------------------------------------------------
-            // Delivery validation
+            // Delivery address validation by OrderType
             // -------------------------------------------------
+            ModelState.Remove("DeliveryAddress");
 
-            model.DeliveryAddress =
-                string.IsNullOrWhiteSpace(model.DeliveryAddress)
+            if (model.OrderType == "Delivery")
+            {
+                model.DeliveryAddress = string.IsNullOrWhiteSpace(model.DeliveryAddress)
                     ? user.Address
                     : model.DeliveryAddress.Trim();
 
-            if (model.OrderType == "Delivery" &&
-                string.IsNullOrWhiteSpace(model.DeliveryAddress))
-            {
-                ModelState.AddModelError(
-                    "DeliveryAddress",
-                    "Delivery address is required for Delivery orders.");
+                if (string.IsNullOrWhiteSpace(model.DeliveryAddress))
+                {
+                    ModelState.AddModelError(
+                        "DeliveryAddress",
+                        "Delivery address is required for Delivery orders.");
+                }
+                else if (model.DeliveryAddress.Length > 500)
+                {
+                    ModelState.AddModelError(
+                        "DeliveryAddress",
+                        "Delivery address cannot exceed 500 characters.");
+                }
             }
-
-            if (!string.IsNullOrWhiteSpace(model.DeliveryAddress) &&
-                model.DeliveryAddress.Length > 500)
+            else
             {
-                ModelState.AddModelError(
-                    "DeliveryAddress",
-                    "Delivery address cannot exceed 500 characters.");
+                // Dine-in and Takeaway do not require or use a delivery address
+                model.DeliveryAddress = null;
             }
 
             // -------------------------------------------------

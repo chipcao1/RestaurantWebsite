@@ -29,10 +29,10 @@ $(window).on('load', function () {
     })
 });
 
-// nice select
+// nice select - only apply to select elements that request custom styling and explicitly exclude #OrderType
 $(document).ready(function() {
-    $('select').niceSelect();
-  });
+    $('select.nice-select-custom, .book_section select').not('#OrderType').niceSelect();
+});
 
 /** google_map js **/
 function myMap() {

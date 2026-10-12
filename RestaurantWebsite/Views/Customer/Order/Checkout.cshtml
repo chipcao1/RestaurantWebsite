@@ -381,7 +381,9 @@
 @section Scripts {
     <script>
         function toggleDeliveryAddress() {
-            var orderType = document.getElementById("OrderType").value;
+            var orderTypeSelect = document.getElementById("OrderType");
+            if (!orderTypeSelect) return;
+            var orderType = orderTypeSelect.value;
             var addressGroup = document.getElementById("deliveryAddressGroup");
             if (addressGroup) {
                 if (orderType === "Delivery") {
@@ -391,8 +393,20 @@
                 }
             }
         }
-        document.addEventListener("DOMContentLoaded", function () {
+
+        $(document).ready(function () {
+            // Guarantee #OrderType uses native HTML select behavior
+            if ($.fn.niceSelect && $('#OrderType').next('.nice-select').length) {
+                $('#OrderType').niceSelect('destroy');
+            }
+
+            // Sync address visibility with initial OrderType on page load
             toggleDeliveryAddress();
+
+            // Listen for user changes
+            $('#OrderType').on('change', function () {
+                toggleDeliveryAddress();
+            });
         });
     </script>
 }
