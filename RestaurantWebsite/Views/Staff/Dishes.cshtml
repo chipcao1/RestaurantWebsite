@@ -1,0 +1,114 @@
+@model IEnumerable<RestaurantWebsite.Models.Dish>
+
+@{
+    ViewBag.Title = "Staff - Menu & Dish Availability";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title font-weight-bold"><i class="fa fa-cutlery mr-2"></i>Menu Dish Availability Control</h3>
+        <div class="card-tools">
+            <span class="badge badge-info">Staff Workspace</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Category Filter Form -->
+        @using (Html.BeginForm("Dishes", "Staff", FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Category:</label>
+                @Html.DropDownList("categoryId", (SelectList)ViewBag.Categories, "All Categories", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Dish name..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || !string.IsNullOrEmpty(ViewBag.SelectedCategory))
+            {
+                <a href="@Url.Action("Dishes", "Staff")" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Dishes Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No dishes found.</h5>
+                <p class="mb-0">Try clearing your filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Dish Name</th>
+                            <th>Category</th>
+                            <th class="text-right">Price</th>
+                            <th class="text-center">Preparation Time</th>
+                            <th class="text-center">Availability Status</th>
+                            <th style="width: 170px;" class="text-center">Quick Toggle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dish in Model)
+                        {
+                            bool isAvailable = dish.Status == "Available";
+                            <tr>
+                                <td class="text-center font-weight-bold">#@dish.Id</td>
+                                <td>
+                                    <span class="font-weight-bold">@dish.Name</span>
+                                    @if (!string.IsNullOrEmpty(dish.Description))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 250px;">@dish.Description</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-light border">@(dish.Category != null ? dish.Category.Name : "Uncategorized")</span>
+                                </td>
+                                <td class="text-right font-weight-bold text-success">$@dish.Price.ToString("N2")</td>
+                                <td class="text-center"><i class="fa fa-clock-o text-muted mr-1"></i>@dish.PreparationTime mins</td>
+                                <td class="text-center">
+                                    @if (isAvailable)
+                                    {
+                                        <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger px-2 py-1"><i class="fa fa-ban mr-1"></i>Sold Out / Unavailable</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @using (Html.BeginForm("ToggleDishStatus", "Staff", new { id = dish.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm @(isAvailable ? "btn-outline-danger" : "btn-outline-success")"
+                                                title="@(isAvailable ? "Mark Out of Stock" : "Mark Available")">
+                                            <i class="fa @(isAvailable ? "fa-toggle-on" : "fa-toggle-off") mr-1"></i>
+                                            @(isAvailable ? "Mark Sold Out" : "Mark Available")
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

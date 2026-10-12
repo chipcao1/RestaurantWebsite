@@ -1,0 +1,338 @@
+@{
+    string currentRole = Session["Role"] != null ? Session["Role"].ToString() : "Admin";
+    string userName = Session["UserName"] != null ? Session["UserName"].ToString() : "Administrator";
+
+    string currentController = ViewContext.RouteData.Values["controller"] != null
+        ? ViewContext.RouteData.Values["controller"].ToString()
+        : string.Empty;
+
+    string currentAction = ViewContext.RouteData.Values["action"] != null
+        ? ViewContext.RouteData.Values["action"].ToString()
+        : string.Empty;
+
+    bool isDashboard = string.Equals(currentController, "Admin", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
+
+    bool isCategories = string.Equals(currentController, "Category", StringComparison.OrdinalIgnoreCase);
+
+    bool isDishes = string.Equals(currentController, "Dish", StringComparison.OrdinalIgnoreCase);
+
+    bool isTables = string.Equals(currentController, "Table", StringComparison.OrdinalIgnoreCase);
+
+    bool isPromotions = string.Equals(currentController, "Promotion", StringComparison.OrdinalIgnoreCase);
+
+    bool isReservations = string.Equals(currentController, "AdminReservation", StringComparison.OrdinalIgnoreCase);
+
+    bool isOrders = string.Equals(currentController, "AdminOrder", StringComparison.OrdinalIgnoreCase);
+
+    bool isUsers = string.Equals(currentController, "AdminUser", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>@(ViewBag.Title ?? "Dashboard") - Feane Admin</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
+
+    <!-- Font Awesome (Local from User resources) -->
+    <link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")" />
+
+    <!-- AdminLTE 3 CSS (Local from Admin resources) -->
+    <link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")" />
+
+    <style>
+        /* Custom tweaks for Font Awesome 4 icon alignment in AdminLTE 3 */
+        .nav-sidebar .nav-icon {
+            margin-left: 0.05rem;
+            margin-right: 0.2rem;
+            text-align: center;
+            width: 1.6rem;
+            font-size: 1.1rem;
+        }
+        .small-box .icon > i.fa {
+            font-size: 70px;
+            top: 20px;
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+
+        <!-- ================= TOP NAVBAR ================= -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button" title="Toggle Navigation">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="@Url.RouteUrl("AdminHome")" class="nav-link @(isDashboard ? "active" : "")">
+                        <i class="fa fa-tachometer mr-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="@Url.Action("Index", "Home")" class="nav-link" target="_blank" title="View Customer Website">
+                        <i class="fa fa-globe mr-1 text-primary"></i> View Website
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto align-items-center">
+                <li class="nav-item mr-3">
+                    <span class="nav-link text-dark py-0">
+                        <i class="fa fa-user-circle mr-1 text-primary"></i>
+                        <strong>@userName</strong>
+                        <span class="badge badge-danger ml-1">@currentRole</span>
+                    </span>
+                </li>
+
+                <li class="nav-item mr-2">
+                    <a href="@Url.RouteUrl("StaffHome")" class="btn btn-outline-info btn-sm" title="Switch to Staff Area">
+                        <i class="fa fa-desktop mr-1"></i> Staff Area
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Logout", "Account")" class="btn btn-outline-danger btn-sm" title="Log out">
+                        <i class="fa fa-sign-out mr-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+
+        <!-- ================= MAIN SIDEBAR ================= -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="@Url.RouteUrl("AdminHome")" class="brand-link">
+                <img src="@Url.Content("~/Resources/Admin/img/AdminLTELogo.png")"
+                     alt="Feane Logo"
+                     class="brand-image img-circle elevation-3"
+                     style="opacity: .8" />
+                <span class="brand-text font-weight-light"><strong>Feane</strong> Admin</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+                    <div class="image">
+                        <img src="@Url.Content("~/Resources/Admin/img/avatar5.png")" class="img-circle elevation-2" alt="User Image" />
+                    </div>
+                    <div class="info">
+                        <a href="javascript:void(0)" class="d-block font-weight-bold text-white">@userName</a>
+                        <small class="text-success"><i class="fa fa-circle mr-1"></i> Online (@currentRole)</small>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a href="@Url.RouteUrl("AdminHome")" class="nav-link @(isDashboard ? "active" : "")">
+                                <i class="nav-icon fa fa-tachometer"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <!-- SECTION: MENU & FOOD -->
+                        <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">Menu & Food</li>
+
+                        <!-- Categories -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Category")" class="nav-link @(isCategories ? "active" : "")">
+                                <i class="nav-icon fa fa-th-list"></i>
+                                <p>
+                                    Categories
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- Dishes -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Dish")" class="nav-link @(isDishes ? "active" : "")">
+                                <i class="nav-icon fa fa-cutlery"></i>
+                                <p>
+                                    Dishes / Menu
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- SECTION: TABLES & RESERVATIONS -->
+                        <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">Tables & Bookings</li>
+
+                        <!-- Tables -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Table")" class="nav-link @(isTables ? "active" : "")">
+                                <i class="nav-icon fa fa-table"></i>
+                                <p>
+                                    Restaurant Tables
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- Reservations -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "AdminReservation")" class="nav-link @(isReservations ? "active" : "")">
+                                <i class="nav-icon fa fa-calendar"></i>
+                                <p>
+                                    Reservations
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- SECTION: SALES & MARKETING -->
+                        <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">Sales & Marketing</li>
+
+                        <!-- Orders -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "AdminOrder")" class="nav-link @(isOrders ? "active" : "")">
+                                <i class="nav-icon fa fa-shopping-cart"></i>
+                                <p>
+                                    Orders
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- Promotions -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Promotion")" class="nav-link @(isPromotions ? "active" : "")">
+                                <i class="nav-icon fa fa-tags"></i>
+                                <p>
+                                    Promotions
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- SECTION: SYSTEM & ACCOUNTS -->
+                        <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">System</li>
+
+                        <!-- Users -->
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "AdminUser")" class="nav-link @(isUsers ? "active" : "")">
+                                <i class="nav-icon fa fa-users"></i>
+                                <p>
+                                    Users & Accounts
+                                    <span class="badge badge-success right">Active</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- Quick Exit to Public Website -->
+                        <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">Public Site</li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Home")" class="nav-link" target="_blank">
+                                <i class="nav-icon fa fa-external-link text-info"></i>
+                                <p>Customer Home</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Logout", "Account")" class="nav-link text-danger">
+                                <i class="nav-icon fa fa-sign-out"></i>
+                                <p>Sign Out</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- ================= CONTENT WRAPPER ================= -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-sm-6">
+                            <h1 class="m-0 text-dark">@(ViewBag.Title ?? "Dashboard")</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="@Url.RouteUrl("AdminHome")">Admin</a></li>
+                                <li class="breadcrumb-item active">@(ViewBag.Title ?? "Dashboard")</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.content-header -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+
+                    <!-- Flash messages -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle mr-2"></i> @TempData["Success"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-circle mr-2"></i> @TempData["Error"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Page Body -->
+                    @RenderBody()
+
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+
+        <!-- ================= FOOTER ================= -->
+        <footer class="main-footer text-sm">
+            <div class="float-right d-none d-sm-inline">
+                Restaurant Management System (ASP.NET MVC 5)
+            </div>
+            <strong>Copyright &copy; @DateTime.Now.Year <a href="@Url.RouteUrl("AdminHome")">Feane Restaurant</a>.</strong> All rights reserved.
+        </footer>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- ================= SCRIPTS ================= -->
+    <!-- jQuery (Local) -->
+    <script src="@Url.Content("~/Resources/User/js/jquery-3.4.1.min.js")"></script>
+
+    <!-- Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+
+    <!-- Bootstrap 4 (Local) -->
+    <script src="@Url.Content("~/Resources/User/js/bootstrap.js")"></script>
+
+    <!-- AdminLTE 3 (Local) -->
+    <script src="@Url.Content("~/Resources/Admin/js/adminlte.min.js")"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

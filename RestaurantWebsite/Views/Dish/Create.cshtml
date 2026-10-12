@@ -1,0 +1,207 @@
+@model RestaurantWebsite.Models.Dish
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Add New Dish";
+
+    SelectList categories = ViewBag.CategoryId as SelectList;
+    string primaryImageUrl = ViewBag.PrimaryImageUrl as string ?? "";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+        <div class="card card-success card-outline shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold">
+                    <i class="fa fa-plus-circle text-success mr-1"></i> Add Dish to Menu
+                </h3>
+                <div class="card-tools">
+                    <a href="@Url.Action("Index", "Dish")" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left mr-1"></i> Back to Dishes List
+                    </a>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Create", "Dish", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Please correct the following errors:</h5>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0 pl-3 text-white" })
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Dish Name -->
+                    <div class="form-group row">
+                        <label for="Name" class="col-sm-3 col-form-label font-weight-bold">
+                            Dish Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.Name, new {
+                                @class = "form-control",
+                                placeholder = "e.g. Grilled Beef Steak, Seafood Fried Rice, Mango Smoothie...",
+                                autofocus = "autofocus",
+                                maxlength = "150",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group row">
+                        <label for="CategoryId" class="col-sm-3 col-form-label font-weight-bold">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(m => m.CategoryId, categories, "-- Select Category --", new {
+                                @class = "form-control",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="form-group row">
+                        <label for="Price" class="col-sm-3 col-form-label font-weight-bold">
+                            Price (VNĐ) <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.Price, new {
+                                    @class = "form-control",
+                                    type = "number",
+                                    step = "1000",
+                                    min = "0",
+                                    max = "999999999",
+                                    required = "required"
+                                })
+                                <div class="input-group-append">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Preparation Time -->
+                    <div class="form-group row">
+                        <label for="PreparationTime" class="col-sm-3 col-form-label font-weight-bold">
+                            Prep Time (Mins) <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.PreparationTime, new {
+                                    @class = "form-control",
+                                    type = "number",
+                                    min = "1",
+                                    max = "300",
+                                    required = "required"
+                                })
+                                <div class="input-group-append">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.PreparationTime, "", new { @class = "text-danger small" })
+                            <small class="form-text text-muted">Estimated time in minutes to prepare and serve this dish (1 - 300 mins).</small>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group row">
+                        <label for="Status" class="col-sm-3 col-form-label font-weight-bold">
+                            Initial Status
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="Status" class="form-control">
+                                <option value="Available" @(Model.Status == "Available" ? "selected" : "")>Available (Visible on customer menu)</option>
+                                <option value="Unavailable" @(Model.Status == "Unavailable" ? "selected" : "")>Unavailable (Hidden from customer menu)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group row">
+                        <label for="Description" class="col-sm-3 col-form-label font-weight-bold">
+                            Description
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextAreaFor(m => m.Description, new {
+                                @class = "form-control",
+                                rows = "3",
+                                placeholder = "Ingredients, flavor profile, dietary information...",
+                                maxlength = "1000"
+                            })
+                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Primary Image URL -->
+                    <div class="form-group row">
+                        <label for="primaryImageUrl" class="col-sm-3 col-form-label font-weight-bold">
+                            Dish Image URL
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text"
+                                   name="primaryImageUrl"
+                                   id="dishImageUrl"
+                                   class="form-control"
+                                   placeholder="e.g. /Resources/User/images/dish01.jpg or https://..."
+                                   value="@primaryImageUrl"
+                                   maxlength="500" />
+                            <small class="form-text text-muted">Relative path in project (e.g. <code>/Resources/User/images/...</code>) or full URL.</small>
+
+                            <!-- Image Preview -->
+                            <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
+                                <span class="mr-2 small text-muted">Preview:</span>
+                                <img id="previewImg"
+                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(primaryImageUrl))"
+                                     alt="Preview"
+                                     class="img-thumbnail rounded"
+                                     style="width: 65px; height: 65px; object-fit: cover;"
+                                     onerror="this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-light d-flex justify-content-between">
+                    <a href="@Url.Action("Index", "Dish")" class="btn btn-default">
+                        <i class="fa fa-times mr-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success font-weight-bold px-4">
+                        <i class="fa fa-save mr-1"></i> Save Dish
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var $imgInput = $('#dishImageUrl');
+            var $preview = $('#previewImg');
+
+            function updatePreview() {
+                var val = $imgInput.val().trim();
+                if (val) {
+                    $preview.attr('src', val);
+                } else {
+                    $preview.attr('src', '@Url.Content("~/Resources/Admin/img/default-150x150.png")');
+                }
+            }
+
+            $imgInput.on('input change blur', updatePreview);
+        });
+    </script>
+}

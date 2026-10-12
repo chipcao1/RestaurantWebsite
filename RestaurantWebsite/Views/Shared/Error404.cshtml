@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Page Not Found";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="food_section layout_padding">
+
+    <div class="container">
+
+        <div class="heading_container heading_center">
+
+            <h2>
+                404
+            </h2>
+
+            <h3>
+                Page Not Found
+            </h3>
+
+            <p>
+                Sorry, the page you are looking for does not exist
+                or may have been moved.
+            </p>
+
+            <div class="btn-box">
+
+                <a href="@Url.Action("Index", "Home")">
+                    Back To Home
+                </a>
+
+                <a href="@Url.Action("Index", "Menu")">
+                    View Menu
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

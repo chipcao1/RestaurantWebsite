@@ -1,0 +1,178 @@
+@model RestaurantWebsite.Models.User
+
+@{
+    ViewBag.Title = "User Details #" + Model.Id;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    int currentAdminId = ViewBag.CurrentAdminId != null ? (int)ViewBag.CurrentAdminId : 0;
+    bool isSelf = Model.Id == currentAdminId;
+}
+
+<div class="row">
+    <!-- Left Column: User Profile Form -->
+    <div class="col-lg-7">
+
+        @if (isSelf)
+        {
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle mr-2"></i>
+                <strong>Notice:</strong> You are currently editing your own logged-in Admin account (#@Model.Id). Security restrictions prevent self-deactivation or demotion.
+            </div>
+        }
+
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa fa-user mr-2"></i>User Profile: @Model.FullName</h3>
+                <div class="card-tools">
+                    <span class="badge badge-light px-2 py-1 font-weight-bold">Role: @Model.Role</span>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Edit", "AdminUser", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <div class="card-body">
+                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                    <div class="form-group row">
+                        <label for="FullName" class="col-sm-3 col-form-label font-weight-bold">Full Name <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="Email" class="col-sm-3 col-form-label font-weight-bold">Email <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", required = "required" })
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="Phone" class="col-sm-3 col-form-label font-weight-bold">Phone</label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="Address" class="col-sm-3 col-form-label font-weight-bold">Address</label>
+                        <div class="col-sm-9">
+                            @Html.TextAreaFor(m => m.Address, new { @class = "form-control", rows = 2 })
+                            @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="form-group row">
+                        <label for="Role" class="col-sm-3 col-form-label font-weight-bold">Account Role <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            @if (isSelf)
+                            {
+                                @Html.HiddenFor(m => m.Role)
+                                <input type="text" class="form-control-plaintext font-weight-bold text-danger" value="Admin (Self - Protected)" readonly />
+                            }
+                            else
+                            {
+                                @Html.DropDownListFor(m => m.Role, (SelectList)ViewBag.ValidRoles, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Role, "", new { @class = "text-danger" })
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label font-weight-bold">Registered At</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control-plaintext text-muted" value="@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-9 offset-sm-3">
+                            <div class="custom-control custom-checkbox">
+                                @if (isSelf)
+                                {
+                                    @Html.HiddenFor(m => m.IsActive)
+                                    <input type="checkbox" class="custom-control-input" id="IsActiveSelf" checked disabled />
+                                    <label class="custom-control-label font-weight-bold text-success" for="IsActiveSelf">Is Active (Self - Always Active)</label>
+                                }
+                                else
+                                {
+                                    @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "IsActive" })
+                                    <label class="custom-control-label font-weight-bold" for="IsActive">Account Active</label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer text-right">
+                    <a href="@Url.Action("Index", "AdminUser")" class="btn btn-default mr-2">
+                        <i class="fa fa-arrow-left mr-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save mr-1"></i> Save Profile Changes
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column: Reset Password & Activity Summary -->
+    <div class="col-lg-5">
+
+        <!-- Reset Password Card -->
+        <div class="card card-outline card-danger">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold"><i class="fa fa-key text-danger mr-2"></i>Reset User Password</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Manually set a new password for this user using the project's SHA-256 password hash system:</p>
+
+                @using (Html.BeginForm("ResetPassword", "AdminUser", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("id", Model.Id)
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">New Password (min 6 chars):</label>
+                        <input type="password" name="newPassword" class="form-control" placeholder="Enter new password..." minlength="6" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Are you sure you want to reset password for @Model.FullName?');">
+                        <i class="fa fa-refresh mr-1"></i> Reset Password
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Activity History Summary -->
+        <div class="card card-outline card-secondary">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold"><i class="fa fa-history text-secondary mr-2"></i>User Activity Stats</h3>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fa fa-shopping-cart text-primary mr-2"></i> Total Orders Placed</span>
+                        <span class="badge badge-primary badge-pill">@(Model.Orders?.Count ?? 0)</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fa fa-calendar text-info mr-2"></i> Total Table Bookings</span>
+                        <span class="badge badge-info badge-pill">@(Model.Reservations?.Count ?? 0)</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fa fa-star text-warning mr-2"></i> Dish Reviews Written</span>
+                        <span class="badge badge-warning badge-pill">@(Model.Reviews?.Count ?? 0)</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>

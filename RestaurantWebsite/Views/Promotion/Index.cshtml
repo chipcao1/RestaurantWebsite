@@ -1,0 +1,245 @@
+@model IEnumerable<RestaurantWebsite.Models.Promotion>
+
+@{
+    ViewBag.Title = "Promotions Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    int totalCount = Model.Count();
+    int activeCount = Model.Count(p => p.IsActive && p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now);
+    int expiredCount = Model.Count(p => p.EndDate < DateTime.Now);
+    int inactiveCount = Model.Count(p => !p.IsActive);
+}
+
+<!-- Summary Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@totalCount</h3>
+                <p>Total Promotions</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-tags"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@activeCount</h3>
+                <p>Active & Live</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@expiredCount</h3>
+                <p>Expired</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-clock-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-secondary">
+            <div class="inner">
+                <h3>@inactiveCount</h3>
+                <p>Inactive / Disabled</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-ban"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Card -->
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title text-bold"><i class="fa fa-tags mr-2"></i>Promotions List</h3>
+        <div class="card-tools">
+            <a href="@Url.Action("Create", "Promotion")" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus-circle mr-1"></i> Add New Promotion
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Index", "Promotion", FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Discount Type:</label>
+                @Html.DropDownList("discountType", (SelectList)ViewBag.DiscountTypes, "All Types", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Status:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Code, Name, Description..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedDiscountType != "All" || ViewBag.SelectedStatus != "All")
+            {
+                <a href="@Url.Action("Index", "Promotion")" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No promotions found.</h5>
+                <p class="mb-0">Try adjusting your filters or click <strong>Add New Promotion</strong> to create one.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#</th>
+                            <th>Code & Name</th>
+                            <th>Discount</th>
+                            <th>Min. Order</th>
+                            <th>Max. Discount</th>
+                            <th>Validity Period</th>
+                            <th class="text-center">Usage</th>
+                            <th class="text-center">Status</th>
+                            <th style="width: 190px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            bool isExpired = item.EndDate < DateTime.Now;
+                            bool isUpcoming = item.StartDate > DateTime.Now;
+                            bool isLive = item.IsActive && !isExpired && !isUpcoming;
+                            int orderCount = item.OrderPromotions?.Count ?? 0;
+
+                            <tr>
+                                <td class="text-center font-weight-bold">@item.Id</td>
+                                <td>
+                                    <span class="badge badge-primary font-size-14 font-weight-bold px-2 py-1 mb-1">
+                                        <i class="fa fa-tag mr-1"></i>@item.Code
+                                    </span>
+                                    <div class="font-weight-bold">@item.Name</div>
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 250px;">@item.Description</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.DiscountType == "Percentage")
+                                    {
+                                        <span class="text-success font-weight-bold"><i class="fa fa-percent mr-1"></i>@item.DiscountValue.ToString("G29")% OFF</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-primary font-weight-bold">$@item.DiscountValue.ToString("N2") OFF</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MinimumOrderAmount > 0)
+                                    {
+                                        <span>$@item.MinimumOrderAmount.ToString("N2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">None</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MaximumDiscount.HasValue && item.MaximumDiscount.Value > 0)
+                                    {
+                                        <span>$@item.MaximumDiscount.Value.ToString("N2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No Cap</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block"><i class="fa fa-calendar-check-o text-success mr-1"></i><strong>From:</strong> @item.StartDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                    <small class="d-block"><i class="fa fa-calendar-times-o text-danger mr-1"></i><strong>To:</strong> @item.EndDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-info">@item.UsedCount used</span>
+                                    @if (item.UsageLimit.HasValue)
+                                    {
+                                        <small class="d-block text-muted">Limit: @item.UsageLimit.Value</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="d-block text-muted">Unlimited</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (!item.IsActive)
+                                    {
+                                        <span class="badge badge-secondary">Disabled</span>
+                                    }
+                                    else if (isExpired)
+                                    {
+                                        <span class="badge badge-warning">Expired</span>
+                                    }
+                                    else if (isUpcoming)
+                                    {
+                                        <span class="badge badge-info">Upcoming</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">Active & Live</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Edit", "Promotion", new { id = item.Id })" class="btn btn-warning" title="Edit Promotion">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+
+                                        @using (Html.BeginForm("ToggleStatus", "Promotion", new { id = item.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success")" title="@(item.IsActive ? "Deactivate" : "Activate")">
+                                                <i class="fa @(item.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
+                                            </button>
+                                        }
+
+                                        @using (Html.BeginForm("Delete", "Promotion", new { id = item.Id }, FormMethod.Post, new { style = "display:inline;", onsubmit = "return confirm('Are you sure you want to delete promotion " + item.Code + "?');" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger @(orderCount > 0 || item.UsedCount > 0 ? "disabled" : "")"
+                                                    title="@(orderCount > 0 || item.UsedCount > 0 ? "Cannot delete: linked to orders or used" : "Delete promotion")">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,381 @@
+@using System.Collections.Generic
+@using System.Linq
+@model RestaurantWebsite.Models.Order
+
+@{
+    ViewBag.Title = "Checkout";
+    ViewBag.BodyClass = "sub_page";
+
+    var dishes =
+        ViewBag.CartDishes as IEnumerable<RestaurantWebsite.Models.Dish>
+        ?? new List<RestaurantWebsite.Models.Dish>();
+
+    var quantities =
+        ViewBag.CartQuantities as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var combos =
+        ViewBag.CartCombos as IEnumerable<RestaurantWebsite.Models.Combo>
+        ?? new List<RestaurantWebsite.Models.Combo>();
+
+    var comboQuantities =
+        ViewBag.ComboQuantities as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+
+
+    var promotions =
+        ViewBag.ActivePromotions as IEnumerable<RestaurantWebsite.Models.Promotion>
+        ?? new List<RestaurantWebsite.Models.Promotion>();
+
+    decimal subTotal =
+        ViewBag.CheckoutSubTotal != null
+            ? (decimal)ViewBag.CheckoutSubTotal
+            : 0m;
+
+    decimal deliveryFee =
+        ViewBag.DeliveryFee != null
+            ? (decimal)ViewBag.DeliveryFee
+            : 0m;
+}
+
+<section class="food_section layout_padding">
+
+    <div class="container">
+
+        <div class="heading_container heading_center mb-4">
+            <h2>Checkout</h2>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false, "Please check the information below:")
+            </div>
+        }
+
+        <div class="row">
+
+            <!-- ================================================= -->
+            <!-- CUSTOMER INFORMATION -->
+            <!-- ================================================= -->
+
+            <div class="col-lg-7">
+
+                <div class="bg-white p-4 rounded shadow-sm mb-4">
+
+                    <div class="heading_container mb-3">
+                        <h3>Order Information</h3>
+                    </div>
+
+                    @using (Html.BeginForm(
+                        "PlaceOrder",
+                        "Order",
+                        FormMethod.Post,
+                        new { id = "checkoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- ORDER TYPE -->
+                        <div class="form-group">
+                            <label for="OrderType" class="font-weight-bold">Order Type</label>
+                            <select name="OrderType" id="OrderType" class="form-control" onchange="toggleDeliveryAddress()">
+                                <option value="Delivery" @(Model.OrderType == "Delivery" ? "selected" : "")>Delivery</option>
+                                <option value="Dine-in" @(Model.OrderType == "Dine-in" ? "selected" : "")>Dine-in</option>
+                                <option value="Takeaway" @(Model.OrderType == "Takeaway" ? "selected" : "")>Takeaway</option>
+                            </select>
+                        </div>
+
+                        <!-- PHONE -->
+                        <div class="form-group">
+                            <label for="Phone" class="font-weight-bold">
+                                Phone Number
+                            </label>
+
+                            @Html.TextBoxFor(
+                                m => m.Phone,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "Phone",
+                                    maxlength = "20",
+                                    placeholder = "Your phone number"
+                                })
+
+                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- DELIVERY ADDRESS -->
+                        <div class="form-group" id="deliveryAddressGroup">
+                            <label for="DeliveryAddress" class="font-weight-bold">
+                                Delivery Address
+                            </label>
+
+                            @Html.TextAreaFor(
+                                m => m.DeliveryAddress,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "DeliveryAddress",
+                                    rows = "3",
+                                    maxlength = "500",
+                                    placeholder = "Enter delivery address"
+                                })
+
+                            <small class="form-text text-muted">
+                                This address will be used for this delivery order.
+                            </small>
+
+                            @Html.ValidationMessageFor(m => m.DeliveryAddress, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- PAYMENT -->
+                        <div class="form-group">
+                            <label class="font-weight-bold">Payment Method</label>
+
+                            <div class="border rounded p-3">
+                                <label class="d-block mb-2">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Cash"
+                                           checked="checked" />
+                                    <span class="ml-2">Cash</span>
+                                </label>
+
+                                <label class="d-block mb-2">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Bank Transfer" />
+                                    <span class="ml-2">Bank Transfer</span>
+                                </label>
+
+                                <label class="d-block mb-0">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Digital Wallet" />
+                                    <span class="ml-2">Digital Wallet</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- PROMOTION -->
+                        <div class="form-group">
+                            <label for="promotionCode" class="font-weight-bold">
+                                Promotion Code
+                            </label>
+
+                            <input type="text"
+                                   name="promotionCode"
+                                   id="promotionCode"
+                                   class="form-control"
+                                   maxlength="50"
+                                   placeholder="Enter promotion code" />
+
+                            @if (promotions.Any())
+                            {
+                                <small class="form-text text-muted">
+                                    Available codes:
+                                    @string.Join(", ", promotions.Select(p => p.Code))
+                                </small>
+                            }
+                        </div>
+
+                        <!-- NOTE -->
+                        <div class="form-group">
+                            <label for="Note" class="font-weight-bold">
+                                Note
+                            </label>
+
+                            @Html.TextAreaFor(
+                                m => m.Note,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "Note",
+                                    rows = "3",
+                                    maxlength = "500",
+                                    placeholder = "Special instructions for the restaurant"
+                                })
+
+                            @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+
+                            <a href="@Url.RouteUrl("CustomerCart")"
+                               class="btn btn-outline-secondary">
+                                Back to Cart
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-warning text-white">
+                                Place Order
+                            </button>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- ORDER SUMMARY -->
+            <!-- ================================================= -->
+
+            <div class="col-lg-5">
+
+                <div class="bg-white p-4 rounded shadow-sm">
+
+                    <div class="heading_container mb-3">
+                        <h3>Order Summary</h3>
+                    </div>
+
+                    <!-- DISHES -->
+                    @foreach (var dish in dishes)
+                    {
+                        int quantity =
+                            quantities.ContainsKey(dish.Id)
+                                ? quantities[dish.Id]
+                                : 0;
+
+                        decimal subtotal =
+                            dish.Price * quantity;
+
+                        string imageUrl =
+                            "~/Resources/User/images/f1.png";
+
+                        if (dish.DishImages != null &&
+                            dish.DishImages.Any())
+                        {
+                            var primaryImage =
+                                dish.DishImages.FirstOrDefault(
+                                    image => image.IsPrimary)
+                                ?? dish.DishImages.First();
+
+                            if (!string.IsNullOrWhiteSpace(primaryImage.ImageUrl))
+                            {
+                                imageUrl = primaryImage.ImageUrl;
+                            }
+                        }
+
+                        <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                            <img src="@Url.Content(imageUrl)"
+                                 alt="@dish.Name"
+                                 style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
+                                 class="mr-3" />
+
+                            <div class="flex-grow-1">
+                                <strong>@dish.Name</strong>
+                                <div class="text-muted small">
+                                    @quantity x @dish.Price.ToString("N0") VNĐ
+                                </div>
+                            </div>
+
+                            <strong>
+                                @subtotal.ToString("N0") VNĐ
+                            </strong>
+                        </div>
+                    }
+
+                    <!-- COMBOS -->
+                    @foreach (var combo in combos)
+                    {
+                        int quantity =
+                            comboQuantities.ContainsKey(combo.Id)
+                                ? comboQuantities[combo.Id]
+                                : 0;
+
+                        decimal subtotal =
+                            combo.Price * quantity;
+
+                        string imageUrl =
+                            string.IsNullOrWhiteSpace(combo.ImageUrl)
+                                ? "~/Resources/User/images/o2.jpg"
+                                : combo.ImageUrl;
+
+                        <div class="border-bottom pb-3 mb-3">
+
+                            <div class="d-flex align-items-center">
+                                <img src="@Url.Content(imageUrl)"
+                                     alt="@combo.Name"
+                                     style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
+                                     class="mr-3" />
+
+                                <div class="flex-grow-1">
+                                    <strong>@combo.Name</strong>
+                                    <div class="text-muted small">
+                                        @quantity x @combo.Price.ToString("N0") VNĐ
+                                    </div>
+                                </div>
+
+                                <strong>
+                                    @subtotal.ToString("N0") VNĐ
+                                </strong>
+                            </div>
+
+                            @if (combo.ComboItems != null && combo.ComboItems.Any())
+                            {
+                                <div class="mt-2 pl-2">
+                                    <small class="text-muted">
+                                        Includes:
+                                        @string.Join(
+                                            ", ",
+                                            combo.ComboItems.Select(ci =>
+                                                (ci.Dish != null
+                                                    ? ci.Dish.Name
+                                                    : "Dish #" + ci.DishId)
+                                                + " x "
+                                                + (ci.Quantity * quantity)))
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <strong>@subTotal.ToString("N0") VNĐ</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Discount</span>
+                        <strong id="discountPreview">Calculated after applying code</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Delivery Fee</span>
+                        <strong>
+                            @(deliveryFee > 0m
+                                ? deliveryFee.ToString("N0") + " VNĐ"
+                                : "0 VNĐ")
+                        </strong>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <span class="font-weight-bold">
+                            Total
+                        </span>
+                        <strong class="text-danger" id="checkoutTotal">
+                            @subTotal.ToString("N0") VNĐ
+                        </strong>
+                    </div>
+
+                    <small class="text-muted d-block mt-3">
+                        The final discount and total are recalculated on the server when you place the order.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+

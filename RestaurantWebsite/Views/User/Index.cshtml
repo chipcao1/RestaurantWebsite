@@ -1,0 +1,211 @@
+@model IEnumerable<RestaurantWebsite.Models.User>
+
+@{
+    ViewBag.Title = "Users & Accounts Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    int currentAdminId = ViewBag.CurrentAdminId != null ? (int)ViewBag.CurrentAdminId : 0;
+    int totalUsers = Model.Count();
+    int adminCount = Model.Count(u => u.Role == "Admin");
+    int staffCount = Model.Count(u => u.Role == "Staff");
+    int customerCount = Model.Count(u => u.Role == "Customer");
+}
+
+<!-- Summary Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-dark">
+            <div class="inner">
+                <h3>@totalUsers</h3>
+                <p>Total Registered Accounts</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-users"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>@adminCount</h3>
+                <p>Administrators</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-user-secret"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@staffCount</h3>
+                <p>Restaurant Staff</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-user-md"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@customerCount</h3>
+                <p>Customers</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-user"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Card -->
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title text-bold"><i class="fa fa-users mr-2"></i>Accounts Directory</h3>
+        <div class="card-tools">
+            <a href="@Url.Action("CreateStaff", "AdminUser")" class="btn btn-primary btn-sm">
+                <i class="fa fa-user-plus mr-1"></i> Create Staff Account
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Index", "AdminUser", FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Role:</label>
+                @Html.DropDownList("role", (SelectList)ViewBag.RoleList, "All Roles", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Status:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Name, email, phone..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedRole != "All" || ViewBag.SelectedStatus != "All")
+            {
+                <a href="@Url.Action("Index", "AdminUser")" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No user accounts found.</h5>
+                <p class="mb-0">Try clearing search filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Full Name & Email</th>
+                            <th class="text-center">Role</th>
+                            <th>Phone & Address</th>
+                            <th class="text-center">Activity Summary</th>
+                            <th class="text-center">Status</th>
+                            <th>Registered At</th>
+                            <th style="width: 170px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            bool isSelf = item.Id == currentAdminId;
+                            int orderCount = item.Orders?.Count ?? 0;
+                            int resCount = item.Reservations?.Count ?? 0;
+
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">
+                                        @item.FullName
+                                        @if (isSelf)
+                                        {
+                                            <span class="badge badge-warning ml-1">(You)</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted"><i class="fa fa-envelope mr-1"></i>@item.Email</small>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Role == "Admin")
+                                    {
+                                        <span class="badge badge-danger"><i class="fa fa-shield mr-1"></i>Admin</span>
+                                    }
+                                    else if (item.Role == "Staff")
+                                    {
+                                        <span class="badge badge-info"><i class="fa fa-desktop mr-1"></i>Staff</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success"><i class="fa fa-user mr-1"></i>Customer</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block"><i class="fa fa-phone mr-1"></i>@(item.Phone ?? "N/A")</small>
+                                    @if (!string.IsNullOrEmpty(item.Address))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 200px;" title="@item.Address"><i class="fa fa-map-marker mr-1"></i>@item.Address</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <small class="d-block">Orders: <strong>@orderCount</strong></small>
+                                    <small class="d-block text-muted">Reservations: <strong>@resCount</strong></small>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge badge-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Disabled</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block font-weight-bold">@item.CreatedAt.ToString("yyyy-MM-dd")</small>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", "AdminUser", new { id = item.Id })" class="btn btn-info" title="View Details / Edit">
+                                            <i class="fa fa-eye"></i> Details
+                                        </a>
+
+                                        @using (Html.BeginForm("ToggleStatus", "AdminUser", new { id = item.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success") @(isSelf ? "disabled" : "")"
+                                                    title="@(isSelf ? "You cannot disable your own active account" : (item.IsActive ? "Deactivate Account" : "Activate Account"))">
+                                                <i class="fa @(item.IsActive ? "fa-lock" : "fa-unlock")"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

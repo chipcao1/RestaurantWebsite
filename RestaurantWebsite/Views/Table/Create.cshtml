@@ -1,0 +1,134 @@
+@model RestaurantWebsite.Models.RestaurantTable
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Add New Restaurant Table";
+
+    SelectList zones = ViewBag.Zones as SelectList;
+    SelectList statuses = ViewBag.Statuses as SelectList;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold">
+                    <i class="fa fa-plus-circle text-primary mr-1"></i> Create Restaurant Table
+                </h3>
+                <div class="card-tools">
+                    <a href="@Url.Action("Index", "Table")" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left mr-1"></i> Back to Tables List
+                    </a>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Create", "Table", FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Please correct the following errors:</h5>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0 pl-3 text-white" })
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Table Number -->
+                    <div class="form-group row">
+                        <label for="TableNumber" class="col-sm-3 col-form-label font-weight-bold">
+                            Table Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.TableNumber, new {
+                                @class = "form-control",
+                                placeholder = "e.g. T01, T02, VIP-01, OUT-05...",
+                                autofocus = "autofocus",
+                                maxlength = "20",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.TableNumber, "", new { @class = "text-danger small" })
+                            <small class="form-text text-muted">A unique identifier for this table (up to 20 characters).</small>
+                        </div>
+                    </div>
+
+                    <!-- Capacity -->
+                    <div class="form-group row">
+                        <label for="Capacity" class="col-sm-3 col-form-label font-weight-bold">
+                            Capacity (Seats) <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.Capacity, new {
+                                    @class = "form-control",
+                                    type = "number",
+                                    min = "1",
+                                    max = "50",
+                                    required = "required"
+                                })
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-users"></i> seats</span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.Capacity, "", new { @class = "text-danger small" })
+                            <small class="form-text text-muted">Maximum seating capacity (1 to 50 persons).</small>
+                        </div>
+                    </div>
+
+                    <!-- Zone -->
+                    <div class="form-group row">
+                        <label for="Zone" class="col-sm-3 col-form-label font-weight-bold">
+                            Zone / Area <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(m => m.Zone, zones, "-- Select Zone --", new {
+                                @class = "form-control",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.Zone, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Operational Status -->
+                    <div class="form-group row">
+                        <label for="Status" class="col-sm-3 col-form-label font-weight-bold">
+                            Operational Status
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(m => m.Status, statuses, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- IsActive -->
+                    <div class="form-group row align-items-center">
+                        <label class="col-sm-3 col-form-label font-weight-bold">
+                            Active Status
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="custom-control custom-checkbox">
+                                @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "isActiveCheck" })
+                                <label class="custom-control-label font-weight-normal" for="isActiveCheck">
+                                    <strong>Active</strong> (Table is active and available for customer reservations)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-light d-flex justify-content-between">
+                    <a href="@Url.Action("Index", "Table")" class="btn btn-default">
+                        <i class="fa fa-times mr-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fa fa-save mr-1"></i> Save Table
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
