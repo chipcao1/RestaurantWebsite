@@ -12,6 +12,13 @@ namespace RestaurantWebsite.Controllers
     {
         private readonly AppDbContext db = new AppDbContext();
 
+        public static readonly string[] ValidDishStatuses = new[]
+        {
+            "Available",
+            "Temporarily Unavailable",
+            "Discontinued"
+        };
+
         // =====================================================
         // GET: Dish (List with Filter & Search)
         // =====================================================
@@ -38,7 +45,14 @@ namespace RestaurantWebsite.Controllers
             // Filter by Status
             if (!string.IsNullOrWhiteSpace(status) && status != "All")
             {
-                query = query.Where(d => d.Status == status);
+                if (status == "Temporarily Unavailable" || status == "Unavailable")
+                {
+                    query = query.Where(d => d.Status == "Temporarily Unavailable" || d.Status == "Unavailable");
+                }
+                else
+                {
+                    query = query.Where(d => d.Status == status);
+                }
             }
 
             // Search by Name or Description
@@ -136,9 +150,16 @@ namespace RestaurantWebsite.Controllers
             }
 
             model.CreatedAt = DateTime.Now;
-            if (string.IsNullOrWhiteSpace(model.Status))
+            if (string.IsNullOrWhiteSpace(model.Status) || !ValidDishStatuses.Contains(model.Status))
             {
-                model.Status = "Available";
+                if (model.Status == "Unavailable")
+                {
+                    model.Status = "Temporarily Unavailable";
+                }
+                else
+                {
+                    model.Status = "Available";
+                }
             }
 
             db.Dishes.Add(model);
@@ -250,7 +271,18 @@ namespace RestaurantWebsite.Controllers
             dish.CategoryId = model.CategoryId;
             dish.Price = model.Price;
             dish.PreparationTime = model.PreparationTime;
-            dish.Status = model.Status;
+            if (ValidDishStatuses.Contains(model.Status))
+            {
+                dish.Status = model.Status;
+            }
+            else if (model.Status == "Unavailable")
+            {
+                dish.Status = "Temporarily Unavailable";
+            }
+            else
+            {
+                dish.Status = "Available";
+            }
             dish.Description = model.Description;
 
             // Handle Primary DishImage
@@ -298,7 +330,7 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Index");
             }
 
-            dish.Status = (dish.Status == "Available") ? "Unavailable" : "Available";
+            dish.Status = (dish.Status == "Available") ? "Temporarily Unavailable" : "Available";
             db.SaveChanges();
 
             TempData["Success"] = $"Status of dish \"{dish.Name}\" changed to \"{dish.Status}\".";
@@ -336,7 +368,7 @@ namespace RestaurantWebsite.Controllers
                 if (comboCount > 0) reason += $"{comboCount} combo(s) ";
                 if (reviewCount > 0) reason += $"{reviewCount} review(s) ";
 
-                TempData["Error"] = $"Cannot delete dish \"{dish.Name}\" because it is linked to {reason.Trim()}. Please set its status to \"Unavailable\" instead of deleting.";
+                TempData["Error"] = $"Cannot delete dish \"{dish.Name}\" because it is linked to {reason.Trim()}. Please set its status to \"Temporarily Unavailable\" or \"Discontinued\" instead of deleting.";
                 return RedirectToAction("Index");
             }
 

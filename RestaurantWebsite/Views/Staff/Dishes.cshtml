@@ -88,9 +88,13 @@
                                     {
                                         <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Available</span>
                                     }
+                                    else if (dish.Status == "Discontinued")
+                                    {
+                                        <span class="badge badge-secondary px-2 py-1"><i class="fa fa-ban mr-1"></i>Discontinued</span>
+                                    }
                                     else
                                     {
-                                        <span class="badge badge-danger px-2 py-1"><i class="fa fa-ban mr-1"></i>Sold Out / Unavailable</span>
+                                        <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-pause mr-1"></i>Temporarily Unavailable</span>
                                     }
                                 </td>
                                 <td class="text-center">
@@ -98,9 +102,9 @@
                                     {
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm @(isAvailable ? "btn-outline-danger" : "btn-outline-success")"
-                                                title="@(isAvailable ? "Mark Out of Stock" : "Mark Available")">
+                                                title="@(isAvailable ? "Mark Temporarily Unavailable" : "Mark Available")">
                                             <i class="fa @(isAvailable ? "fa-toggle-on" : "fa-toggle-off") mr-1"></i>
-                                            @(isAvailable ? "Mark Sold Out" : "Mark Available")
+                                            @(isAvailable ? "Mark Temp. Unavailable" : "Mark Available")
                                         </button>
                                     }
                                 </td>

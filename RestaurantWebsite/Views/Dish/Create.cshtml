@@ -122,7 +122,8 @@
                         <div class="col-sm-9">
                             <select name="Status" class="form-control">
                                 <option value="Available" @(Model.Status == "Available" ? "selected" : "")>Available (Visible on customer menu)</option>
-                                <option value="Unavailable" @(Model.Status == "Unavailable" ? "selected" : "")>Unavailable (Hidden from customer menu)</option>
+                                <option value="Temporarily Unavailable" @(Model.Status == "Temporarily Unavailable" || Model.Status == "Unavailable" ? "selected" : "")>Temporarily Unavailable (Out of stock / hidden)</option>
+                                <option value="Discontinued" @(Model.Status == "Discontinued" ? "selected" : "")>Discontinued (No longer served)</option>
                             </select>
                         </div>
                     </div>

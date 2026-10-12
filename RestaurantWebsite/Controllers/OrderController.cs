@@ -8,7 +8,6 @@ using RestaurantWebsite.Models;
 
 namespace RestaurantWebsite.Controllers
 {
-    [RoleAuthorize("Customer")]
     public class OrderController : Controller
     {
         private readonly AppDbContext db = new AppDbContext();
@@ -17,6 +16,7 @@ namespace RestaurantWebsite.Controllers
         // GET: Order/Checkout
         // =====================================================
         [HttpGet]
+        [RoleAuthorize("Customer")]
         public ActionResult Checkout()
         {
             if (Session["UserId"] == null)
@@ -75,6 +75,7 @@ namespace RestaurantWebsite.Controllers
         // POST: Order/PlaceOrder
         // =====================================================
         [HttpPost]
+        [RoleAuthorize("Customer")]
         [ValidateAntiForgeryToken]
         public ActionResult PlaceOrder(
             Order model,
@@ -556,6 +557,7 @@ namespace RestaurantWebsite.Controllers
         // GET: Order/Success/5
         // =====================================================
         [HttpGet]
+        [RoleAuthorize("Customer")]
         public ActionResult Success(int? id)
         {
             if (Session["UserId"] == null)
@@ -591,6 +593,46 @@ namespace RestaurantWebsite.Controllers
             }
 
             return View("~/Views/Customer/Order/Success.cshtml", order);
+        }
+
+
+        // =====================================================
+        // GET: Order/Receipt/5 (Printable Order Receipt)
+        // =====================================================
+        [HttpGet]
+        [RoleAuthorize("Customer", "Staff", "Admin")]
+        public ActionResult Receipt(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return HttpNotFound("Order ID was not provided.");
+            }
+
+            int currentUserId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
+            string currentRole = Session["Role"] != null ? Session["Role"].ToString() : "";
+
+            var order = db.Orders
+                .Include(o => o.User)
+                .Include(o => o.Reservation)
+                .Include(o => o.Table)
+                .Include(o => o.OrderItems.Select(oi => oi.Dish))
+                .Include(o => o.OrderItems.Select(oi => oi.Combo))
+                .Include(o => o.Payments)
+                .Include(o => o.OrderPromotions.Select(op => op.Promotion))
+                .FirstOrDefault(o => o.Id == id.Value);
+
+            if (order == null)
+            {
+                return HttpNotFound("Order was not found.");
+            }
+
+            // Customer chỉ được xem biên nhận đơn của chính mình; Staff và Admin được quyền xem tất cả biên nhận
+            if (currentRole == "Customer" && order.UserId != currentUserId)
+            {
+                return new HttpStatusCodeResult(403, "Access denied. You can only view your own receipts.");
+            }
+
+            return View("~/Views/Customer/Order/Receipt.cshtml", order);
         }
 
 

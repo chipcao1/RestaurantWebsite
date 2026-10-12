@@ -14,6 +14,7 @@ namespace RestaurantWebsite.Controllers
 
         private readonly string[] ValidOrderStatuses = new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled" };
         private readonly string[] ValidReservationStatuses = new[] { "Pending", "Confirmed", "Completed", "Cancelled" };
+        private readonly string[] ValidPaymentStatuses = new[] { "Pending", "Completed", "Failed", "Refunded" };
 
         // =====================================================
         // GET: /staff (Dashboard)
@@ -99,8 +100,8 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Dishes");
             }
 
-            // Toggle Status between Available and Unavailable
-            dish.Status = (dish.Status == "Available") ? "Unavailable" : "Available";
+            // Toggle Status between Available and Temporarily Unavailable
+            dish.Status = (dish.Status == "Available") ? "Temporarily Unavailable" : "Available";
             db.SaveChanges();
 
             TempData["Success"] = $"Dish \"{dish.Name}\" availability updated to {dish.Status}.";
@@ -175,6 +176,48 @@ namespace RestaurantWebsite.Controllers
             {
                 return RedirectToAction("Index");
             }
+            return RedirectToAction("Orders");
+        }
+
+        // =====================================================
+        // POST: /staff/update-payment-status
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdatePaymentStatus(int paymentId, string newPaymentStatus)
+        {
+            var payment = db.Payments
+                .Include(p => p.Order)
+                .FirstOrDefault(p => p.Id == paymentId);
+
+            if (payment == null)
+            {
+                TempData["Error"] = "Payment record not found.";
+                return RedirectToAction("Orders");
+            }
+
+            if (!ValidPaymentStatuses.Contains(newPaymentStatus))
+            {
+                TempData["Error"] = "Invalid payment status.";
+                return RedirectToAction("Orders");
+            }
+
+            // Ngăn việc ghi nhận thanh toán thành công trùng lặp
+            if (payment.Status == "Completed" && newPaymentStatus == "Completed")
+            {
+                TempData["Error"] = $"Payment #{payment.Id} for Order #{payment.OrderId} has already been marked as Completed.";
+                return RedirectToAction("Orders");
+            }
+
+            payment.Status = newPaymentStatus;
+            if (newPaymentStatus == "Completed")
+            {
+                payment.PaymentDate = DateTime.Now;
+            }
+
+            db.SaveChanges();
+
+            TempData["Success"] = $"Payment for Order #{payment.OrderId} updated to \"{newPaymentStatus}\" ({payment.PaymentMethod}).";
             return RedirectToAction("Orders");
         }
 

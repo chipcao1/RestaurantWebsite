@@ -45,7 +45,10 @@
                             </div>
                             <div>
                                 <span class="badge @(order.Status == "Delivered" ? "badge-success" : "badge-warning") p-2">@order.Status</span>
-                                <strong class="ml-3 text-danger">@order.TotalAmount.ToString("N0") VNĐ</strong>
+                                <strong class="ml-2 text-danger">@order.TotalAmount.ToString("N0") VNĐ</strong>
+                                <a href="@Url.Action("Receipt", "Order", new { id = order.Id })" target="_blank" class="btn btn-sm btn-outline-info ml-2" title="View Receipt">
+                                    <i class="fa fa-print"></i> Receipt
+                                </a>
                             </div>
                         </div>
                         <div class="card-body p-3">

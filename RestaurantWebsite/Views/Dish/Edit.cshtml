@@ -47,7 +47,7 @@
                         <div class="callout callout-info py-2 mb-3 bg-light">
                             <i class="fa fa-info-circle text-info mr-1"></i>
                             This dish is linked to <strong>@orderCount</strong> customer order(s) and <strong>@comboCount</strong> combo(s).
-                            To hide it from the customer menu without affecting past order history, set Status to <em>Unavailable</em>.
+                            To hide it from the customer menu without affecting past order history, set Status to <em>Temporarily Unavailable</em> or <em>Discontinued</em>.
                         </div>
                     }
 
@@ -145,7 +145,8 @@
                         <div class="col-sm-9">
                             <select name="Status" class="form-control">
                                 <option value="Available" @(Model.Status == "Available" ? "selected" : "")>Available (Visible on customer menu)</option>
-                                <option value="Unavailable" @(Model.Status == "Unavailable" ? "selected" : "")>Unavailable (Hidden from customer menu)</option>
+                                <option value="Temporarily Unavailable" @(Model.Status == "Temporarily Unavailable" || Model.Status == "Unavailable" ? "selected" : "")>Temporarily Unavailable (Out of stock / hidden)</option>
+                                <option value="Discontinued" @(Model.Status == "Discontinued" ? "selected" : "")>Discontinued (No longer served)</option>
                             </select>
                         </div>
                     </div>

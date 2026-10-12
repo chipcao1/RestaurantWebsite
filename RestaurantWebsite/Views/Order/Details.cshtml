@@ -18,6 +18,9 @@
             <div class="card-header">
                 <h3 class="card-title"><i class="fa fa-shopping-cart mr-2"></i>Order Invoice #@Model.Id</h3>
                 <div class="card-tools">
+                    <a href="@Url.Action("Receipt", "Order", new { id = Model.Id })" target="_blank" class="btn btn-tool text-white" title="Print Receipt">
+                        <i class="fa fa-print mr-1"></i> Print Receipt
+                    </a>
                     <span class="badge badge-light px-2 py-1 font-weight-bold">Type: @Model.OrderType</span>
                 </div>
             </div>

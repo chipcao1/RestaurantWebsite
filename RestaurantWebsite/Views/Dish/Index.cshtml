@@ -58,7 +58,8 @@
                 <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
                     <option value="All" @(selectedStatus == "All" ? "selected" : "")>-- All Statuses --</option>
                     <option value="Available" @(selectedStatus == "Available" ? "selected" : "")>Available</option>
-                    <option value="Unavailable" @(selectedStatus == "Unavailable" ? "selected" : "")>Unavailable</option>
+                    <option value="Temporarily Unavailable" @(selectedStatus == "Temporarily Unavailable" ? "selected" : "")>Temporarily Unavailable</option>
+                    <option value="Discontinued" @(selectedStatus == "Discontinued" ? "selected" : "")>Discontinued</option>
                 </select>
             </div>
 
@@ -193,10 +194,22 @@
                                             <i class="fa fa-check-circle mr-1"></i> Available
                                         </span>
                                     }
-                                    else
+                                    else if (item.Status == "Temporarily Unavailable" || item.Status == "Unavailable")
+                                    {
+                                        <span class="badge badge-warning text-dark px-2 py-1">
+                                            <i class="fa fa-pause-circle mr-1"></i> Temp. Unavailable
+                                        </span>
+                                    }
+                                    else if (item.Status == "Discontinued")
                                     {
                                         <span class="badge badge-secondary px-2 py-1">
-                                            <i class="fa fa-pause-circle mr-1"></i> Unavailable
+                                            <i class="fa fa-ban mr-1"></i> Discontinued
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light border px-2 py-1">
+                                            @item.Status
                                         </span>
                                     }
                                 </td>
@@ -215,8 +228,8 @@
                                             @Html.AntiForgeryToken()
                                             <button type="submit"
                                                     class="btn @(item.Status == "Available" ? "btn-outline-warning" : "btn-outline-success") btn-sm"
-                                                    title="@(item.Status == "Available" ? "Set status to Unavailable (Hide from menu)" : "Set status to Available (Show on menu)")"
-                                                    onclick="return confirm('Change status of \'@item.Name\' to @(item.Status == "Available" ? "Unavailable" : "Available")?');">
+                                                    title="@(item.Status == "Available" ? "Set status to Temporarily Unavailable (Hide from menu)" : "Set status to Available (Show on menu)")"
+                                                    onclick="return confirm('Change status of \'@item.Name\' to @(item.Status == "Available" ? "Temporarily Unavailable" : "Available")?');">
                                                 <i class="fa @(item.Status == "Available" ? "fa-pause" : "fa-play")"></i>
                                             </button>
                                         }
@@ -229,8 +242,8 @@
                                             {
                                                 <button type="button"
                                                         class="btn btn-outline-danger btn-sm"
-                                                        title="Cannot delete: Dish is linked to orders/combos. Set to Unavailable instead."
-                                                        onclick="alert('Cannot delete \'@item.Name\' because it has associated customer orders or combos. Please use the Status Toggle button to set it to Unavailable instead.');">
+                                                        title="Cannot delete: Dish is linked to orders/combos. Set to Temporarily Unavailable or Discontinued instead."
+                                                        onclick="alert('Cannot delete \'@item.Name\' because it has associated customer orders or combos. Please set its status to Temporarily Unavailable or Discontinued instead.');">
                                                     <i class="fa fa-trash-o"></i>
                                                 </button>
                                             }

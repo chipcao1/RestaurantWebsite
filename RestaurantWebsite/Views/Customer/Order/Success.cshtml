@@ -1,4 +1,4 @@
-﻿@using System.Linq
+@using System.Linq
 @model RestaurantWebsite.Models.Order
 
 @{
@@ -83,8 +83,14 @@
                     </div>
 
                     <div class="text-center mt-4">
+                        <a href="@Url.Action("Receipt", "Order", new { id = Model.Id })"
+                           target="_blank"
+                           class="btn btn-warning text-dark font-weight-bold mr-2">
+                            <i class="fa fa-print mr-1"></i> View Receipt
+                        </a>
+
                         <a href="@Url.Action("Index", "Menu")"
-                           class="btn btn-warning text-white mr-2">
+                           class="btn btn-outline-warning text-dark mr-2">
                             Continue Shopping
                         </a>
 

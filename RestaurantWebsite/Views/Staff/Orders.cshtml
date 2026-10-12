@@ -59,9 +59,10 @@
                             <th>Customer & Contact</th>
                             <th>Ordered Items</th>
                             <th class="text-right">Total</th>
+                            <th class="text-center">Payment</th>
                             <th class="text-center">Order Status</th>
                             <th>Placed At</th>
-                            <th style="width: 220px;" class="text-center">Status Action</th>
+                            <th style="width: 220px;" class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,6 +90,36 @@
                                     </ul>
                                 </td>
                                 <td class="text-right font-weight-bold text-success">$@item.TotalAmount.ToString("N2")</td>
+                                <td class="text-center">
+                                    @{
+                                        var pmt = item.Payments?.OrderByDescending(p => p.Id).FirstOrDefault();
+                                    }
+                                    @if (pmt != null)
+                                    {
+                                        <div>
+                                            <small class="font-weight-bold d-block text-muted">@pmt.PaymentMethod</small>
+                                            @if (pmt.Status == "Completed")
+                                            {
+                                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Paid</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning text-dark px-2 py-1 mb-1"><i class="fa fa-clock-o mr-1"></i>Unpaid</span>
+                                                using (Html.BeginForm("UpdatePaymentStatus", "Staff", new { paymentId = pmt.Id, newPaymentStatus = "Completed" }, FormMethod.Post, new { style = "display:block;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-xs btn-outline-success mt-1" title="Mark as Paid" onclick="return confirm('Confirm payment received for Order #@item.Id via @pmt.PaymentMethod?');">
+                                                        <i class="fa fa-money mr-1"></i> Mark Paid
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No payment</span>
+                                    }
+                                </td>
                                 <td class="text-center">
                                     @if (item.Status == "Pending")
                                     {
@@ -164,6 +195,10 @@
                                             <button type="submit" class="btn btn-outline-success btn-sm"><i class="fa fa-flag-checkered mr-1"></i> Complete</button>
                                         }
                                     }
+
+                                    <a href="@Url.Action("Receipt", "Order", new { id = item.Id })" target="_blank" class="btn btn-default btn-sm ml-1" title="View / Print Receipt">
+                                        <i class="fa fa-print text-muted"></i> Receipt
+                                    </a>
                                 </td>
                             </tr>
                         }
