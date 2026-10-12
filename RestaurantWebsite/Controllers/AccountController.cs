@@ -194,7 +194,7 @@ namespace RestaurantWebsite.Controllers
 
         [HttpGet]
         [RoleAuthorize("Customer")]
-        public ActionResult Profile()
+        public new ActionResult Profile()
         {
             var user = GetCurrentCustomer();
             if (user == null)
@@ -208,7 +208,7 @@ namespace RestaurantWebsite.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Customer")]
-        public ActionResult Profile(User model)
+        public new ActionResult Profile(User model)
         {
             var user = GetCurrentCustomer();
             if (user == null)
@@ -332,6 +332,71 @@ namespace RestaurantWebsite.Controllers
                 .ToList();
 
             return View("~/Views/Customer/Account/MyReservations.cshtml", reservations);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RoleAuthorize("Customer")]
+        public ActionResult CancelOrder(int id)
+        {
+            int userId = (int)Session["UserId"];
+
+            var order = db.Orders.FirstOrDefault(o => o.Id == id && o.UserId == userId);
+            if (order == null)
+            {
+                TempData["Error"] = "Order not found or access denied.";
+                return RedirectToAction("MyOrders");
+            }
+
+            if (order.Status != "Pending")
+            {
+                TempData["Error"] = $"Cannot cancel order #{id}. Only orders in 'Pending' status can be cancelled.";
+                return RedirectToAction("MyOrders");
+            }
+
+            order.Status = "Cancelled";
+
+            // If payment was recorded as Pending, mark as Failed
+            var payments = db.Payments.Where(p => p.OrderId == order.Id).ToList();
+            foreach (var p in payments)
+            {
+                if (p.Status == "Pending")
+                {
+                    p.Status = "Failed";
+                }
+            }
+
+            db.SaveChanges();
+
+            TempData["Success"] = $"Order #{id} has been cancelled successfully.";
+            return RedirectToAction("MyOrders");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RoleAuthorize("Customer")]
+        public ActionResult CancelReservation(int id)
+        {
+            int userId = (int)Session["UserId"];
+
+            var reservation = db.Reservations.FirstOrDefault(r => r.Id == id && r.UserId == userId);
+            if (reservation == null)
+            {
+                TempData["Error"] = "Reservation not found or access denied.";
+                return RedirectToAction("MyReservations");
+            }
+
+            if (reservation.Status != "Pending" && reservation.Status != "Confirmed")
+            {
+                TempData["Error"] = $"Cannot cancel reservation #{id}. Current status is '{reservation.Status}'.";
+                return RedirectToAction("MyReservations");
+            }
+
+            reservation.Status = "Cancelled";
+            db.SaveChanges();
+
+            TempData["Success"] = $"Reservation #{id} has been cancelled successfully.";
+            return RedirectToAction("MyReservations");
         }
 
         [HttpGet]

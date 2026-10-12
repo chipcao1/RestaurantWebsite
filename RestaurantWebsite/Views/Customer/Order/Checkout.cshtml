@@ -378,4 +378,23 @@
 
 </section>
 
+@section Scripts {
+    <script>
+        function toggleDeliveryAddress() {
+            var orderType = document.getElementById("OrderType").value;
+            var addressGroup = document.getElementById("deliveryAddressGroup");
+            if (addressGroup) {
+                if (orderType === "Delivery") {
+                    addressGroup.style.display = "block";
+                } else {
+                    addressGroup.style.display = "none";
+                }
+            }
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            toggleDeliveryAddress();
+        });
+    </script>
+}
+
 
