@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using RestaurantWebsite.Filters;
 using RestaurantWebsite.Models;
+using RestaurantWebsite.Security;
 
 namespace RestaurantWebsite.Controllers
 {
@@ -122,31 +123,37 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Details", new { id = id });
             }
 
-            // If Confirming reservation, check table overlap
-            if (newStatus == "Confirmed")
+            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                DateTime requestedStart = reservation.ReservationDate;
-                DateTime requestedEnd = requestedStart.AddHours(2);
-
-                bool hasOverlap = db.Reservations.Any(r =>
-                    r.Id != reservation.Id &&
-                    r.TableId == reservation.TableId &&
-                    r.Status != "Cancelled" &&
-                    r.ReservationDate < requestedEnd &&
-                    r.ReservationDate.AddHours(2) > requestedStart);
-
-                if (hasOverlap)
+                try
                 {
-                    TempData["Error"] = $"Cannot confirm reservation #{id}. Table {reservation.Table.TableNumber} is already reserved/occupied during this 2-hour window.";
+                    // If Confirming reservation, check table overlap
+                    if (newStatus == "Confirmed")
+                    {
+                        bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, reservation.TableId, reservation.ReservationDate, reservation.Id);
+
+                        if (hasOverlap)
+                        {
+                            transaction.Rollback();
+                            TempData["Error"] = $"Cannot confirm reservation #{id}. Table {reservation.Table.TableNumber} is already reserved/occupied during this 2-hour window.";
+                            return RedirectToAction("Details", new { id = id });
+                        }
+                    }
+
+                    reservation.Status = newStatus;
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    TempData["Success"] = $"Reservation #{id} status updated to \"{newStatus}\".";
+                    return RedirectToAction("Details", new { id = id });
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    TempData["Error"] = $"Unable to update reservation #{id} due to concurrent activity. Please try again.";
                     return RedirectToAction("Details", new { id = id });
                 }
             }
-
-            reservation.Status = newStatus;
-            db.SaveChanges();
-
-            TempData["Success"] = $"Reservation #{id} status updated to \"{newStatus}\".";
-            return RedirectToAction("Details", new { id = id });
         }
 
         // =====================================================
@@ -173,29 +180,34 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Details", new { id = id });
             }
 
-            // Check reservation overlap for 2 hours window
-            DateTime requestedStart = reservation.ReservationDate;
-            DateTime requestedEnd = requestedStart.AddHours(2);
-
-            bool hasOverlap = db.Reservations.Any(r =>
-                r.Id != reservation.Id &&
-                r.TableId == targetTable.Id &&
-                r.Status != "Cancelled" &&
-                r.ReservationDate < requestedEnd &&
-                r.ReservationDate.AddHours(2) > requestedStart);
-
-            if (hasOverlap)
+            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                TempData["Error"] = $"Cannot reassign to Table {targetTable.TableNumber}. It is already reserved during the requested time window ({requestedStart:HH:mm} - {requestedEnd:HH:mm}).";
-                return RedirectToAction("Details", new { id = id });
+                try
+                {
+                    bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, targetTable.Id, reservation.ReservationDate, reservation.Id);
+
+                    if (hasOverlap)
+                    {
+                        transaction.Rollback();
+                        TempData["Error"] = $"Cannot reassign to Table {targetTable.TableNumber}. It is already reserved during the requested time window.";
+                        return RedirectToAction("Details", new { id = id });
+                    }
+
+                    string oldTableNum = reservation.Table != null ? reservation.Table.TableNumber : reservation.TableId.ToString();
+                    reservation.TableId = targetTable.Id;
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    TempData["Success"] = $"Reservation #{id} reassigned from Table {oldTableNum} to Table {targetTable.TableNumber}.";
+                    return RedirectToAction("Details", new { id = id });
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    TempData["Error"] = $"Unable to reassign table for reservation #{id} due to concurrent activity. Please try again.";
+                    return RedirectToAction("Details", new { id = id });
+                }
             }
-
-            string oldTableNum = reservation.Table.TableNumber;
-            reservation.TableId = targetTable.Id;
-            db.SaveChanges();
-
-            TempData["Success"] = $"Reservation #{id} reassigned from Table {oldTableNum} to Table {targetTable.TableNumber}.";
-            return RedirectToAction("Details", new { id = id });
         }
 
         protected override void Dispose(bool disposing)

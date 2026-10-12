@@ -3,6 +3,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using RestaurantWebsite.Models;
+using RestaurantWebsite.Security;
 
 namespace RestaurantWebsite.Controllers
 {
@@ -145,62 +146,58 @@ namespace RestaurantWebsite.Controllers
 
 
             // =================================================
-            // Check reservation overlap
-            // Each reservation occupies a 2-hour time window
-            // =================================================
-            DateTime requestedStart = model.ReservationDate;
-            DateTime requestedEnd = requestedStart.AddHours(2);
-
-            bool hasOverlap = db.Reservations.Any(r =>
-                r.TableId == table.Id &&
-                r.Status != "Cancelled" &&
-                r.ReservationDate < requestedEnd &&
-                r.ReservationDate.AddHours(2) > requestedStart);
-
-            if (hasOverlap)
-            {
-                ModelState.AddModelError(
-                    "TableId",
-                    "This table is already reserved during the selected time.");
-            }
-
-
-            // =================================================
-            // Reload page if validation fails
+            // Reload page if basic validation fails
             // =================================================
             if (!ModelState.IsValid)
             {
                 LoadReservationData(userId);
-
                 return View("~/Views/Customer/Reservation/Index.cshtml", model);
             }
 
-
             // =================================================
-            // Create reservation
+            // Atomic check & insert with Serializable transaction
+            // to eliminate concurrency race condition
             // =================================================
-            var reservation = new Reservation
+            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                UserId = userId,
-                TableId = table.Id,
-                ReservationDate = model.ReservationDate,
-                PartySize = table.Capacity,
-                SpecialRequest = model.SpecialRequest,
-                Status = "Pending",
-                CreatedAt = DateTime.Now
-            };
+                try
+                {
+                    bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, table.Id, model.ReservationDate);
 
-            db.Reservations.Add(reservation);
-            db.SaveChanges();
+                    if (hasOverlap)
+                    {
+                        transaction.Rollback();
+                        ModelState.AddModelError("TableId", "This table is already reserved during the selected time.");
+                        LoadReservationData(userId);
+                        return View("~/Views/Customer/Reservation/Index.cshtml", model);
+                    }
 
+                    var reservation = new Reservation
+                    {
+                        UserId = userId,
+                        TableId = table.Id,
+                        ReservationDate = model.ReservationDate,
+                        PartySize = table.Capacity,
+                        SpecialRequest = model.SpecialRequest,
+                        Status = "Pending",
+                        CreatedAt = DateTime.Now
+                    };
 
-            // =================================================
-            // Success
-            // =================================================
-            TempData["ReservationSuccess"] =
-                "Your table has been booked successfully.";
+                    db.Reservations.Add(reservation);
+                    db.SaveChanges();
+                    transaction.Commit();
 
-            return RedirectToAction("Index");
+                    TempData["ReservationSuccess"] = "Your table has been booked successfully.";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    ModelState.AddModelError("", "Unable to complete reservation due to high demand. Please try again.");
+                    LoadReservationData(userId);
+                    return View("~/Views/Customer/Reservation/Index.cshtml", model);
+                }
+            }
         }
 
 

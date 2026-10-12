@@ -6,6 +6,7 @@ using System.Text;
 using System.Web.Mvc;
 using RestaurantWebsite.Filters;
 using RestaurantWebsite.Models;
+using RestaurantWebsite.Security;
 
 namespace RestaurantWebsite.Controllers
 {
@@ -58,14 +59,21 @@ namespace RestaurantWebsite.Controllers
                 return View();
             }
 
-            string hashedPassword = HashPassword(password);
+            bool needsRehash;
+            bool isPasswordValid = PasswordHasher.VerifyPassword(user.PasswordHash, password, out needsRehash);
 
-            if (!string.Equals(user.PasswordHash, hashedPassword,
-                               StringComparison.OrdinalIgnoreCase))
+            if (!isPasswordValid)
             {
                 ModelState.AddModelError("", "Invalid email or password.");
                 ViewBag.ReturnUrl = returnUrl;
                 return View();
+            }
+
+            // Tự động nâng cấp hash legacy SHA-256 sang PBKDF2 an toàn khi đăng nhập thành công
+            if (needsRehash)
+            {
+                user.PasswordHash = PasswordHasher.HashPassword(password);
+                db.SaveChanges();
             }
 
             Session["UserId"] = user.Id;
@@ -154,7 +162,7 @@ namespace RestaurantWebsite.Controllers
             {
                 FullName = model.FullName,
                 Email = model.Email,
-                PasswordHash = HashPassword(password),
+                PasswordHash = PasswordHasher.HashPassword(password),
                 Phone = model.Phone,
                 Address = model.Address,
                 Role = "Customer",
@@ -274,8 +282,7 @@ namespace RestaurantWebsite.Controllers
 
             if (!string.IsNullOrWhiteSpace(currentPassword))
             {
-                string currentHash = HashPassword(currentPassword);
-                if (!string.Equals(user.PasswordHash, currentHash, StringComparison.OrdinalIgnoreCase))
+                if (!PasswordHasher.VerifyPassword(user.PasswordHash, currentPassword))
                 {
                     ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
                 }
@@ -286,7 +293,7 @@ namespace RestaurantWebsite.Controllers
                 return View("~/Views/Customer/Account/ChangePassword.cshtml");
             }
 
-            user.PasswordHash = HashPassword(newPassword);
+            user.PasswordHash = PasswordHasher.HashPassword(newPassword);
             db.SaveChanges();
 
             // logout the user after changing password
@@ -415,20 +422,6 @@ namespace RestaurantWebsite.Controllers
                 u.Id == userId &&
                 u.IsActive &&
                 u.Role == "Customer");
-        }
-
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(password);
-                byte[] hash = sha256.ComputeHash(bytes);
-
-                return BitConverter
-                    .ToString(hash)
-                    .Replace("-", "")
-                    .ToLowerInvariant();
-            }
         }
 
         protected override void Dispose(bool disposing)

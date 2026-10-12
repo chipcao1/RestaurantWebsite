@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using RestaurantWebsite.Filters;
 using RestaurantWebsite.Models;
+using RestaurantWebsite.Security;
 
 namespace RestaurantWebsite.Controllers
 {
@@ -284,37 +285,44 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToAction("Reservations");
             }
 
-            // Check overlap if confirming
-            if (newStatus == "Confirmed")
+            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                DateTime requestedStart = reservation.ReservationDate;
-                DateTime requestedEnd = requestedStart.AddHours(2);
-
-                bool hasOverlap = db.Reservations.Any(r =>
-                    r.Id != reservation.Id &&
-                    r.TableId == reservation.TableId &&
-                    r.Status != "Cancelled" &&
-                    r.ReservationDate < requestedEnd &&
-                    r.ReservationDate.AddHours(2) > requestedStart);
-
-                if (hasOverlap)
+                try
                 {
-                    TempData["Error"] = $"Cannot confirm reservation #{id}. Table {reservation.Table.TableNumber} is already booked during this time.";
+                    // Check overlap if confirming
+                    if (newStatus == "Confirmed")
+                    {
+                        bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, reservation.TableId, reservation.ReservationDate, reservation.Id);
+
+                        if (hasOverlap)
+                        {
+                            transaction.Rollback();
+                            TempData["Error"] = $"Cannot confirm reservation #{id}. Table {reservation.Table.TableNumber} is already booked during this time.";
+                            if (returnAction == "Index") return RedirectToAction("Index");
+                            return RedirectToAction("Reservations");
+                        }
+                    }
+
+                    reservation.Status = newStatus;
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    TempData["Success"] = $"Reservation #{id} status updated to \"{newStatus}\".";
+
+                    if (returnAction == "Index")
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    return RedirectToAction("Reservations");
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    TempData["Error"] = $"Unable to update reservation #{id} due to concurrent activity. Please try again.";
                     if (returnAction == "Index") return RedirectToAction("Index");
                     return RedirectToAction("Reservations");
                 }
             }
-
-            reservation.Status = newStatus;
-            db.SaveChanges();
-
-            TempData["Success"] = $"Reservation #{id} status updated to \"{newStatus}\".";
-
-            if (returnAction == "Index")
-            {
-                return RedirectToAction("Index");
-            }
-            return RedirectToAction("Reservations");
         }
 
         protected override void Dispose(bool disposing)
