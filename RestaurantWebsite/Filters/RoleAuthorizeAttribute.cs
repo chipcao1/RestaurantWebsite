@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -63,6 +63,7 @@ namespace RestaurantWebsite.Filters
                         new RouteValueDictionary(
                             new
                             {
+                                area = "",
                                 controller = "Account",
                                 action = "Login"
                             }));

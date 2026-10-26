@@ -87,7 +87,7 @@
                     </a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="@Url.Action("Index", "Home")" class="nav-link" target="_blank" title="View Customer Website">
+                    <a href="@Url.Action("Index", "Home", new { area = "" })" class="nav-link" target="_blank" title="View Customer Website">
                         <i class="fa fa-globe mr-1 text-primary"></i> View Website
                     </a>
                 </li>
@@ -110,7 +110,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="@Url.Action("Logout", "Account")" class="btn btn-outline-danger btn-sm" title="Log out">
+                    <a href="@Url.Action("Logout", "Account", new { area = "" })" class="btn btn-outline-danger btn-sm" title="Log out">
                         <i class="fa fa-sign-out mr-1"></i> Logout
                     </a>
                 </li>
@@ -246,13 +246,13 @@
                         <!-- Quick Exit to Public Website -->
                         <li class="nav-header text-uppercase font-weight-bold text-muted mt-2">Public Site</li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Index", "Home")" class="nav-link" target="_blank">
+                            <a href="@Url.Action("Index", "Home", new { area = "" })" class="nav-link" target="_blank">
                                 <i class="nav-icon fa fa-external-link text-info"></i>
                                 <p>Customer Home</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Logout", "Account")" class="nav-link text-danger">
+                            <a href="@Url.Action("Logout", "Account", new { area = "" })" class="nav-link text-danger">
                                 <i class="nav-icon fa fa-sign-out"></i>
                                 <p>Sign Out</p>
                             </a>
