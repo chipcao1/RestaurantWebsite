@@ -1,0 +1,210 @@
+@model IEnumerable<RestaurantWebsite.Models.Order>
+
+@{
+    ViewBag.Title = "Staff - Order Queue Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card card-warning card-outline">
+    <div class="card-header">
+        <h3 class="card-title font-weight-bold"><i class="fa fa-shopping-cart text-warning mr-2"></i>Orders Dispatch & Processing Queue</h3>
+        <div class="card-tools">
+            <span class="badge badge-warning text-dark font-weight-bold">Staff Area</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Orders", "Staff", FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Status:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="#Order, customer, phone..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedStatus != "All")
+            {
+                <a href="@Url.Action("Orders", "Staff")" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No orders found in queue.</h5>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Customer & Contact</th>
+                            <th>Ordered Items</th>
+                            <th class="text-right">Total</th>
+                            <th class="text-center">Payment</th>
+                            <th class="text-center">Order Status</th>
+                            <th>Placed At</th>
+                            <th style="width: 220px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">@(item.User != null ? item.User.FullName : "Guest Customer")</div>
+                                    <small class="text-muted d-block"><i class="fa fa-phone mr-1"></i>@(item.Phone ?? "N/A")</small>
+                                    @if (!string.IsNullOrEmpty(item.DeliveryAddress))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 220px;" title="@item.DeliveryAddress"><i class="fa fa-map-marker mr-1"></i>@item.DeliveryAddress</small>
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled mb-0 font-size-13">
+                                        @foreach (var oi in item.OrderItems)
+                                        {
+                                            <li>
+                                                <strong class="text-primary">@oi.Quantity x</strong>
+                                                @(oi.Dish != null ? oi.Dish.Name : (oi.Combo != null ? oi.Combo.Name + " (Combo)" : "Item"))
+                                            </li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td class="text-right font-weight-bold text-success">$@item.TotalAmount.ToString("N2")</td>
+                                <td class="text-center">
+                                    @{
+                                        var pmt = item.Payments?.OrderByDescending(p => p.Id).FirstOrDefault();
+                                    }
+                                    @if (pmt != null)
+                                    {
+                                        <div>
+                                            <small class="font-weight-bold d-block text-muted">@pmt.PaymentMethod</small>
+                                            @if (pmt.Status == "Completed")
+                                            {
+                                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Paid</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning text-dark px-2 py-1 mb-1"><i class="fa fa-clock-o mr-1"></i>Unpaid</span>
+                                                using (Html.BeginForm("UpdatePaymentStatus", "Staff", new { paymentId = pmt.Id, newPaymentStatus = "Completed" }, FormMethod.Post, new { style = "display:block;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-xs btn-outline-success mt-1" title="Mark as Paid" onclick="return confirm('Confirm payment received for Order #@item.Id via @pmt.PaymentMethod?');">
+                                                        <i class="fa fa-money mr-1"></i> Mark Paid
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No payment</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-clock-o mr-1"></i>Pending</span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-info px-2 py-1"><i class="fa fa-check mr-1"></i>Confirmed</span>
+                                    }
+                                    else if (item.Status == "Preparing")
+                                    {
+                                        <span class="badge badge-primary px-2 py-1"><i class="fa fa-cog fa-spin mr-1"></i>Preparing</span>
+                                    }
+                                    else if (item.Status == "Ready")
+                                    {
+                                        <span class="badge badge-info px-2 py-1"><i class="fa fa-check-circle mr-1"></i>Ready</span>
+                                    }
+                                    else if (item.Status == "Delivered")
+                                    {
+                                        <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i>Delivered</span>
+                                    }
+                                    else if (item.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-secondary px-2 py-1"><i class="fa fa-times-circle mr-1"></i>Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark">@item.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block font-weight-bold">@item.CreatedAt.ToString("yyyy-MM-dd")</small>
+                                    <small class="text-muted">@item.CreatedAt.ToString("HH:mm")</small>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { id = item.Id, newStatus = "Confirmed" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-check mr-1"></i> Confirm</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { id = item.Id, newStatus = "Preparing" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-cog mr-1"></i> Prepare</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Preparing")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { id = item.Id, newStatus = "Ready" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-info btn-sm"><i class="fa fa-check-circle mr-1"></i> Ready</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Ready")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { id = item.Id, newStatus = "Delivered" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-truck mr-1"></i> Deliver</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Delivered")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { id = item.Id, newStatus = "Completed" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success btn-sm"><i class="fa fa-flag-checkered mr-1"></i> Complete</button>
+                                        }
+                                    }
+
+                                    <a href="@Url.Action("Receipt", "Order", new { id = item.Id })" target="_blank" class="btn btn-default btn-sm ml-1" title="View / Print Receipt">
+                                        <i class="fa fa-print text-muted"></i> Receipt
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

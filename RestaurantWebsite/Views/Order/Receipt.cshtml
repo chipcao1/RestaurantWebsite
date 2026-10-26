@@ -1,0 +1,220 @@
+@model RestaurantWebsite.Models.Order
+@{
+    Layout = null;
+    var payment = Model.Payments?.OrderByDescending(p => p.Id).FirstOrDefault();
+    var promo = Model.OrderPromotions?.FirstOrDefault();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Order Receipt #@Model.Id - Feane Restaurant</title>
+
+    <link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .receipt-container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 35px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #dee2e6;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .receipt-header h2 {
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .receipt-table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .receipt-table td, .receipt-table th {
+            vertical-align: middle;
+            padding: 10px 12px;
+        }
+        .summary-table td {
+            padding: 6px 12px;
+            border: none;
+        }
+        .summary-table tr.total-row td {
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .no-print {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        @@media print {
+            body {
+                background: #fff;
+            }
+            .receipt-container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                max-width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Print & Navigation Controls -->
+        <div class="no-print mt-4">
+            <button onclick="window.print()" class="btn btn-warning text-dark font-weight-bold mr-2 shadow-sm">
+                <i class="fa fa-print mr-1"></i> Print Receipt
+            </button>
+            <button onclick="window.close()" class="btn btn-secondary shadow-sm">
+                <i class="fa fa-times mr-1"></i> Close
+            </button>
+        </div>
+
+        <div class="receipt-container">
+            <!-- Restaurant Info & Header -->
+            <div class="receipt-header">
+                <h2>FEANE RESTAURANT</h2>
+                <p class="text-muted mb-1 font-size-14">Taste the Extraordinary Experience</p>
+                <small class="text-muted d-block">Hotline: (+84) 123 456 789 | Website: restaurant.local</small>
+                <h4 class="mt-3 mb-0 text-uppercase font-weight-bold" style="letter-spacing: 1px;">Official Order Receipt</h4>
+            </div>
+
+            <!-- Metadata Details -->
+            <div class="row mb-3 font-size-14">
+                <div class="col-6">
+                    <p class="mb-1"><strong>Order ID:</strong> <span class="text-dark">#@Model.Id</span></p>
+                    <p class="mb-1"><strong>Order Date:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Order Type:</strong> <span class="badge badge-info">@Model.OrderType</span></p>
+                    @if (Model.Table != null)
+                    {
+                        <p class="mb-1"><strong>Table:</strong> Table @Model.Table.TableNumber (@Model.Table.Zone)</p>
+                    }
+                </div>
+                <div class="col-6 text-right">
+                    <p class="mb-1"><strong>Customer:</strong> @(Model.User != null ? Model.User.FullName : "Guest Customer")</p>
+                    <p class="mb-1"><strong>Phone:</strong> @(Model.Phone ?? "N/A")</p>
+                    @if (!string.IsNullOrEmpty(Model.DeliveryAddress))
+                    {
+                        <p class="mb-1"><strong>Address:</strong> <small class="text-muted">@Model.DeliveryAddress</small></p>
+                    }
+                </div>
+            </div>
+
+            <!-- Items Breakdown -->
+            <div class="table-responsive mb-3">
+                <table class="table table-bordered receipt-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th class="text-center" style="width: 70px;">Qty</th>
+                            <th class="text-right" style="width: 120px;">Unit Price</th>
+                            <th class="text-right" style="width: 130px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@(item.Dish != null ? item.Dish.Name : (item.Combo != null ? item.Combo.Name + " (Combo)" : "Menu Item"))</strong>
+                                    @if (!string.IsNullOrEmpty(item.Note))
+                                    {
+                                        <small class="text-muted d-block">Note: @item.Note</small>
+                                    }
+                                </td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-right">$@item.UnitPrice.ToString("N2")</td>
+                                <td class="text-right font-weight-bold">$@item.SubTotal.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Financial Summary -->
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <div class="p-3 bg-light rounded border">
+                        <h6 class="font-weight-bold text-uppercase mb-2 text-muted" style="font-size: 12px;">Payment Information</h6>
+                        <p class="mb-1"><strong>Method:</strong> @(payment != null ? payment.PaymentMethod : "N/A")</p>
+                        <p class="mb-1">
+                            <strong>Payment Status:</strong>
+                            @if (payment != null && payment.Status == "Completed")
+                            {
+                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>PAID</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-clock-o mr-1"></i>@(payment != null ? payment.Status : "Pending")</span>
+                            }
+                        </p>
+                        @if (payment != null && payment.PaymentDate != default(DateTime))
+                        {
+                            <p class="mb-0"><small class="text-muted">Paid at: @payment.PaymentDate.ToString("dd/MM/yyyy HH:mm")</small></p>
+                        }
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <table class="table summary-table text-right mb-0">
+                        <tr>
+                            <td class="text-muted">Subtotal:</td>
+                            <td>$@Model.SubTotal.ToString("N2")</td>
+                        </tr>
+                        @if (Model.DiscountAmount > 0)
+                        {
+                            <tr class="text-success">
+                                <td>Discount @(promo != null && promo.Promotion != null ? $"({promo.Promotion.Code})" : ""):</td>
+                                <td>-$@Model.DiscountAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                        @if (Model.DeliveryFee > 0)
+                        {
+                            <tr>
+                                <td class="text-muted">Delivery Fee:</td>
+                                <td>$@Model.DeliveryFee.ToString("N2")</td>
+                            </tr>
+                        }
+                        <tr class="total-row text-danger">
+                            <td>TOTAL:</td>
+                            <td>$@Model.TotalAmount.ToString("N2")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Receipt Footer Note -->
+            <div class="text-center border-top pt-3 mt-2 text-muted font-size-13">
+                <p class="mb-1 font-italic">Thank you for dining with Feane Restaurant!</p>
+                <small>Please keep this receipt for verification if needed.</small>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

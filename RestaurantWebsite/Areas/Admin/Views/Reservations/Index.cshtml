@@ -1,0 +1,223 @@
+@model IEnumerable<RestaurantWebsite.Models.Reservation>
+
+@{
+    ViewBag.Title = "Reservations Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    int totalCount = Model.Count();
+    int pendingCount = Model.Count(r => r.Status == "Pending");
+    int confirmedCount = Model.Count(r => r.Status == "Confirmed");
+    int completedCount = Model.Count(r => r.Status == "Completed");
+    int cancelledCount = Model.Count(r => r.Status == "Cancelled");
+}
+
+<!-- Summary Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@pendingCount</h3>
+                <p>Pending Confirmations</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-clock-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@confirmedCount</h3>
+                <p>Confirmed Bookings</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-calendar-check-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@completedCount</h3>
+                <p>Completed Visits</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-secondary">
+            <div class="inner">
+                <h3>@cancelledCount</h3>
+                <p>Cancelled</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-times-circle"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Card -->
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title text-bold"><i class="fa fa-calendar mr-2"></i>Reservations List</h3>
+        <div class="card-tools">
+            <span class="badge badge-primary">Total: @totalCount</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Index", "Reservations", new { area = "Admin" }, FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Status:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Date:</label>
+                <input type="date" name="date" class="form-control form-control-sm" value="@ViewBag.SelectedDate" onchange="this.form.submit()" />
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Customer, email, table..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedStatus != "All" || !string.IsNullOrEmpty(ViewBag.SelectedDate))
+            {
+                <a href="@Url.Action("Index", "Reservations", new { area = "Admin" })" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No reservations found.</h5>
+                <p class="mb-0">Try clearing search filters to see all reservations.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Customer</th>
+                            <th>Table & Zone</th>
+                            <th class="text-center">Party Size</th>
+                            <th>Reservation Date & Time</th>
+                            <th class="text-center">Status</th>
+                            <th>Special Request</th>
+                            <th style="width: 210px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">@(item.User != null ? item.User.FullName : "Guest")</div>
+                                    <small class="text-muted d-block"><i class="fa fa-envelope mr-1"></i>@(item.User != null ? item.User.Email : "N/A")</small>
+                                    @if (item.User != null && !string.IsNullOrEmpty(item.User.Phone))
+                                    {
+                                        <small class="text-muted d-block"><i class="fa fa-phone mr-1"></i>@item.User.Phone</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary font-weight-bold px-2 py-1">
+                                        <i class="fa fa-table mr-1"></i>Table @(item.Table != null ? item.Table.TableNumber : item.TableId.ToString())
+                                    </span>
+                                    @if (item.Table != null)
+                                    {
+                                        <small class="d-block text-muted mt-1">Zone: <strong>@item.Table.Zone</strong> (Max: @item.Table.Capacity seats)</small>
+                                    }
+                                </td>
+                                <td class="text-center font-weight-bold font-size-16">
+                                    <span class="badge badge-light border px-2 py-1"><i class="fa fa-users mr-1 text-info"></i>@item.PartySize</span>
+                                </td>
+                                <td>
+                                    <div class="font-weight-bold"><i class="fa fa-calendar text-primary mr-1"></i>@item.ReservationDate.ToString("yyyy-MM-dd")</div>
+                                    <div class="text-success"><i class="fa fa-clock-o mr-1"></i>@item.ReservationDate.ToString("HH:mm") <small class="text-muted">(2h window)</small></div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark"><i class="fa fa-hourglass-half mr-1"></i>Pending</span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-info"><i class="fa fa-check mr-1"></i>Confirmed</span>
+                                    }
+                                    else if (item.Status == "Completed")
+                                    {
+                                        <span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Completed</span>
+                                    }
+                                    else if (item.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-secondary"><i class="fa fa-times-circle mr-1"></i>Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark">@item.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.SpecialRequest))
+                                    {
+                                        <small class="font-italic text-dark d-block text-truncate" style="max-width: 200px;" title="@item.SpecialRequest">"@item.SpecialRequest"</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">None</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Details", "Reservations", new { area = "Admin", id = item.Id })" class="btn btn-info btn-sm" title="View Details / Manage">
+                                        <i class="fa fa-eye mr-1"></i> Details
+                                    </a>
+
+                                    @if (item.Status == "Pending")
+                                    {
+                                        using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin", id = item.Id, newStatus = "Confirmed" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm" title="Confirm Reservation">
+                                                <i class="fa fa-check"></i>
+                                            </button>
+                                        }
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin", id = item.Id, newStatus = "Completed" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-primary btn-sm" title="Mark Visit Completed">
+                                                <i class="fa fa-flag-checkered"></i>
+                                            </button>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,75 @@
+@using System.Linq
+@model IEnumerable<RestaurantWebsite.Models.Reservation>
+
+@{
+    ViewBag.Title = "My Reservations";
+    ViewBag.BodyClass = "sub_page";
+}
+
+<section class="layout_padding">
+    <div class="container">
+        <div class="heading_container heading_center">
+            <h2>My Reservations</h2>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered bg-white">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Table</th>
+                            <th>Date</th>
+                            <th>Guests</th>
+                            <th>Status</th>
+                            <th>Special Request</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reservation in Model)
+                        {
+                            <tr>
+                                <td>@(reservation.Table != null ? "Table " + reservation.Table.TableNumber : "-")</td>
+                                <td>@reservation.ReservationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@reservation.PartySize</td>
+                                <td>
+                                    <span class="badge @(reservation.Status == "Confirmed" ? "badge-success" : (reservation.Status == "Cancelled" ? "badge-secondary" : "badge-warning")) p-2">
+                                        @reservation.Status
+                                    </span>
+                                </td>
+                                <td>@reservation.SpecialRequest</td>
+                                <td>
+                                    @if (reservation.Status == "Pending" || reservation.Status == "Confirmed")
+                                    {
+                                        using (Html.BeginForm("CancelReservation", "Account", new { id = reservation.Id }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Are you sure you want to cancel this table reservation?');" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fa fa-times"></i> Cancel
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border mt-4 text-center">
+                You do not have any reservations yet.
+            </div>
+        }
+
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Profile", "Account")" class="btn btn-outline-secondary">Back to Profile</a>
+        </div>
+    </div>
+</section>

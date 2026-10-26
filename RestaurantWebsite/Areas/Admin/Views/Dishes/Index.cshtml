@@ -1,0 +1,281 @@
+@model IEnumerable<RestaurantWebsite.Models.Dish>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Dishes & Menu Items";
+
+    int availableCount = Model != null ? Model.Count(d => d.Status == "Available") : 0;
+    int unavailableCount = Model != null ? Model.Count(d => d.Status != "Available") : 0;
+    int totalCount = Model != null ? Model.Count() : 0;
+
+    SelectList categories = ViewBag.Categories as SelectList;
+    string selectedStatus = ViewBag.SelectedStatus as string ?? "All";
+    string searchTerm = ViewBag.SearchTerm as string ?? "";
+}
+
+<!-- Summary stats header -->
+<div class="row mb-3">
+    <div class="col-md-4 col-sm-6 col-12">
+        <div class="info-box shadow-sm mb-2">
+            <span class="info-box-icon bg-success"><i class="fa fa-cutlery"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Dishes</span>
+                <span class="info-box-number font-weight-bold">@totalCount</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-12">
+        <div class="info-box shadow-sm mb-2">
+            <span class="info-box-icon bg-info"><i class="fa fa-check-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Available (On Menu)</span>
+                <span class="info-box-number font-weight-bold">@availableCount</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-12 col-12">
+        <div class="info-box shadow-sm mb-2">
+            <span class="info-box-icon bg-secondary"><i class="fa fa-pause-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Unavailable (Hidden)</span>
+                <span class="info-box-number font-weight-bold">@unavailableCount</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Search Card -->
+<div class="card card-outline card-secondary mb-3 shadow-sm">
+    <div class="card-body p-3">
+        @using (Html.BeginForm("Index", "Dishes", new { area = "Admin" }, FormMethod.Get, new { @class = "form-inline flex-wrap" }))
+        {
+            <div class="form-group mr-3 mb-2">
+                <label for="categoryId" class="mr-2 font-weight-bold small"><i class="fa fa-filter mr-1"></i> Category:</label>
+                @Html.DropDownList("categoryId", categories, "-- All Categories --", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-3 mb-2">
+                <label for="status" class="mr-2 font-weight-bold small">Status:</label>
+                <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+                    <option value="All" @(selectedStatus == "All" ? "selected" : "")>-- All Statuses --</option>
+                    <option value="Available" @(selectedStatus == "Available" ? "selected" : "")>Available</option>
+                    <option value="Temporarily Unavailable" @(selectedStatus == "Temporarily Unavailable" ? "selected" : "")>Temporarily Unavailable</option>
+                    <option value="Discontinued" @(selectedStatus == "Discontinued" ? "selected" : "")>Discontinued</option>
+                </select>
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label for="search" class="sr-only">Search</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Search dish name..." value="@searchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (categories.SelectedValue != null || selectedStatus != "All" || !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <a href="@Url.Action("Index", "Dishes", new { area = "Admin" })" class="btn btn-outline-dark btn-sm mb-2">
+                    <i class="fa fa-undo mr-1"></i> Reset Filters
+                </a>
+            }
+        }
+    </div>
+</div>
+
+<!-- Main Dishes Table Card -->
+<div class="card card-success card-outline shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title font-weight-bold mb-0">
+            <i class="fa fa-cutlery mr-1 text-success"></i> Menu Dishes List
+        </h3>
+        <div class="card-tools ml-auto">
+            <a href="@Url.Action("Create", "Dishes", new { area = "Admin" })" class="btn btn-success btn-sm">
+                <i class="fa fa-plus-circle mr-1"></i> Add New Dish
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center py-5">
+                <div class="text-muted mb-3" style="font-size: 48px;">
+                    <i class="fa fa-cutlery"></i>
+                </div>
+                <h5 class="text-muted">No dishes found</h5>
+                <p class="text-muted">Try adjusting your filters or create a new dish item.</p>
+                <a href="@Url.Action("Create", "Dishes", new { area = "Admin" })" class="btn btn-success">
+                    <i class="fa fa-plus-circle mr-1"></i> Add First Dish
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#</th>
+                            <th style="width: 70px;" class="text-center">Image</th>
+                            <th style="min-width: 160px;">Dish Name</th>
+                            <th style="width: 140px;">Category</th>
+                            <th style="width: 120px;" class="text-right">Price</th>
+                            <th style="width: 110px;" class="text-center">Prep Time</th>
+                            <th style="width: 110px;" class="text-center">Status</th>
+                            <th style="width: 200px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var primaryImg = item.DishImages != null
+                                ? (item.DishImages.FirstOrDefault(i => i.IsPrimary) ?? item.DishImages.FirstOrDefault())
+                                : null;
+
+                            int orderCount = item.OrderItems != null ? item.OrderItems.Count : 0;
+                            int comboCount = item.ComboItems != null ? item.ComboItems.Count : 0;
+                            bool isUsed = (orderCount > 0 || comboCount > 0);
+
+                            <tr>
+                                <td class="text-center align-middle font-weight-bold text-muted">
+                                    @item.Id
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (primaryImg != null && !string.IsNullOrWhiteSpace(primaryImg.ImageUrl))
+                                    {
+                                        <img src="@Url.Content(primaryImg.ImageUrl)"
+                                             alt="@item.Name"
+                                             class="img-thumbnail rounded"
+                                             style="width: 48px; height: 48px; object-fit: cover;"
+                                             onerror="this.onerror=null; this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded d-inline-flex align-items-center justify-content-center"
+                                             style="width: 48px; height: 48px; border: 1px dashed #ccc;">
+                                            <i class="fa fa-cutlery text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="align-middle">
+                                    <strong class="text-dark font-weight-bold">@item.Name</strong>
+                                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                                    {
+                                        <small class="d-block text-muted text-truncate" style="max-width: 250px;">
+                                            @item.Description
+                                        </small>
+                                    }
+                                </td>
+                                <td class="align-middle">
+                                    @if (item.Category != null)
+                                    {
+                                        <span class="badge badge-light border text-dark px-2 py-1">
+                                            <i class="fa fa-folder-o mr-1"></i> @item.Category.Name
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-right align-middle font-weight-bold text-success">
+                                    @item.Price.ToString("N0") VNĐ
+                                </td>
+                                <td class="text-center align-middle text-muted">
+                                    <i class="fa fa-clock-o mr-1"></i> @item.PreparationTime m
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (item.Status == "Available")
+                                    {
+                                        <span class="badge badge-success px-2 py-1">
+                                            <i class="fa fa-check-circle mr-1"></i> Available
+                                        </span>
+                                    }
+                                    else if (item.Status == "Temporarily Unavailable" || item.Status == "Unavailable")
+                                    {
+                                        <span class="badge badge-warning text-dark px-2 py-1">
+                                            <i class="fa fa-pause-circle mr-1"></i> Temp. Unavailable
+                                        </span>
+                                    }
+                                    else if (item.Status == "Discontinued")
+                                    {
+                                        <span class="badge badge-secondary px-2 py-1">
+                                            <i class="fa fa-ban mr-1"></i> Discontinued
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light border px-2 py-1">
+                                            @item.Status
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <!-- Edit -->
+                                        <a href="@Url.Action("Edit", "Dishes", new { area = "Admin", id = item.Id })"
+                                           class="btn btn-outline-primary btn-sm mr-1"
+                                           title="Edit dish">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+
+                                        <!-- Toggle Status -->
+                                        @using (Html.BeginForm("ToggleStatus", "Dishes", new { area = "Admin", id = item.Id }, FormMethod.Post, new { @class = "d-inline mr-1" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="btn @(item.Status == "Available" ? "btn-outline-warning" : "btn-outline-success") btn-sm"
+                                                    title="@(item.Status == "Available" ? "Set status to Temporarily Unavailable (Hide from menu)" : "Set status to Available (Show on menu)")"
+                                                    onclick="return confirm('Change status of \'@item.Name\' to @(item.Status == "Available" ? "Temporarily Unavailable" : "Available")?');">
+                                                <i class="fa @(item.Status == "Available" ? "fa-pause" : "fa-play")"></i>
+                                            </button>
+                                        }
+
+                                        <!-- Delete -->
+                                        @using (Html.BeginForm("Delete", "Dishes", new { area = "Admin", id = item.Id }, FormMethod.Post, new { @class = "d-inline" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            if (isUsed)
+                                             {
+                                                <button type="button"
+                                                        class="btn btn-outline-danger btn-sm"
+                                                        title="Cannot delete: Dish is linked to orders/combos. Set to Temporarily Unavailable or Discontinued instead."
+                                                        onclick="alert('Cannot delete \'@item.Name\' because it has associated customer orders or combos. Please set its status to Temporarily Unavailable or Discontinued instead.');">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm"
+                                                        title="Delete dish permanently"
+                                                        onclick="return confirm('Are you sure you want to delete dish \'@item.Name\'?');">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+                Showing <strong>@totalCount</strong> dishes (@availableCount available, @unavailableCount unavailable)
+            </span>
+            <a href="@Url.Action("Create", "Dishes", new { area = "Admin" })" class="btn btn-success btn-sm">
+                <i class="fa fa-plus-circle mr-1"></i> Add Dish
+            </a>
+        </div>
+    }
+</div>

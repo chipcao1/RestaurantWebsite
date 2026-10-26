@@ -1,0 +1,237 @@
+@model IEnumerable<RestaurantWebsite.Models.Order>
+
+@{
+    ViewBag.Title = "Orders Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    int totalCount = Model.Count();
+    int pendingCount = Model.Count(o => o.Status == "Pending");
+    int confirmedProcessingCount = Model.Count(o => o.Status == "Confirmed" || o.Status == "Preparing" || o.Status == "Ready");
+    int completedDeliveredCount = Model.Count(o => o.Status == "Delivered");
+    int cancelledCount = Model.Count(o => o.Status == "Cancelled");
+    decimal totalRevenue = Model.Where(o => o.Status != "Cancelled").Sum(o => (decimal?)o.TotalAmount) ?? 0m;
+}
+
+<!-- Summary Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@pendingCount</h3>
+                <p>Pending Orders</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-clock-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@confirmedProcessingCount</h3>
+                <p>Processing / In-Kitchen</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-spinner"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@completedDeliveredCount</h3>
+                <p>Completed / Delivered</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>$@totalRevenue.ToString("N2")</h3>
+                <p>Filtered Total Revenue</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-dollar"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Card -->
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title text-bold"><i class="fa fa-shopping-cart mr-2"></i>Orders List</h3>
+        <div class="card-tools">
+            <span class="badge badge-primary">Total Orders: @totalCount</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Index", "Orders", new { area = "Admin" }, FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Status:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Type:</label>
+                @Html.DropDownList("orderType", (SelectList)ViewBag.OrderTypeList, "All Types", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Date:</label>
+                <input type="date" name="date" class="form-control form-control-sm" value="@ViewBag.SelectedDate" onchange="this.form.submit()" />
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="#Order, customer, phone..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedStatus != "All" || ViewBag.SelectedOrderType != "All" || !string.IsNullOrEmpty(ViewBag.SelectedDate))
+            {
+                <a href="@Url.Action("Index", "Orders", new { area = "Admin" })" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Reset Filters
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>No orders found.</h5>
+                <p class="mb-0">Try clearing search filters to view all orders.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Customer Info</th>
+                            <th class="text-center">Type</th>
+                            <th>Order Items</th>
+                            <th>Total Amount</th>
+                            <th>Payment Status</th>
+                            <th class="text-center">Order Status</th>
+                            <th>Date</th>
+                            <th style="width: 140px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var latestPayment = item.Payments?.OrderByDescending(p => p.Id).FirstOrDefault();
+                            int itemsCount = item.OrderItems?.Sum(oi => oi.Quantity) ?? 0;
+
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">@(item.User != null ? item.User.FullName : "Guest Customer")</div>
+                                    <small class="text-muted d-block"><i class="fa fa-phone mr-1"></i>@(item.Phone ?? "N/A")</small>
+                                    @if (!string.IsNullOrEmpty(item.DeliveryAddress))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 200px;" title="@item.DeliveryAddress"><i class="fa fa-map-marker mr-1"></i>@item.DeliveryAddress</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-light border">@item.OrderType</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info"><i class="fa fa-shopping-basket mr-1"></i>@itemsCount item(s)</span>
+                                </td>
+                                <td class="font-weight-bold text-success">
+                                    $@item.TotalAmount.ToString("N2")
+                                    @if (item.DiscountAmount > 0)
+                                    {
+                                        <small class="d-block text-danger">(-$@item.DiscountAmount.ToString("N2") promo)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (latestPayment != null)
+                                    {
+                                        <small class="d-block font-weight-bold">@latestPayment.PaymentMethod</small>
+                                        if (latestPayment.Status == "Completed")
+                                        {
+                                            <span class="badge badge-success"><i class="fa fa-check mr-1"></i>Paid</span>
+                                        }
+                                        else if (latestPayment.Status == "Pending")
+                                        {
+                                            <span class="badge badge-warning text-dark"><i class="fa fa-clock-o mr-1"></i>Unpaid</span>
+                                        }
+                                        else if (latestPayment.Status == "Failed")
+                                        {
+                                            <span class="badge badge-danger">Failed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">@latestPayment.Status</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">No Payment Record</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark"><i class="fa fa-clock-o mr-1"></i>Pending</span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-info"><i class="fa fa-check mr-1"></i>Confirmed</span>
+                                    }
+                                    else if (item.Status == "Preparing")
+                                    {
+                                        <span class="badge badge-primary"><i class="fa fa-cog fa-spin mr-1"></i>Preparing</span>
+                                    }
+                                    else if (item.Status == "Ready")
+                                    {
+                                        <span class="badge badge-info"><i class="fa fa-check-circle mr-1"></i>Ready</span>
+                                    }
+                                    else if (item.Status == "Delivered")
+                                    {
+                                        <span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Delivered</span>
+                                    }
+                                    else if (item.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-secondary"><i class="fa fa-times-circle mr-1"></i>Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark">@item.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block font-weight-bold">@item.CreatedAt.ToString("yyyy-MM-dd")</small>
+                                    <small class="text-muted">@item.CreatedAt.ToString("HH:mm")</small>
+                                </td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Details", "Orders", new { area = "Admin", id = item.Id })" class="btn btn-info btn-sm" title="View Order Details & Update Status">
+                                        <i class="fa fa-eye mr-1"></i> Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
