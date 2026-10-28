@@ -1,153 +1,50 @@
-@{
-    string currentRole = Session["Role"] != null
-        ? Session["Role"].ToString()
-        : string.Empty;
-
-    string currentController = ViewContext.RouteData.Values["controller"] != null
-        ? ViewContext.RouteData.Values["controller"].ToString()
-        : string.Empty;
-
-    bool isLoggedIn = Session["UserId"] != null;
-    bool isCustomer = string.Equals(currentRole, "Customer", System.StringComparison.OrdinalIgnoreCase);
-    bool isStaff = string.Equals(currentRole, "Staff", System.StringComparison.OrdinalIgnoreCase);
-    bool isAdmin = string.Equals(currentRole, "Admin", System.StringComparison.OrdinalIgnoreCase);
-}
-
+@{string role=Convert.ToString(Session["Role"]);bool logged=Session["UserId"]!=null;}
 <header class="header_section">
-    <div class="container">
-        <nav class="navbar navbar-expand-lg custom_nav-container">
-
-            <a class="navbar-brand"
-               href="@(isCustomer ? Url.RouteUrl("CustomerHome") : isStaff ? Url.RouteUrl("StaffHome") : isAdmin ? Url.RouteUrl("AdminHome") : Url.Action("Index", "Home"))">
-                <span>Feane</span>
-            </a>
-
-            <button class="navbar-toggler"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <span class=""></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mx-auto">
-
-                    @if (isCustomer)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.RouteUrl("CustomerHome")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Menu")">Menu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.RouteUrl("CustomerAbout")">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Reservation")">Book Table</a>
-                        </li>
-                    }
-                    else if (isStaff)
-                    {
-                        <li class="nav-item active">
-                            <a class="nav-link" href="@Url.RouteUrl("StaffHome")">Staff Area</a>
-                        </li>
-                    }
-                    else if (isAdmin)
-                    {
-                        <li class="nav-item active">
-                            <a class="nav-link" href="@Url.RouteUrl("AdminHome")">Admin Area</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.RouteUrl("StaffHome")">Staff Area</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Menu")">Menu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("About", "Home")">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Index", "Reservation")">Book Table</a>
-                        </li>
-                    }
-
-                </ul>
-
-                <div class="user_option">
-                    @if (isLoggedIn)
-                    {
-                        string profileUrl = isCustomer
-                            ? Url.RouteUrl("CustomerProfile")
-                            : isStaff
-                                ? Url.RouteUrl("StaffHome")
-                                : Url.RouteUrl("AdminHome");
-
-                        <a class="user_link" href="@profileUrl" title="Account">
-                            <i class="fa fa-user" aria-hidden="true"></i>
-                        </a>
-
-                        <span class="ml-2 mr-2 text-white">
-                            @Session["UserName"]
-                        </span>
-
-                        <a class="user_link"
-                           href="@Url.Action("Logout", "Account")"
-                           title="Logout">
-                            <i class="fa fa-sign-out" aria-hidden="true"></i>
-                        </a>
-                    }
-                    else
-                    {
-                        <a class="user_link"
-                           href="@Url.Action("Login", "Account")"
-                           title="Login">
-                            <i class="fa fa-user" aria-hidden="true"></i>
-                        </a>
-                    }
-
-                    @if (!isLoggedIn || isCustomer)
-                    {
-                        <a class="cart_link"
-                           href="@Url.RouteUrl("CustomerCart")"
-                           title="Cart">
-                            <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                        </a>
-                    }
-
-                    @if (isAdmin && string.Equals(currentController, "Staff", System.StringComparison.OrdinalIgnoreCase))
-                    {
-                        <a class="order_online ml-2"
-                           href="@Url.RouteUrl("AdminHome")"
-                           title="Switch to Admin Interface">
-                            Admin Interface
-                        </a>
-                    }
-                    else if (isAdmin)
-                    {
-                        <a class="order_online ml-2"
-                           href="@Url.RouteUrl("StaffHome")"
-                           title="Switch to Staff Interface">
-                            Staff Interface
-                        </a>
-                    }
-                    else if (!isLoggedIn)
-                    {
-                        <a href="@Url.Action("Login", "Account")" class="order_online">
-                            Login
-                        </a>
-                    }
-                </div>
-            </div>
-        </nav>
-    </div>
+<div class="container">
+<nav class="navbar navbar-expand-lg custom_nav-container">
+<a class="navbar-brand" href="@Url.Action("Index", "Home",new{area=""})">
+<span>Feane</span>
+</a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Mở hoặc đóng menu">
+<span>
+</span>
+</button>
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav mx-auto">
+<li class="nav-item">
+<a class="nav-link" href="@Url.Action("Index", "Home",new{area=""})">Trang chủ</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="@Url.Action("Index", "Menu",new{area="Customer"})">Thực đơn</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="@Url.Action("About", "Home",new{area=""})">Về nhà hàng</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="@Url.Action("Index", "Reservation",new{area="Customer"})">Đặt bàn</a>
+</li>
+@if(role=="Admin"){<li class="nav-item">
+<a class="nav-link" href="@Url.RouteUrl("AdminHome")">Quản trị</a>
+</li>}else if(role=="Staff"){<li class="nav-item">
+<a class="nav-link" href="@Url.RouteUrl("StaffHome")">Nhân viên</a>
+</li>}
+</ul>
+<div class="user_option">
+<a href="@Url.RouteUrl("CustomerCart")" class="cart_link" aria-label="Giỏ hàng">
+<i class="fa fa-shopping-bag">
+</i>
+</a>
+@if(logged){<div class="dropdown">
+<button class="btn text-white dropdown-toggle" type="button" id="accountMenu" aria-haspopup="true" aria-expanded="false">@Session["UserName"]</button>
+<div class="dropdown-menu dropdown-menu-right" aria-labelledby="accountMenu">@if(role=="Customer"){<a class="dropdown-item" href="@Url.RouteUrl("CustomerProfile")">Hồ sơ cá nhân</a>
+<a class="dropdown-item" href="@Url.RouteUrl("CustomerOrders")">Đơn hàng của tôi</a>
+<a class="dropdown-item" href="@Url.RouteUrl("CustomerReservations")">Lịch đặt bàn</a>
+<a class="dropdown-item" href="@Url.RouteUrl("CustomerReviews")">Đánh giá của tôi</a>
+<a class="dropdown-item" href="@Url.RouteUrl("CustomerChangePassword")">Đổi mật khẩu</a>}@using(Html.BeginForm("Logout", "Account",new{area=""},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="dropdown-item">Đăng xuất</button>}</div>
+</div>}
+else{<a class="order_online" href="@Url.Action("Login", "Account",new{area=""})">Đăng nhập</a>}
+</div>
+</div>
+</nav>
+</div>
 </header>

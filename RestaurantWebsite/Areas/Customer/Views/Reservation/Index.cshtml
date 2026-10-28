@@ -1,0 +1,192 @@
+@using System.Collections.Generic
+@using RestaurantWebsite.Models
+@model RestaurantWebsite.Models.Reservation
+
+@{
+    ViewBag.Title = "Đặt bàn";
+    ViewBag.BodyClass = "sub_page";
+
+    var tables =
+        ViewBag.AvailableTables as IEnumerable<RestaurantTable>
+        ?? new List<RestaurantTable>();
+
+    var user =
+        ViewBag.CurrentUser as User;
+}
+
+<section class="book_section layout_padding">
+
+    <div class="container">
+
+        <div class="heading_container heading_center mb-4">
+            <h2>Đặt bàn</h2>
+        </div>
+
+
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false, "Vui lòng kiểm tra thông tin đặt bàn:")
+            </div>
+        }
+
+        <div class="row">
+
+            <div class="col-lg-7">
+
+                <div class="bg-white p-4 rounded shadow-sm">
+
+                    <div class="heading_container mb-3">
+                        <h3>Thông tin đặt bàn</h3>
+                    </div>
+
+                    @using (Html.BeginForm("Book", "Reservation", new { area = "Customer" }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-group">
+                            <label class="font-weight-bold">Khách hàng</label>
+
+                            <div class="border rounded p-3 bg-light">
+                                <strong>
+                                    @(user != null ? user.FullName : "Khách hàng")
+                                </strong>
+                                <div class="text-muted small">
+                                    @(user != null ? user.Phone : "")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reservationDate" class="font-weight-bold">
+                                Reservation Date &amp; Time
+                            </label>
+
+                            <input type="datetime-local"
+                                   name="reservationDate"
+                                   id="reservationDate"
+                                   class="form-control"
+                                   value="@Model.ReservationDate.ToString("yyyy-MM-ddTHH:mm")"
+                                   required />
+
+                            @Html.ValidationMessage("ReservationDate", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold">Chọn bàn</label>
+
+                            <div class="row">
+                                @foreach (var table in tables)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <label class="reservation-table-card d-flex align-items-center w-100 mb-0">
+                                            <input type="radio"
+                                                   name="tableId"
+                                                   value="@table.Id"
+                                                   class="mr-3"
+                                                   @(Model.TableId == table.Id ? "checked" : "")
+                                                   required />
+
+                                            <span>
+                                                <strong class="d-block">
+
+                                                    Bàn @table.TableNumber - @table.Capacity người
+                                                </strong>
+                                                <small class="text-muted">
+                                                    @(Vietnamese.Label(table.Zone))
+                                                </small>
+                                            </span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+
+                            @Html.ValidationMessage("TableId", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group"><label for="PartySize">Số khách</label>@Html.TextBoxFor(m=>m.PartySize,new{type="number",min=1,max=50,@class="form-control",required="required"})@Html.ValidationMessageFor(m=>m.PartySize)</div>
+                        <div class="form-group">
+                            <label for="specialRequest" class="font-weight-bold">
+                                Yêu cầu đặc biệt
+                            </label>
+
+                            <textarea name="specialRequest"
+                                      id="specialRequest"
+                                      class="form-control"
+                                      rows="3"
+                                      maxlength="500"
+                                      placeholder="Bạn có yêu cầu đặc biệt nào cho buổi đặt bàn?">@Model.SpecialRequest</textarea>
+
+                            @Html.ValidationMessage("SpecialRequest", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.RouteUrl("CustomerHome")"
+                               class="btn btn-outline-secondary">
+                                Về trang chủ
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-warning text-white">
+                                Đặt bàn
+                            </button>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5 mt-4 mt-lg-0">
+                <div class="bg-white p-4 rounded shadow-sm">
+                    <div class="heading_container mb-3">
+                        <h3>Bàn sẵn sàng</h3>
+                    </div>
+
+                    <p class="text-muted">
+                        Bàn được hiển thị theo <strong>số bàn và sức chứa</strong>
+                        để bạn chọn bàn phù hợp với số khách.
+                    </p>
+
+                    <div class="reservation-note border rounded p-3">
+                        <strong>Giờ đặt bàn</strong>
+                        <div class="text-muted small mt-1">
+                            Mỗi lượt đặt bàn giữ khung giờ phục vụ trong hai giờ.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<style>
+    .reservation-table-card {
+        min-height: 72px;
+        padding: 14px 16px;
+        border: 1px solid #d8d8d8;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #fff;
+        transition: all .2s ease;
+    }
+
+    .reservation-table-card:hover {
+        border-color: #ffbe33;
+        background: #fffaf0;
+    }
+
+    .reservation-table-card input[type="radio"] {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+    }
+
+    .reservation-note {
+        background: #f8f9fa;
+    }
+</style>

@@ -1,12 +1,12 @@
 @model IEnumerable<RestaurantWebsite.Models.Promotion>
 
 @{
-    ViewBag.Title = "Promotions Management";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Quản lý khuyến mãi";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
 
     int totalCount = Model.Count();
-    int activeCount = Model.Count(p => p.IsActive && p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now);
-    int expiredCount = Model.Count(p => p.EndDate < DateTime.Now);
+    int activeCount = Model.Count(p => p.IsActive && p.StartDate <= RestaurantWebsite.Infrastructure.RestaurantClock.Now && p.EndDate >= RestaurantWebsite.Infrastructure.RestaurantClock.Now);
+    int expiredCount = Model.Count(p => p.EndDate < RestaurantWebsite.Infrastructure.RestaurantClock.Now);
     int inactiveCount = Model.Count(p => !p.IsActive);
 }
 
@@ -16,7 +16,7 @@
         <div class="small-box bg-info">
             <div class="inner">
                 <h3>@totalCount</h3>
-                <p>Total Promotions</p>
+                <p>Tổng khuyến mãi</p>
             </div>
             <div class="icon">
                 <i class="fa fa-tags"></i>
@@ -27,7 +27,7 @@
         <div class="small-box bg-success">
             <div class="inner">
                 <h3>@activeCount</h3>
-                <p>Active & Live</p>
+                <p>Đang hoạt động</p>
             </div>
             <div class="icon">
                 <i class="fa fa-check-circle"></i>
@@ -38,7 +38,7 @@
         <div class="small-box bg-warning">
             <div class="inner">
                 <h3>@expiredCount</h3>
-                <p>Expired</p>
+                <p>Hết hạn</p>
             </div>
             <div class="icon">
                 <i class="fa fa-clock-o"></i>
@@ -49,7 +49,7 @@
         <div class="small-box bg-secondary">
             <div class="inner">
                 <h3>@inactiveCount</h3>
-                <p>Inactive / Disabled</p>
+                <p>Ngừng hoạt động</p>
             </div>
             <div class="icon">
                 <i class="fa fa-ban"></i>
@@ -61,10 +61,10 @@
 <!-- Main Content Card -->
 <div class="card card-primary card-outline">
     <div class="card-header">
-        <h3 class="card-title text-bold"><i class="fa fa-tags mr-2"></i>Promotions List</h3>
+        <h3 class="card-title text-bold"><i class="fa fa-tags mr-2"></i>Danh sách khuyến mãi</h3>
         <div class="card-tools">
             <a href="@Url.Action("Create", "Promotions", new { area = "Admin" })" class="btn btn-primary btn-sm">
-                <i class="fa fa-plus-circle mr-1"></i> Add New Promotion
+                <i class="fa fa-plus-circle mr-1"></i> Thêm khuyến mãi
             </a>
         </div>
     </div>
@@ -74,18 +74,18 @@
         @using (Html.BeginForm("Index", "Promotions", new { area = "Admin" }, FormMethod.Get, new { @class = "form-inline mb-4" }))
         {
             <div class="form-group mr-2 mb-2">
-                <label class="mr-2 font-weight-bold">Discount Type:</label>
-                @Html.DropDownList("discountType", (SelectList)ViewBag.DiscountTypes, "All Types", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+                <label class="mr-2 font-weight-bold">Loại giảm giá:</label>
+                @Html.DropDownList("discountType", (SelectList)ViewBag.DiscountTypes, "Tất cả hình thức", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
             </div>
 
             <div class="form-group mr-2 mb-2">
-                <label class="mr-2 font-weight-bold">Status:</label>
-                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "All Statuses", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+                <label class="mr-2 font-weight-bold">Trạng thái:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "Tất cả trạng thái", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
             </div>
 
             <div class="form-group mr-2 mb-2">
                 <div class="input-group input-group-sm">
-                    <input type="text" name="search" class="form-control" placeholder="Code, Name, Description..." value="@ViewBag.SearchTerm" />
+                    <input type="text" name="search" class="form-control" placeholder="Mã, tên, mô tả..." value="@ViewBag.SearchTerm" />
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-default">
                             <i class="fa fa-search"></i>
@@ -97,7 +97,7 @@
             if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedDiscountType != "All" || ViewBag.SelectedStatus != "All")
             {
                 <a href="@Url.Action("Index", "Promotions", new { area = "Admin" })" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
-                    <i class="fa fa-times"></i> Reset Filters
+                    <i class="fa fa-times"></i> Xóa bộ lọc
                 </a>
             }
         }
@@ -107,8 +107,8 @@
         {
             <div class="alert alert-info text-center my-4">
                 <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
-                <h5>No promotions found.</h5>
-                <p class="mb-0">Try adjusting your filters or click <strong>Add New Promotion</strong> to create one.</p>
+                <h5>Không tìm thấy khuyến mãi phù hợp.</h5>
+                <p class="mb-0">Thử đổi bộ lọc hoặc chọn <strong>Thêm khuyến mãi</strong> để tạo mới.</p>
             </div>
         }
         else
@@ -118,21 +118,21 @@
                     <thead class="thead-dark">
                         <tr>
                             <th style="width: 50px;" class="text-center">#</th>
-                            <th>Code & Name</th>
-                            <th>Discount</th>
-                            <th>Min. Order</th>
-                            <th>Max. Discount</th>
-                            <th>Validity Period</th>
-                            <th class="text-center">Usage</th>
-                            <th class="text-center">Status</th>
-                            <th style="width: 190px;" class="text-center">Actions</th>
+                            <th>Mã và tên</th>
+                            <th>Giảm giá</th>
+                            <th>Đơn tối thiểu</th>
+                            <th>Giảm tối đa</th>
+                            <th>Thời gian áp dụng</th>
+                            <th class="text-center">Lượt sử dụng</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th style="width: 190px;" class="text-center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            bool isExpired = item.EndDate < DateTime.Now;
-                            bool isUpcoming = item.StartDate > DateTime.Now;
+                            bool isExpired = item.EndDate < RestaurantWebsite.Infrastructure.RestaurantClock.Now;
+                            bool isUpcoming = item.StartDate > RestaurantWebsite.Infrastructure.RestaurantClock.Now;
                             bool isLive = item.IsActive && !isExpired && !isUpcoming;
                             int orderCount = item.OrderPromotions?.Count ?? 0;
 
@@ -155,32 +155,32 @@
                                     }
                                     else
                                     {
-                                        <span class="text-primary font-weight-bold">$@item.DiscountValue.ToString("N2") OFF</span>
+                                        <span class="text-primary font-weight-bold">@item.DiscountValue.ToString("N0") ₫ OFF</span>
                                     }
                                 </td>
                                 <td>
                                     @if (item.MinimumOrderAmount > 0)
                                     {
-                                        <span>$@item.MinimumOrderAmount.ToString("N2")</span>
+                                        <span>@item.MinimumOrderAmount.ToString("N0") ₫</span>
                                     }
                                     else
                                     {
-                                        <span class="text-muted">None</span>
+                                        <span class="text-muted">Không có</span>
                                     }
                                 </td>
                                 <td>
                                     @if (item.MaximumDiscount.HasValue && item.MaximumDiscount.Value > 0)
                                     {
-                                        <span>$@item.MaximumDiscount.Value.ToString("N2")</span>
+                                        <span>@item.MaximumDiscount.Value.ToString("N0") ₫</span>
                                     }
                                     else
                                     {
-                                        <span class="text-muted">No Cap</span>
+                                        <span class="text-muted">Không giới hạn</span>
                                     }
                                 </td>
                                 <td>
-                                    <small class="d-block"><i class="fa fa-calendar-check-o text-success mr-1"></i><strong>From:</strong> @item.StartDate.ToString("yyyy-MM-dd HH:mm")</small>
-                                    <small class="d-block"><i class="fa fa-calendar-times-o text-danger mr-1"></i><strong>To:</strong> @item.EndDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                    <small class="d-block"><i class="fa fa-calendar-check-o text-success mr-1"></i><strong>Từ:</strong> @item.StartDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                    <small class="d-block"><i class="fa fa-calendar-times-o text-danger mr-1"></i><strong>Đến:</strong> @item.EndDate.ToString("yyyy-MM-dd HH:mm")</small>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge badge-info">@item.UsedCount used</span>
@@ -190,42 +190,42 @@
                                     }
                                     else
                                     {
-                                        <small class="d-block text-muted">Unlimited</small>
+                                        <small class="d-block text-muted">Không giới hạn</small>
                                     }
                                 </td>
                                 <td class="text-center">
                                     @if (!item.IsActive)
                                     {
-                                        <span class="badge badge-secondary">Disabled</span>
+                                        <span class="badge badge-secondary">Đã vô hiệu hóa</span>
                                     }
                                     else if (isExpired)
                                     {
-                                        <span class="badge badge-warning">Expired</span>
+                                        <span class="badge badge-warning">Hết hạn</span>
                                     }
                                     else if (isUpcoming)
                                     {
-                                        <span class="badge badge-info">Upcoming</span>
+                                        <span class="badge badge-info">Sắp áp dụng</span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-success">Active & Live</span>
+                                        <span class="badge badge-success">Đang hoạt động</span>
                                     }
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <a href="@Url.Action("Edit", "Promotions", new { area = "Admin", id = item.Id })" class="btn btn-warning" title="Edit Promotion">
+                                        <a href="@Url.Action("Edit", "Promotions", new { area = "Admin", id = item.Id })" class="btn btn-warning" title="Sửa khuyến mãi">
                                             <i class="fa fa-edit"></i>
                                         </a>
 
                                         @using (Html.BeginForm("ToggleStatus", "Promotions", new { area = "Admin", id = item.Id }, FormMethod.Post, new { style = "display:inline;" }))
                                         {
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success")" title="@(item.IsActive ? "Deactivate" : "Activate")">
+                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success")" title="@(item.IsActive ? "Ngừng hoạt động" : "Kích hoạt")">
                                                 <i class="fa @(item.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
                                             </button>
                                         }
 
-                                        @using (Html.BeginForm("Delete", "Promotions", new { area = "Admin", id = item.Id }, FormMethod.Post, new { style = "display:inline;", onsubmit = "return confirm('Are you sure you want to delete promotion " + item.Code + "?');" }))
+                                        @using (Html.BeginForm("Delete", "Promotions", new { area = "Admin", id = item.Id }, FormMethod.Post, new { style = "display:inline;", onsubmit = "return confirm('Bạn xác nhận thực hiện thao tác này?');" }))
                                         {
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-danger @(orderCount > 0 || item.UsedCount > 0 ? "disabled" : "")"

@@ -14,34 +14,40 @@ namespace RestaurantWebsite.Models
 
         public int? TableId { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Hình thức phục vụ")]
         public string OrderType { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Trạng thái")]
         public string Status { get; set; }
 
-        [StringLength(500)]
+        [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string DeliveryAddress { get; set; }
 
-        [StringLength(20)]
+        [StringLength(20, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Điện thoại")]
         public string Phone { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal SubTotal { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal DiscountAmount { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal DeliveryFee { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal TotalAmount { get; set; }
 
-        [StringLength(500)]
+        [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string Note { get; set; }
+
+        public DateTime? ServiceStart { get; set; }
+        public DateTime? ServiceEnd { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
@@ -67,7 +73,7 @@ namespace RestaurantWebsite.Models
             Reviews = new HashSet<Review>();
 
             Status = "Pending";
-            CreatedAt = DateTime.Now;
+            CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
         }
     }
 }

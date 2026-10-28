@@ -1,0 +1,425 @@
+@using System.Collections.Generic
+@using System.Linq
+@model RestaurantWebsite.Models.Order
+
+@{
+    ViewBag.Title = "Đặt món và thanh toán";
+    ViewBag.BodyClass = "sub_page";
+
+    var dishes =
+        ViewBag.CartDishes as IEnumerable<RestaurantWebsite.Models.Dish>
+        ?? new List<RestaurantWebsite.Models.Dish>();
+
+    var quantities =
+        ViewBag.CartQuantities as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var combos =
+        ViewBag.CartCombos as IEnumerable<RestaurantWebsite.Models.Combo>
+        ?? new List<RestaurantWebsite.Models.Combo>();
+
+    var comboQuantities =
+        ViewBag.ComboQuantities as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+
+
+    var promotions =
+        ViewBag.ActivePromotions as IEnumerable<RestaurantWebsite.Models.Promotion>
+        ?? new List<RestaurantWebsite.Models.Promotion>();
+
+    decimal subTotal =
+        ViewBag.CheckoutSubTotal != null
+            ? (decimal)ViewBag.CheckoutSubTotal
+            : 0m;
+
+    decimal deliveryFee =
+        ViewBag.DeliveryFee != null
+            ? (decimal)ViewBag.DeliveryFee
+            : 0m;
+}
+
+<section class="food_section layout_padding">
+
+    <div class="container">
+
+        <div class="heading_container heading_center mb-4">
+            <h2>Đặt món và thanh toán</h2>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false, "Vui lòng kiểm tra lại thông tin:")
+            </div>
+        }
+
+        <div class="row">
+
+            <!-- ================================================= -->
+            <!-- CUSTOMER INFORMATION -->
+            <!-- ================================================= -->
+
+            <div class="col-lg-7">
+
+                <div class="bg-white p-4 rounded shadow-sm mb-4">
+
+                    <div class="heading_container mb-3">
+                        <h3>Thông tin đặt món</h3>
+                    </div>
+
+                    @using (Html.BeginForm(
+                        "PlaceOrder", "Order", new { area = "Customer" },
+                        FormMethod.Post,
+                        new { id = "checkoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- ORDER TYPE -->
+                        <div class="form-group">
+                            <label for="OrderType" class="font-weight-bold">Hình thức phục vụ</label>
+                            <select name="OrderType" id="OrderType" class="form-control" onchange="toggleDeliveryAddress()">
+                                <option value="Delivery" @(Model.OrderType == "Delivery" ? "selected" : "")>Giao hàng</option>
+                                <option value="Dine-in" @(Model.OrderType == "Dine-in" ? "selected" : "")>Tại bàn</option>
+                                <option value="Takeaway" @(Model.OrderType == "Takeaway" ? "selected" : "")>Mang về</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="dineInGroup">
+                            <label for="ReservationId">Đặt bàn đã xác nhận của bạn</label>
+                            <select name="ReservationId" id="ReservationId" class="form-control"><option value="">Chọn trực tiếp bàn trống</option>
+                            @foreach(var r in (IEnumerable<RestaurantWebsite.Models.Reservation>)ViewBag.Reservations){<option value="@r.Id" @(Model.ReservationId==r.Id?"selected":"")>Bàn @r.Table.TableNumber · @r.ReservationDate.ToString("dd/MM/yyyy HH:mm")</option>}
+                            </select><label class="mt-2" for="TableId">Hoặc chọn bàn để dùng bữa ngay</label>
+                            <select name="TableId" id="TableId" class="form-control"><option value="">Chọn bàn</option>
+                            @foreach(var table in (IEnumerable<RestaurantWebsite.Models.RestaurantTable>)ViewBag.Tables){<option value="@table.Id" @(Model.TableId==table.Id?"selected":"")>Bàn @table.TableNumber · @table.Capacity chỗ</option>}
+                            </select><small class="form-text text-muted">Đặt bàn đã xác nhận được ưu tiên khi chọn cả hai. Nhà hàng kiểm tra lại lịch khi nhận đơn; khung phục vụ tiêu chuẩn là hai giờ.</small>
+                        </div>
+                        <!-- PHONE -->
+                        <div class="form-group">
+                            <label for="Phone" class="font-weight-bold">
+                                Số điện thoại
+                            </label>
+
+                            @Html.TextBoxFor(
+                                m => m.Phone,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "Phone",
+                                    maxlength = "20",
+                                    placeholder = "Số điện thoại của bạn"
+                                })
+
+                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- DELIVERY ADDRESS -->
+                        <div class="form-group" id="deliveryAddressGroup">
+                            <label for="DeliveryAddress" class="font-weight-bold">
+                                Địa chỉ nhận hàng
+                            </label>
+
+                            @Html.TextAreaFor(
+                                m => m.DeliveryAddress,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "DeliveryAddress",
+                                    rows = "3",
+                                    maxlength = "500",
+                                    placeholder = "Nhập địa chỉ nhận hàng"
+                                })
+
+                            <small class="form-text text-muted">
+                                Nhà hàng sử dụng địa chỉ này để giao đơn hiện tại.
+                            </small>
+
+                            @Html.ValidationMessageFor(m => m.DeliveryAddress, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- PAYMENT -->
+                        <div class="form-group">
+                            <label class="font-weight-bold">Phương thức thanh toán</label>
+
+                            <div class="border rounded p-3">
+                                <label class="d-block mb-2">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Cash"
+                                           checked="checked" />
+                                    <span class="ml-2">Tiền mặt</span>
+                                </label>
+
+                                <label class="d-block mb-2">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Bank Transfer" />
+                                    <span class="ml-2">Chuyển khoản</span>
+                                </label>
+
+                                <label class="d-block mb-0">
+                                    <input type="radio"
+                                           name="paymentMethod"
+                                           value="Digital Wallet" />
+                                    <span class="ml-2">Ví điện tử</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- PROMOTION -->
+                        <div class="form-group">
+                            <label for="promotionCode" class="font-weight-bold">
+                                Mã khuyến mãi
+                            </label>
+
+                            <input type="text"
+                                   name="promotionCode"
+                                   id="promotionCode"
+                                   class="form-control"
+                                   maxlength="50"
+                                   placeholder="Nhập mã khuyến mãi" />
+
+                            @if (promotions.Any())
+                            {
+                                <small class="form-text text-muted">
+                                    Available codes:
+                                    @string.Join(", ", promotions.Select(p => p.Code))
+                                </small>
+                            }
+                        </div>
+
+                        <!-- NOTE -->
+                        <div class="form-group">
+                            <label for="Note" class="font-weight-bold">
+                                Ghi chú
+                            </label>
+
+                            @Html.TextAreaFor(
+                                m => m.Note,
+                                new
+                                {
+                                    @class = "form-control",
+                                    id = "Note",
+                                    rows = "3",
+                                    maxlength = "500",
+                                    placeholder = "Yêu cầu riêng dành cho nhà hàng"
+                                })
+
+                            @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+
+                            <a href="@Url.RouteUrl("CustomerCart")"
+                               class="btn btn-outline-secondary">
+                                Về giỏ hàng
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-warning text-white">
+                                Xác nhận đặt món
+                            </button>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- ORDER SUMMARY -->
+            <!-- ================================================= -->
+
+            <div class="col-lg-5">
+
+                <div class="bg-white p-4 rounded shadow-sm">
+
+                    <div class="heading_container mb-3">
+                        <h3>Tóm tắt đơn hàng</h3>
+                    </div>
+
+                    <!-- DISHES -->
+                    @foreach (var dish in dishes)
+                    {
+                        int quantity =
+                            quantities.ContainsKey(dish.Id)
+                                ? quantities[dish.Id]
+                                : 0;
+
+                        decimal subtotal =
+                            dish.Price * quantity;
+
+                        string imageUrl =
+                            "~/Resources/User/images/f1.png";
+
+                        if (dish.DishImages != null &&
+                            dish.DishImages.Any())
+                        {
+                            var primaryImage =
+                                dish.DishImages.FirstOrDefault(
+                                    image => image.IsPrimary)
+                                ?? dish.DishImages.First();
+
+                            if (!string.IsNullOrWhiteSpace(primaryImage.ImageUrl))
+                            {
+                                imageUrl = primaryImage.ImageUrl;
+                            }
+                        }
+
+                        <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                            <img src="@Url.Content(imageUrl)"
+                                 alt="@dish.Name"
+                                 style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
+                                 class="mr-3" />
+
+                            <div class="flex-grow-1">
+                                <strong>@dish.Name</strong>
+                                <div class="text-muted small">
+                                    @quantity x @dish.Price.ToString("N0") VNĐ
+                                </div>
+                            </div>
+
+                            <strong>
+                                @subtotal.ToString("N0") VNĐ
+                            </strong>
+                        </div>
+                    }
+
+                    <!-- COMBOS -->
+                    @foreach (var combo in combos)
+                    {
+                        int quantity =
+                            comboQuantities.ContainsKey(combo.Id)
+                                ? comboQuantities[combo.Id]
+                                : 0;
+
+                        decimal subtotal =
+                            combo.Price * quantity;
+
+                        string imageUrl =
+                            string.IsNullOrWhiteSpace(combo.ImageUrl)
+                                ? "~/Resources/User/images/o2.jpg"
+                                : combo.ImageUrl;
+
+                        <div class="border-bottom pb-3 mb-3">
+
+                            <div class="d-flex align-items-center">
+                                <img src="@Url.Content(imageUrl)"
+                                     alt="@combo.Name"
+                                     style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
+                                     class="mr-3" />
+
+                                <div class="flex-grow-1">
+                                    <strong>@combo.Name</strong>
+                                    <div class="text-muted small">
+                                        @quantity x @combo.Price.ToString("N0") VNĐ
+                                    </div>
+                                </div>
+
+                                <strong>
+                                    @subtotal.ToString("N0") VNĐ
+                                </strong>
+                            </div>
+
+                            @if (combo.ComboItems != null && combo.ComboItems.Any())
+                            {
+                                <div class="mt-2 pl-2">
+                                    <small class="text-muted">
+                                        Includes:
+                                        @string.Join(
+                                            ", ",
+                                            combo.ComboItems.Select(ci =>
+                                                (ci.Dish != null
+                                                    ? ci.Dish.Name
+                                                    : "Dish #" + ci.DishId)
+                                                + " x "
+                                                + (ci.Quantity * quantity)))
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <span>Tạm tính</span>
+                        <strong>@subTotal.ToString("N0") VNĐ</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Giảm giá</span>
+                        <strong id="discountPreview">Tính lại sau khi áp dụng mã</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Phí giao hàng</span>
+                        <strong>
+                            @(deliveryFee > 0m
+                                ? deliveryFee.ToString("N0") + " VNĐ"
+                                : "0 VNĐ")
+                        </strong>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <span class="font-weight-bold">
+                            Tổng cộng
+                        </span>
+                        <strong class="text-danger" id="checkoutTotal">
+                            @subTotal.ToString("N0") VNĐ
+                        </strong>
+                    </div>
+
+                    <small class="text-muted d-block mt-3">
+                        Nhà hàng kiểm tra giá, khuyến mãi và tính tổng chính xác khi bạn xác nhận đặt món.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+@section scripts {
+    <script>
+        function toggleDeliveryAddress() {
+            document.getElementById('dineInGroup').style.display = document.getElementById('OrderType').value === 'Dine-in' ? '' : 'none';
+            var orderTypeSelect = document.getElementById("OrderType");
+            if (!orderTypeSelect) return;
+            var orderType = orderTypeSelect.value;
+            var addressGroup = document.getElementById("deliveryAddressGroup");
+            if (addressGroup) {
+                if (orderType === "Delivery") {
+                    addressGroup.style.display = "block";
+                } else {
+                    addressGroup.style.display = "none";
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            // Guarantee #OrderType uses native HTML select behavior
+            if ($.fn.niceSelect && $('#OrderType').next('.nice-select').length) {
+                $('#OrderType').niceSelect('destroy');
+            }
+
+            // Sync address visibility with initial OrderType on page load
+            toggleDeliveryAddress();
+
+            // Listen for user changes
+            $('#OrderType').on('change', function () {
+                toggleDeliveryAddress();
+            });
+        });
+    </script>
+}
+
+
+
+<script>(function(){var type=document.getElementById('OrderType');function update(){document.getElementById('dineInGroup').style.display=type.value==='Dine-in'?'':'none';document.getElementById('deliveryAddressGroup').style.display=type.value==='Delivery'?'':'none';}type.addEventListener('change',update);update();})();</script>

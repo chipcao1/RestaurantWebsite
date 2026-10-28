@@ -1,15 +1,15 @@
 @model RestaurantWebsite.Models.Promotion
 
 @{
-    ViewBag.Title = "Add New Promotion";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Thêm khuyến mãi";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
 }
 
 <div class="row">
     <div class="col-md-9 col-lg-8 mx-auto">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title"><i class="fa fa-plus-circle mr-2"></i>Create New Promotion</h3>
+                <h3 class="card-title"><i class="fa fa-plus-circle mr-2"></i>Tạo khuyến mãi mới</h3>
             </div>
 
             @using (Html.BeginForm("Create", "Promotions", new { area = "Admin" }, FormMethod.Post, new { @class = "form-horizontal" }))
@@ -20,26 +20,26 @@
                     @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
                     <div class="form-group row">
-                        <label for="Code" class="col-sm-3 col-form-label font-weight-bold">Code <span class="text-danger">*</span></label>
+                        <label for="Code" class="col-sm-3 col-form-label font-weight-bold">Mã <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.Code, new { @class = "form-control text-uppercase", placeholder = "e.g. SUMMER2026, WELCOME10", required = "required" })
-                            <small class="form-text text-muted">Unique promotion voucher code. Will be automatically converted to uppercase.</small>
+                            @Html.TextBoxFor(m => m.Code, new { @class = "form-control text-uppercase", placeholder = "Ví dụ: HE2026, CHAO10", required = "required" })
+                            <small class="form-text text-muted">Mã khuyến mãi không trùng, được tự động viết hoa.</small>
                             @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="Name" class="col-sm-3 col-form-label font-weight-bold">Name <span class="text-danger">*</span></label>
+                        <label for="Name" class="col-sm-3 col-form-label font-weight-bold">Tên <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "e.g. Summer Discount 20%", required = "required" })
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Ví dụ: Ưu đãi mùa hè 20%", required = "required" })
                             @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="Description" class="col-sm-3 col-form-label font-weight-bold">Description</label>
+                        <label for="Description" class="col-sm-3 col-form-label font-weight-bold">Mô tả</label>
                         <div class="col-sm-9">
-                            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, placeholder = "Optional description or terms for this promotion..." })
+                            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, placeholder = "Mô tả hoặc điều kiện khuyến mãi (không bắt buộc)..." })
                             @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                     <hr />
 
                     <div class="form-group row">
-                        <label for="DiscountType" class="col-sm-3 col-form-label font-weight-bold">Discount Type <span class="text-danger">*</span></label>
+                        <label for="DiscountType" class="col-sm-3 col-form-label font-weight-bold">Loại giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             @Html.DropDownListFor(m => m.DiscountType, (SelectList)ViewBag.DiscountTypes, new { @class = "form-control" })
                             @Html.ValidationMessageFor(m => m.DiscountType, "", new { @class = "text-danger" })
@@ -55,28 +55,28 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="DiscountValue" class="col-sm-3 col-form-label font-weight-bold">Discount Value <span class="text-danger">*</span></label>
+                        <label for="DiscountValue" class="col-sm-3 col-form-label font-weight-bold">Mức giảm <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.DiscountValue, new { @class = "form-control", type = "number", step = "0.01", min = "0.01", required = "required" })
-                            <small class="form-text text-muted">Percentage (e.g. 20 for 20%) or Fixed dollar amount (e.g. 15 for $15 OFF).</small>
+                            @Html.TextBox("DiscountValue", Model.DiscountValue.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new { @class = "form-control", type = "number", step = "0.01", min = "0.01", required = "required" })
+                            <small class="form-text text-muted">Nhập phần trăm (20 tương ứng 20%) hoặc số tiền giảm cố định bằng đồng.</small>
                             @Html.ValidationMessageFor(m => m.DiscountValue, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="MinimumOrderAmount" class="col-sm-3 col-form-label font-weight-bold">Min Order ($)</label>
+                        <label for="MinimumOrderAmount" class="col-sm-3 col-form-label font-weight-bold">Đơn tối thiểu (đồng)</label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.MinimumOrderAmount, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
-                            <small class="form-text text-muted">Minimum subtotal required to apply code (0 for no minimum).</small>
+                            @Html.TextBox("MinimumOrderAmount", Model.MinimumOrderAmount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                            <small class="form-text text-muted">Giá trị đơn tối thiểu để dùng mã (0 nếu không giới hạn).</small>
                             @Html.ValidationMessageFor(m => m.MinimumOrderAmount, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="MaximumDiscount" class="col-sm-3 col-form-label font-weight-bold">Max Discount ($)</label>
+                        <label for="MaximumDiscount" class="col-sm-3 col-form-label font-weight-bold">Giảm tối đa (đồng)</label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.MaximumDiscount, new { @class = "form-control", type = "number", step = "0.01", min = "0", placeholder = "Leave empty for unlimited cap" })
-                            <small class="form-text text-muted">Maximum cap for percentage discounts (optional).</small>
+                            @Html.TextBox("MaximumDiscount", Model.MaximumDiscount.HasValue ? Model.MaximumDiscount.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) : "", new { @class = "form-control", type = "number", step = "0.01", min = "0", placeholder = "Để trống nếu không giới hạn mức giảm" })
+                            <small class="form-text text-muted">Số tiền giảm tối đa khi áp dụng mã phần trăm (không bắt buộc).</small>
                             @Html.ValidationMessageFor(m => m.MaximumDiscount, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                     <hr />
 
                     <div class="form-group row">
-                        <label for="StartDate" class="col-sm-3 col-form-label font-weight-bold">Start Date <span class="text-danger">*</span></label>
+                        <label for="StartDate" class="col-sm-3 col-form-label font-weight-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <input type="datetime-local" id="StartDate" name="StartDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
                             @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
@@ -92,7 +92,7 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="EndDate" class="col-sm-3 col-form-label font-weight-bold">End Date <span class="text-danger">*</span></label>
+                        <label for="EndDate" class="col-sm-3 col-form-label font-weight-bold">Ngày kết thúc <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <input type="datetime-local" id="EndDate" name="EndDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
                             @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
@@ -100,10 +100,10 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="UsageLimit" class="col-sm-3 col-form-label font-weight-bold">Usage Limit</label>
+                        <label for="UsageLimit" class="col-sm-3 col-form-label font-weight-bold">Giới hạn lượt</label>
                         <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.UsageLimit, new { @class = "form-control", type = "number", min = "1", placeholder = "Leave empty for unlimited redemptions" })
-                            <small class="form-text text-muted">Maximum total times this code can be used across all customers.</small>
+                            @Html.TextBoxFor(m => m.UsageLimit, new { @class = "form-control", type = "number", min = "1", placeholder = "Để trống nếu không giới hạn lượt" })
+                            <small class="form-text text-muted">Tổng lượt sử dụng tối đa của mã cho tất cả khách hàng.</small>
                             @Html.ValidationMessageFor(m => m.UsageLimit, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                         <div class="col-sm-9 offset-sm-3">
                             <div class="custom-control custom-checkbox">
                                 @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "IsActive" })
-                                <label class="custom-control-label font-weight-bold" for="IsActive">Activate immediately</label>
+                                <label class="custom-control-label font-weight-bold" for="IsActive">Kích hoạt ngay</label>
                             </div>
                         </div>
                     </div>
@@ -120,10 +120,10 @@
 
                 <div class="card-footer text-right">
                     <a href="@Url.Action("Index", "Promotions", new { area = "Admin" })" class="btn btn-default mr-2">
-                        <i class="fa fa-arrow-left mr-1"></i> Cancel
+                        <i class="fa fa-arrow-left mr-1"></i> Hủy
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fa fa-save mr-1"></i> Create Promotion
+                        <i class="fa fa-save mr-1"></i> Tạo khuyến mãi
                     </button>
                 </div>
             }

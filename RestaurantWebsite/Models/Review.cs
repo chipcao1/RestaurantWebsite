@@ -13,10 +13,12 @@ namespace RestaurantWebsite.Models
 
         public int OrderId { get; set; }
 
-        [Range(1, 5)]
+        [Range(1, 5, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Số sao")]
         public int Rating { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(1000, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Bình luận")]
         public string Comment { get; set; }
 
         public DateTime CreatedAt { get; set; }
@@ -31,8 +33,8 @@ namespace RestaurantWebsite.Models
 
         public Review()
         {
-            CreatedAt = DateTime.Now;
-            IsApproved = true;
+            CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
+            IsApproved = false;
         }
     }
 }

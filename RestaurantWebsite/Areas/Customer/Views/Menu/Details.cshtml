@@ -1,0 +1,366 @@
+@using System.Linq
+@model RestaurantWebsite.Models.Dish
+
+@{
+    Layout = null;
+
+    RestaurantWebsite.Models.DishImage primaryImage = null;
+
+    if (Model != null &&
+        Model.DishImages != null &&
+        Model.DishImages.Any())
+    {
+        primaryImage =
+            Model.DishImages.FirstOrDefault(i => i.IsPrimary)
+            ?? Model.DishImages.FirstOrDefault();
+    }
+
+    bool isLoggedIn = Session["UserId"] != null;
+}
+
+
+@if (Model == null)
+{
+    <div class="text-center p-4">
+        <p class="text-danger">
+            Không tìm thấy thông tin món ăn.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row">
+
+        <!-- ================================================= -->
+        <!-- DISH IMAGE -->
+        <!-- ================================================= -->
+
+        <div class="col-md-6">
+
+            <div class="img-box text-center p-2 bg-light rounded">
+
+                @if (primaryImage != null &&
+                     !string.IsNullOrEmpty(primaryImage.ImageUrl))
+                {
+                    <img src="@Url.Content(primaryImage.ImageUrl)"
+                         id="mainModalImg"
+                         alt="@Model.Name"
+                         class="img-fluid rounded"
+                         style="max-height:300px;width:100%;object-fit:cover;" />
+                }
+                else
+                {
+                    <img src="@Url.Content("~/Resources/User/images/f1.png")"
+                         id="mainModalImg"
+                         alt="Ảnh mặc định"
+                         class="img-fluid rounded"
+                         style="max-height:300px;width:100%;object-fit:cover;" />
+                }
+
+            </div>
+
+
+            <!-- OTHER IMAGES -->
+            @if (Model.DishImages != null &&
+                 Model.DishImages.Count() > 1)
+            {
+                <div class="row mt-2 justify-content-center">
+
+                    @foreach (var img in Model.DishImages)
+                    {
+                        if (!string.IsNullOrEmpty(img.ImageUrl))
+                        {
+                            <div class="col-3 p-1">
+
+                                <img src="@Url.Content(img.ImageUrl)"
+                                     class="img-thumbnail"
+                                     style="height:50px;width:100%;object-fit:cover;cursor:pointer;"
+                                     onclick="document.getElementById('mainModalImg').src=this.src"
+                                     alt="@Model.Name" />
+
+                            </div>
+                        }
+                    }
+
+                </div>
+            }
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- DISH INFORMATION -->
+        <!-- ================================================= -->
+
+        <div class="col-md-6">
+
+            <div class="detail-box pl-md-2">
+
+                <h3 class="text-dark font-weight-bold">
+                    @Model.Name
+                </h3>
+
+
+                <h4 class="text-danger font-weight-bold my-3">
+                    @Model.Price.ToString("N0") VNĐ
+                </h4>
+
+
+                <p class="text-secondary"
+                   style="font-size:14px;max-height:100px;overflow-y:auto;">
+
+                    @(
+                        !string.IsNullOrEmpty(Model.Description)
+                            ? Model.Description
+                            : "Món đang được cập nhật mô tả."
+                    )
+
+                </p>
+
+
+                <!-- ATTRIBUTES -->
+                <div class="attributes mt-3"
+                     style="font-size:14px;">
+
+                    <p class="mb-1">
+
+
+                        Loại:
+
+                        <span class="badge badge-info">
+
+                            @(
+                                Model.Category != null
+                                    ? Model.Category.Name
+                                    : "Chưa phân loại"
+                            )
+
+                        </span>
+
+                    </p>
+
+
+                    <p class="mb-1">
+
+                        Thời gian chuẩn bị:
+
+                        <strong>
+                            @Model.PreparationTime mins
+                        </strong>
+
+                    </p>
+
+
+                    <p class="mb-3">
+
+                            Tình trạng:
+
+                        @if (Model.Status == "Available")
+                        {
+                            <span class="text-success font-weight-bold">
+                                ● Còn bán
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                ● Hết hàng
+                            </span>
+                        }
+
+                    </p>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- ACTION -->
+                <!-- ================================================= -->
+
+                @if (Model.Status == "Available")
+                {
+
+                    if (isLoggedIn)
+                    {
+                        using (Html.BeginForm(
+                            "AddToCart", "Menu", new { area = "Customer" },
+                            FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@Model.Id" />
+
+                            <!-- QUANTITY -->
+                            <div class="form-group mb-3">
+
+                                <label class="text-secondary d-block mb-2">
+                                    Số lượng:
+                                </label>
+
+                                <div class="d-flex align-items-center"
+                                     style="max-width:220px;">
+
+                                    <!-- MINUS -->
+                                    <button type="button"
+                                            class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                            style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
+                                            onclick="
+                                            var input=document.getElementById('txtQuantity');
+                                            var value=parseInt(input.value, 10) || 1;
+                                            if (value>
+                                        1) {
+                                        input.value = value - 1;
+                                        }
+                                        "
+                                        aria-label="Giảm số lượng">
+
+                                        −
+
+                                    </button>
+
+
+                                    <!-- QUANTITY DISPLAY -->
+                                    <input type="text"
+                                           id="txtQuantity"
+                                           name="quantity"
+                                           value="1"
+                                           readonly
+                                           class="form-control text-center mx-2"
+                                           style="width:80px;height:48px;font-size:18px;font-weight:bold;background:#fff;"
+                                           aria-label="Số lượng" />
+
+
+                                    <!-- PLUS -->
+                                    <button type="button"
+                                            class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                            style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
+                                            onclick="
+                                            var input=document.getElementById('txtQuantity');
+                                            var value=parseInt(input.value, 10) || 1;
+                                            if (value < 99) {
+                                                    input.value = value + 1;
+                                                }
+                                            "
+                                            aria-label="Tăng số lượng">
+
+                                        +
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ADD TO CART -->
+                            <button type="submit"
+                                    class="btn btn-warning btn-block text-white font-weight-bold py-2 shadow-sm">
+
+                                <i class="fa fa-shopping-cart"></i>
+
+                                Thêm vào giỏ
+
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <!-- QUANTITY -->
+                        <div class="form-group mb-3">
+
+                            <label class="text-secondary d-block mb-2">
+                                Số lượng:
+                            </label>
+
+                            <div class="d-flex align-items-center"
+                                 style="max-width:220px;">
+
+                                <!-- MINUS -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                        style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
+                                        onclick="
+                                        var input=document.getElementById('txtQuantity');
+                                        var value=parseInt(input.value, 10) || 1;
+                                        if (value>
+                                    1) {
+                                    input.value = value - 1;
+                                    }
+                                    "
+                                    aria-label="Giảm số lượng">
+
+                                    −
+
+                                </button>
+
+
+                                <!-- QUANTITY DISPLAY -->
+                                <input type="text"
+                                       id="txtQuantity"
+                                       value="1"
+                                       readonly
+                                       class="form-control text-center mx-2"
+                                       style="width:80px;height:48px;font-size:18px;font-weight:bold;background:#fff;"
+                                       aria-label="Số lượng" />
+
+
+                                <!-- PLUS -->
+                                <button type="button"
+                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                        style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
+                                        onclick="
+                                        var input=document.getElementById('txtQuantity');
+                                        var value=parseInt(input.value, 10) || 1;
+                                        if (value < 99) {
+                                                input.value = value + 1;
+                                            }
+                                        "
+                                        aria-label="Tăng số lượng">
+
+                                    +
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- LOGIN -->
+                        <a href="@Url.Action(
+                                    "Login", "Account",
+                                    new
+                                    { area = "",
+                                        returnUrl = Url.Action(
+                                            "Index", "Menu", new { area = "Customer" })
+                                    })"
+                           class="btn btn-warning btn-block text-white font-weight-bold py-2 shadow-sm">
+
+                            <i class="fa fa-sign-in"></i>
+
+                            Đăng nhập để đặt món
+
+                        </a>
+                    }
+
+                }
+                else
+                {
+                    <button type="button"
+                            class="btn btn-secondary btn-block py-2"
+                            disabled>
+
+                        Tạm ngừng phục vụ
+
+                    </button>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+}
+@if(ViewBag.ApprovedReviews!=null){<section class="mt-4"><h3>Khách hàng chia sẻ</h3>@foreach(var review in (IEnumerable<RestaurantWebsite.Models.Review>)ViewBag.ApprovedReviews){<div class="border-top py-3"><strong>@review.User.FullName</strong> · @review.Rating/5 sao<p>@review.Comment</p></div>}</section>}

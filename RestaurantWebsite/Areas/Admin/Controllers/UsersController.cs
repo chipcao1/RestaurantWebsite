@@ -56,8 +56,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .ThenByDescending(u => u.CreatedAt)
                 .ToList();
 
-            ViewBag.RoleList = new SelectList(ValidRoles, role);
-            ViewBag.StatusList = new SelectList(new[] { "Active", "Inactive" }, status);
+            ViewBag.RoleList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidRoles, role);
+            ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(new[] { "Active", "Inactive" }, status);
             ViewBag.SelectedRole = role ?? "All";
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SearchTerm = search;
@@ -85,7 +85,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateStaff(User model, string password)
+        public ActionResult CreateStaff([Bind(Include = "FullName,Email,Phone,Address,IsActive")] User model, string password)
         {
             model.FullName = string.IsNullOrWhiteSpace(model.FullName) ? null : model.FullName.Trim();
             model.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim().ToLower();
@@ -98,25 +98,25 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (string.IsNullOrWhiteSpace(model.FullName))
             {
-                ModelState.AddModelError("FullName", "Full name is required.");
+                ModelState.AddModelError("FullName", "Vui lòng nhập họ tên.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Email))
             {
-                ModelState.AddModelError("Email", "Email is required.");
+                ModelState.AddModelError("Email", "Vui lòng nhập email.");
             }
             else if (db.Users.Any(u => u.Email.ToLower() == model.Email))
             {
-                ModelState.AddModelError("Email", "An account with this email already exists.");
+                ModelState.AddModelError("Email", "Email đã được đăng ký.");
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                ModelState.AddModelError("PasswordHash", "Password is required.");
+                ModelState.AddModelError("PasswordHash", "Vui lòng nhập mật khẩu.");
             }
             else if (password.Length < 6)
             {
-                ModelState.AddModelError("PasswordHash", "Password must be at least 6 characters long.");
+                ModelState.AddModelError("PasswordHash", "Mật khẩu phải có ít nhất 6 ký tự.");
             }
 
             if (!ModelState.IsValid)
@@ -125,12 +125,12 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             }
 
             model.PasswordHash = PasswordHasher.HashPassword(password);
-            model.CreatedAt = DateTime.Now;
+            model.CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
 
             db.Users.Add(model);
             db.SaveChanges();
 
-            TempData["Success"] = $"Staff account \"{model.FullName}\" ({model.Email}) created successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 
@@ -142,7 +142,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         {
             if (!id.HasValue)
             {
-                TempData["Error"] = "User ID was not provided.";
+                TempData["Error"] = "Thiếu mã người dùng.";
                 return RedirectToAction("Index");
             }
 
@@ -154,11 +154,11 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (user == null)
             {
-                TempData["Error"] = "User account was not found.";
+                TempData["Error"] = "Không tìm thấy tài khoản.";
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ValidRoles = new SelectList(ValidRoles, user.Role);
+            ViewBag.ValidRoles = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidRoles, user.Role);
             ViewBag.CurrentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
 
             return View(user);
@@ -169,84 +169,92 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(User model)
+        public ActionResult Edit([Bind(Include = "Id,FullName,Email,Phone,Address,Role,IsActive")] User model)
         {
-            var user = db.Users.FirstOrDefault(u => u.Id == model.Id);
-            if (user == null)
+            using (var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                TempData["Error"] = "User account was not found.";
-                return RedirectToAction("Index");
-            }
 
-            int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
-
-            model.FullName = string.IsNullOrWhiteSpace(model.FullName) ? null : model.FullName.Trim();
-            model.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim().ToLower();
-            model.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
-            model.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
-            model.Role = string.IsNullOrWhiteSpace(model.Role) ? user.Role : model.Role.Trim();
-
-            if (string.IsNullOrWhiteSpace(model.FullName))
-            {
-                ModelState.AddModelError("FullName", "Full name is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.Email))
-            {
-                ModelState.AddModelError("Email", "Email is required.");
-            }
-            else if (db.Users.Any(u => u.Id != model.Id && u.Email.ToLower() == model.Email))
-            {
-                ModelState.AddModelError("Email", "Another user with this email already exists.");
-            }
-
-            if (!ValidRoles.Contains(model.Role))
-            {
-                ModelState.AddModelError("Role", "Invalid role selected.");
-            }
-
-            // Security check: cannot change own role or deactivate self
-            if (user.Id == currentAdminId)
-            {
-                if (!model.IsActive)
+                ModelState.Remove("PasswordHash");
+                var user = db.Users.FirstOrDefault(u => u.Id == model.Id);
+                if (user == null)
                 {
-                    ModelState.AddModelError("IsActive", "You cannot deactivate your own active session account.");
+                    TempData["Error"] = "Không tìm thấy tài khoản.";
+                    return RedirectToAction("Index");
                 }
-                if (model.Role != "Admin")
+
+                int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
+
+                model.FullName = string.IsNullOrWhiteSpace(model.FullName) ? null : model.FullName.Trim();
+                model.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim().ToLower();
+                model.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
+                model.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
+                model.Role = string.IsNullOrWhiteSpace(model.Role) ? user.Role : model.Role.Trim();
+
+                if (string.IsNullOrWhiteSpace(model.FullName))
                 {
-                    ModelState.AddModelError("Role", "You cannot demote your own Admin account.");
+                    ModelState.AddModelError("FullName", "Vui lòng nhập họ tên.");
                 }
+
+                if (string.IsNullOrWhiteSpace(model.Email))
+                {
+                    ModelState.AddModelError("Email", "Vui lòng nhập email.");
+                }
+                else if (db.Users.Any(u => u.Id != model.Id && u.Email.ToLower() == model.Email))
+                {
+                    ModelState.AddModelError("Email", "Email đã được tài khoản khác sử dụng.");
+                }
+
+                if (!ValidRoles.Contains(model.Role))
+                {
+                    ModelState.AddModelError("Role", "Vai trò không hợp lệ.");
+                }
+
+                if (user.Role == "Admin" && user.IsActive && (!model.IsActive || model.Role != "Admin") && db.Users.Count(u => u.Role == "Admin" && u.IsActive) <= 1)
+                    ModelState.AddModelError("Role", "Không thể khóa hoặc gỡ quyền quản trị viên cuối cùng.");
+                // Security check: cannot change own role or deactivate self
+                if (user.Id == currentAdminId)
+                {
+                    if (!model.IsActive)
+                    {
+                        ModelState.AddModelError("IsActive", "Bạn không thể tự khóa tài khoản đang sử dụng.");
+                    }
+                    if (model.Role != "Admin")
+                    {
+                        ModelState.AddModelError("Role", "Bạn không thể tự gỡ quyền quản trị.");
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.ValidRoles = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidRoles, model.Role);
+                    ViewBag.CurrentAdminId = currentAdminId;
+                    model.Orders = user.Orders;
+                    model.Reservations = user.Reservations;
+                    model.Reviews = user.Reviews;
+                    return View("Details", model);
+                }
+
+                user.FullName = model.FullName;
+                user.Email = model.Email;
+                user.Phone = model.Phone;
+                user.Address = model.Address;
+                user.Role = model.Role;
+                user.IsActive = model.IsActive;
+
+                db.SaveChanges(); tx.Commit();
+
+                // If updating currently logged in admin's own info, update Session
+                if (user.Id == currentAdminId)
+                {
+                    Session["UserName"] = user.FullName;
+                    Session["UserEmail"] = user.Email;
+                    Session["Role"] = user.Role;
+                }
+
+                TempData["Success"] = "Đã lưu thay đổi thành công.";
+                return RedirectToAction("Details", new { id = user.Id });
+
             }
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.ValidRoles = new SelectList(ValidRoles, model.Role);
-                ViewBag.CurrentAdminId = currentAdminId;
-                model.Orders = user.Orders;
-                model.Reservations = user.Reservations;
-                model.Reviews = user.Reviews;
-                return View("Details", model);
-            }
-
-            user.FullName = model.FullName;
-            user.Email = model.Email;
-            user.Phone = model.Phone;
-            user.Address = model.Address;
-            user.Role = model.Role;
-            user.IsActive = model.IsActive;
-
-            db.SaveChanges();
-
-            // If updating currently logged in admin's own info, update Session
-            if (user.Id == currentAdminId)
-            {
-                Session["UserName"] = user.FullName;
-                Session["UserEmail"] = user.Email;
-                Session["Role"] = user.Role;
-            }
-
-            TempData["Success"] = $"User \"{user.FullName}\" profile updated successfully.";
-            return RedirectToAction("Details", new { id = user.Id });
         }
 
         // =====================================================
@@ -256,27 +264,33 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ToggleStatus(int id)
         {
-            var user = db.Users.Find(id);
-            if (user == null)
+            using (var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
             {
-                TempData["Error"] = "User was not found.";
+
+                var user = db.Users.Find(id);
+                if (user == null)
+                {
+                    TempData["Error"] = "Không tìm thấy người dùng.";
+                    return RedirectToAction("Index");
+                }
+
+                int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
+                if (user.Id == currentAdminId)
+                {
+                    TempData["Error"] = "Bạn không thể khóa tài khoản quản trị đang sử dụng.";
+                    return RedirectToAction("Index");
+                }
+
+                if (user.Role == "Admin" && user.IsActive && db.Users.Count(u => u.Role == "Admin" && u.IsActive) <= 1) { TempData["Error"] = "Không thể khóa quản trị viên cuối cùng."; return RedirectToAction("Index"); }
+                user.IsActive = !user.IsActive;
+                db.SaveChanges(); tx.Commit();
+
+                string statusText = user.IsActive ? "kích hoạt" : "ngừng hoạt động";
+                TempData["Success"] = "Đã lưu thay đổi thành công.";
+
                 return RedirectToAction("Index");
+
             }
-
-            int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
-            if (user.Id == currentAdminId)
-            {
-                TempData["Error"] = "Security Warning: You cannot deactivate your own current Admin session.";
-                return RedirectToAction("Index");
-            }
-
-            user.IsActive = !user.IsActive;
-            db.SaveChanges();
-
-            string statusText = user.IsActive ? "activated" : "deactivated";
-            TempData["Success"] = $"User \"{user.FullName}\" account has been {statusText}.";
-
-            return RedirectToAction("Index");
         }
 
         // =====================================================
@@ -289,20 +303,20 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             var user = db.Users.Find(id);
             if (user == null)
             {
-                TempData["Error"] = "User was not found.";
+                TempData["Error"] = "Không tìm thấy người dùng.";
                 return RedirectToAction("Index");
             }
 
             if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
             {
-                TempData["Error"] = "New password must be at least 6 characters long.";
+                TempData["Error"] = "Mật khẩu mới phải có ít nhất 6 ký tự.";
                 return RedirectToAction("Details", new { id = id });
             }
 
             user.PasswordHash = PasswordHasher.HashPassword(newPassword);
             db.SaveChanges();
 
-            TempData["Success"] = $"Password for user \"{user.FullName}\" reset successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Details", new { id = id });
         }
 

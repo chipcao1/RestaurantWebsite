@@ -1,0 +1,1 @@
+@foreach(var key in new[]{"Success","Error","AccountSuccess","ProfileSuccess","ReservationSuccess","OrderSuccess","CartError","CartSuccess","PasswordSuccess"}) { var message=TempData[key]; if(message!=null){<div role="alert" class="alert @(key.Contains("Error")?"alert-danger":"alert-success")">@message</div>} }

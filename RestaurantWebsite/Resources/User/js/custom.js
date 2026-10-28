@@ -1,70 +1,29 @@
-// to get current year
-function getYear() {
-    var currentDate = new Date();
-    var currentYear = currentDate.getFullYear();
-    document.querySelector("#displayYear").innerHTML = currentYear;
-}
+(function () {
+    'use strict';
+    var year = document.querySelector('#displayYear');
+    if (year) year.textContent = new Date().getFullYear();
 
-getYear();
-
-
-// isotope js
-$(window).on('load', function () {
-    $('.filters_menu li').click(function () {
-        $('.filters_menu li').removeClass('active');
-        $(this).addClass('active');
-
-        var data = $(this).attr('data-filter');
-        $grid.isotope({
-            filter: data
-        })
+    // Trang thực đơn tự quản lý bộ lọc; không đăng ký Isotope hai lần ở đây.
+    var $ = window.jQuery;
+    if (!$) return;
+    $(function () {
+        if ($.fn.niceSelect) {
+            $('select.nice-select-custom').not('#OrderType').niceSelect();
+        }
+        if ($.fn.owlCarousel && $('.client_owl-carousel').length) {
+            $('.client_owl-carousel').owlCarousel({
+                loop: true,
+                margin: 0,
+                dots: false,
+                nav: true,
+                autoplay: true,
+                autoplayHoverPause: true,
+                navText: [
+                    '<i class="fa fa-angle-left" aria-label="Trước"></i>',
+                    '<i class="fa fa-angle-right" aria-label="Sau"></i>'
+                ],
+                responsive: { 0: { items: 1 }, 768: { items: 2 }, 1000: { items: 2 } }
+            });
+        }
     });
-
-    var $grid = $(".grid").isotope({
-        itemSelector: ".all",
-        percentPosition: false,
-        masonry: {
-            columnWidth: ".all"
-        }
-    })
-});
-
-// nice select - only apply to select elements that request custom styling and explicitly exclude #OrderType
-$(document).ready(function() {
-    $('select.nice-select-custom, .book_section select').not('#OrderType').niceSelect();
-});
-
-/** google_map js **/
-function myMap() {
-    var mapProp = {
-        center: new google.maps.LatLng(40.712775, -74.005973),
-        zoom: 18,
-    };
-    var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
-}
-
-// client section owl carousel
-$(".client_owl-carousel").owlCarousel({
-    loop: true,
-    margin: 0,
-    dots: false,
-    nav: true,
-    navText: [],
-    autoplay: true,
-    autoplayHoverPause: true,
-    navText: [
-        '<i class="fa fa-angle-left" aria-hidden="true"></i>',
-        '<i class="fa fa-angle-right" aria-hidden="true"></i>'
-    ],
-    responsive: {
-        0: {
-            items: 1
-        },
-        768: {
-            items: 2
-        },
-        1000: {
-            items: 2
-        }
-    }
-});
+})();

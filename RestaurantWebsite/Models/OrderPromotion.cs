@@ -10,7 +10,7 @@ namespace RestaurantWebsite.Models
 
         public int PromotionId { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal DiscountAmount { get; set; }
 
         public virtual Order Order { get; set; }

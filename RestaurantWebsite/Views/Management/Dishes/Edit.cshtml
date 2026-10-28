@@ -1,0 +1,235 @@
+@{ Layout = "~/Views/Shared/_OperationsLayout.cshtml"; }
+@model RestaurantWebsite.Models.Dish
+@{
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+    ViewBag.Title = "Sửa món - " + Model.Name;
+
+    SelectList categories = ViewBag.CategoryList as SelectList ?? ViewBag.CategoryId as SelectList;
+    string primaryImageUrl = ViewBag.PrimaryImageUrl as string ?? "";
+
+    int orderCount = Model.OrderItems != null ? Model.OrderItems.Count : 0;
+    int comboCount = Model.ComboItems != null ? Model.ComboItems.Count : 0;
+    int reviewCount = Model.Reviews != null ? Model.Reviews.Count : 0;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold">
+                    <i class="fa fa-pencil text-primary mr-1"></i> Sửa món: <strong>@Model.Name</strong>
+                </h3>
+                <div class="card-tools">
+                    <a href="@Url.Action("Index", "Dishes", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) })" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left mr-1"></i> Về danh sách món
+                    </a>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Edit", "Dishes", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) }, FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+<div class="form-group"><label for="additionalImageUrls">Ảnh bổ sung (mỗi dòng một đường dẫn, tối đa 10 ảnh)</label><textarea name="additionalImageUrls" id="additionalImageUrls" class="form-control" rows="3">@Request.Form["additionalImageUrls"]</textarea></div>
+
+                @Html.HiddenFor(m => m.Id)
+
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Vui lòng kiểm tra lại các thông tin sau:</h5>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0 pl-3 text-white" })
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Đóng">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    @if (orderCount > 0 || comboCount > 0)
+                    {
+                        <div class="callout callout-info py-2 mb-3 bg-light">
+                            <i class="fa fa-info-circle text-info mr-1"></i>
+                            Món này đang được tham chiếu bởi <strong>@orderCount</strong> đơn hàng và <strong>@comboCount</strong> suất ăn kết hợp.
+                            Để ẩn món và giữ lịch sử đơn hàng, hãy đổi trạng thái sang <em>Tạm ngừng phục vụ</em> hoặc <em>Ngừng kinh doanh</em>.
+                        </div>
+                    }
+
+                    <!-- Dish ID (Display only) -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label text-muted">
+                            Mã món
+                        </label>
+                        <div class="col-sm-9 d-flex align-items-center">
+                            <span class="badge badge-light border px-3 py-2 font-weight-bold">#@Model.Id</span>
+                            <small class="text-muted ml-3"><i class="fa fa-calendar mr-1"></i> Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                    </div>
+
+                    <!-- Dish Name -->
+                    <div class="form-group row">
+                        <label for="Name" class="col-sm-3 col-form-label font-weight-bold">
+                            Tên món <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.Name, new {
+                                @class = "form-control",
+                                placeholder = "Ví dụ: Bò nướng sốt tiêu...",
+                                maxlength = "150",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group row">
+                        <label for="CategoryId" class="col-sm-3 col-form-label font-weight-bold">
+                            Danh mục <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(m => m.CategoryId, categories, "-- Chọn danh mục --", new {
+                                @class = "form-control",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="form-group row">
+                        <label for="Price" class="col-sm-3 col-form-label font-weight-bold">
+                            Giá (đồng) <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                @Html.TextBox("Price", Model.Price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new {
+                                    @class = "form-control",
+                                    type = "number",
+                                    step = "1000",
+                                    min = "0",
+                                    max = "999999999",
+                                    required = "required"
+                                })
+                                <div class="input-group-append">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Thời gian chế biến -->
+                    <div class="form-group row">
+                        <label for="PreparationTime" class="col-sm-3 col-form-label font-weight-bold">
+                            Thời gian chế biến (phút) <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                @Html.TextBoxFor(m => m.PreparationTime, new {
+                                    @class = "form-control",
+                                    type = "number",
+                                    min = "1",
+                                    max = "300",
+                                    required = "required"
+                                })
+                                <div class="input-group-append">
+                                    <span class="input-group-text">phút</span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.PreparationTime, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group row">
+                        <label for="Status" class="col-sm-3 col-form-label font-weight-bold">
+                            Trạng thái hiển thị
+                        </label>
+                        <div class="col-sm-9">
+                            <select name="Status" class="form-control">
+                                <option value="Available" @(Model.Status == "Available" ? "selected" : "")>Đang phục vụ (khách có thể xem)</option>
+                                <option value="Temporarily Unavailable" @(Model.Status == "Temporarily Unavailable" || Model.Status == "Unavailable" ? "selected" : "")>Tạm ngừng phục vụ (hết hàng / đang ẩn)</option>
+                                <option value="Discontinued" @(Model.Status == "Discontinued" ? "selected" : "")>Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="form-group row">
+                        <label for="Description" class="col-sm-3 col-form-label font-weight-bold">
+                            Mô tả
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextAreaFor(m => m.Description, new {
+                                @class = "form-control",
+                                rows = "3",
+                                placeholder = "Nguyên liệu, hương vị và thông tin khẩu phần...",
+                                maxlength = "1000"
+                            })
+                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Primary Image URL -->
+                    <div class="form-group row">
+                        <label for="primaryImageUrl" class="col-sm-3 col-form-label font-weight-bold">
+                            Đường dẫn ảnh món
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="text"
+                                   name="primaryImageUrl"
+                                   id="dishImageUrl"
+                                   class="form-control"
+                                   placeholder="Ví dụ: /Resources/User/images/dish01.jpg hoặc https://..."
+                                   value="@primaryImageUrl"
+                                   maxlength="500" />
+
+                            <!-- Image Preview -->
+                            <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
+                                <span class="mr-2 small text-muted">Xem trước:</span>
+                                <img id="previewImg"
+                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(primaryImageUrl))"
+                                     alt="Xem trước"
+                                     class="img-thumbnail rounded"
+                                     style="width: 65px; height: 65px; object-fit: cover;"
+                                     onerror="this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-light d-flex justify-content-between">
+                    <a href="@Url.Action("Index", "Dishes", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) })" class="btn btn-default">
+                        <i class="fa fa-times mr-1"></i> Hủy
+                    </a>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fa fa-check mr-1"></i> Cập nhật món
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var $imgInput = $('#dishImageUrl');
+            var $preview = $('#previewImg');
+
+            function updatePreview() {
+                var val = $imgInput.val().trim();
+                if (val) {
+                    $preview.attr('src', val);
+                } else {
+                    $preview.attr('src', '@Url.Content("~/Resources/Admin/img/default-150x150.png")');
+                }
+            }
+
+            $imgInput.on('input change blur', updatePreview);
+        });
+    </script>
+}
+
+<section class="surface"><h2>Ảnh món ăn</h2><div class="row">@foreach(var image in Model.DishImages){<div class="col-md-3 mb-3"><img src="@Url.Content(image.ImageUrl)" class="img-fluid rounded mb-2" alt="@Model.Name"/><p>@(image.IsPrimary?"Ảnh đại diện":"Ảnh bổ sung")</p>@using(Html.BeginForm("PrimaryImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">Chọn đại diện</button>}@using(Html.BeginForm("RemoveImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-danger">Gỡ ảnh</button>}</div>}</div></section>

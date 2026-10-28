@@ -25,10 +25,17 @@ namespace RestaurantWebsite.Filters
                 return false;
             }
 
-            // Lấy Role từ Session
-            string currentRole =
-                Convert.ToString(httpContext.Session["Role"]);
-
+            int userId;
+            if (!int.TryParse(Convert.ToString(httpContext.Session["UserId"]), out userId)) return false;
+            string currentRole;
+            using (var db = new RestaurantWebsite.Models.AppDbContext())
+            {
+                var user = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == userId && u.IsActive);
+                if (user == null) { httpContext.Session.Clear(); return false; }
+                currentRole = user.Role;
+                httpContext.Session["Role"] = user.Role;
+                httpContext.Session["UserName"] = user.FullName;
+            }
             if (string.IsNullOrWhiteSpace(currentRole))
             {
                 return false;
@@ -65,7 +72,8 @@ namespace RestaurantWebsite.Filters
                             {
                                 area = "",
                                 controller = "Account",
-                                action = "Login"
+                                action = "Login",
+                                returnUrl = filterContext.HttpContext.Request.RawUrl
                             }));
 
                 return;

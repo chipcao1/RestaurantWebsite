@@ -31,7 +31,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             }
 
             // Filter by Status (Active, Inactive, Expired)
-            DateTime now = DateTime.Now;
+            DateTime now = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
             if (!string.IsNullOrWhiteSpace(status) && status != "All")
             {
                 if (status == "Active")
@@ -66,8 +66,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .OrderByDescending(p => p.Id)
                 .ToList();
 
-            ViewBag.DiscountTypes = new SelectList(DiscountTypes, discountType);
-            ViewBag.StatusList = new SelectList(new[] { "Active", "Inactive", "Expired", "Upcoming" }, status);
+            ViewBag.DiscountTypes = RestaurantWebsite.Infrastructure.ViewOptions.Choices(DiscountTypes, discountType);
+            ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(new[] { "Active", "Inactive", "Expired", "Upcoming" }, status);
             ViewBag.SelectedDiscountType = discountType ?? "All";
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SearchTerm = search;
@@ -81,15 +81,15 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            ViewBag.DiscountTypes = new SelectList(DiscountTypes, "Percentage");
+            ViewBag.DiscountTypes = RestaurantWebsite.Infrastructure.ViewOptions.Choices(DiscountTypes, "Percentage");
 
             var model = new Promotion
             {
                 DiscountType = "Percentage",
                 DiscountValue = 10,
                 MinimumOrderAmount = 0,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(30),
+                StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now,
+                EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(30),
                 IsActive = true
             };
 
@@ -101,7 +101,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Promotion model)
+        public ActionResult Create([Bind(Include = "Id,Code,Name,Description,DiscountType,DiscountValue,MinimumOrderAmount,MaximumDiscount,StartDate,EndDate,UsageLimit,IsActive")] Promotion model)
         {
             model.Code = string.IsNullOrWhiteSpace(model.Code) ? null : model.Code.Trim().ToUpper();
             model.Name = string.IsNullOrWhiteSpace(model.Name) ? null : model.Name.Trim();
@@ -111,58 +111,58 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             // Validation
             if (string.IsNullOrWhiteSpace(model.Code))
             {
-                ModelState.AddModelError("Code", "Promotion code is required.");
+                ModelState.AddModelError("Code", "Vui lòng nhập mã khuyến mãi.");
             }
             else if (db.Promotions.Any(p => p.Code.ToUpper() == model.Code))
             {
-                ModelState.AddModelError("Code", "A promotion code with this value already exists.");
+                ModelState.AddModelError("Code", "Mã khuyến mãi đã tồn tại.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
-                ModelState.AddModelError("Name", "Promotion name is required.");
+                ModelState.AddModelError("Name", "Vui lòng nhập tên khuyến mãi.");
             }
 
             if (model.DiscountValue <= 0)
             {
-                ModelState.AddModelError("DiscountValue", "Discount value must be greater than 0.");
+                ModelState.AddModelError("DiscountValue", "Mức giảm phải lớn hơn 0.");
             }
 
             if (model.DiscountType == "Percentage" && model.DiscountValue > 100)
             {
-                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%.");
+                ModelState.AddModelError("DiscountValue", "Mức giảm phần trăm không được vượt quá 100%.");
             }
 
             if (model.MinimumOrderAmount < 0)
             {
-                ModelState.AddModelError("MinimumOrderAmount", "Minimum order amount cannot be negative.");
+                ModelState.AddModelError("MinimumOrderAmount", "Giá trị đơn tối thiểu không được âm.");
             }
 
             if (model.MaximumDiscount.HasValue && model.MaximumDiscount.Value < 0)
             {
-                ModelState.AddModelError("MaximumDiscount", "Maximum discount cannot be negative.");
+                ModelState.AddModelError("MaximumDiscount", "Mức giảm tối đa không được âm.");
             }
 
             if (model.EndDate <= model.StartDate)
             {
-                ModelState.AddModelError("EndDate", "End date must be later than start date.");
+                ModelState.AddModelError("EndDate", "Ngày kết thúc phải sau ngày bắt đầu.");
             }
 
             if (model.UsageLimit.HasValue && model.UsageLimit.Value < 1)
             {
-                ModelState.AddModelError("UsageLimit", "Usage limit must be at least 1 if set.");
+                ModelState.AddModelError("UsageLimit", "Giới hạn sử dụng cần ít nhất 1 lượt nếu có nhập.");
             }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.DiscountTypes = new SelectList(DiscountTypes, model.DiscountType);
+                ViewBag.DiscountTypes = RestaurantWebsite.Infrastructure.ViewOptions.Choices(DiscountTypes, model.DiscountType);
                 return View(model);
             }
 
             db.Promotions.Add(model);
             db.SaveChanges();
 
-            TempData["Success"] = $"Promotion \"{model.Code}\" ({model.Name}) created successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 
@@ -174,7 +174,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         {
             if (!id.HasValue)
             {
-                TempData["Error"] = "Promotion ID was not provided.";
+                TempData["Error"] = "Thiếu mã khuyến mãi.";
                 return RedirectToAction("Index");
             }
 
@@ -184,11 +184,11 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (promotion == null)
             {
-                TempData["Error"] = "Promotion was not found.";
+                TempData["Error"] = "Không tìm thấy khuyến mãi.";
                 return RedirectToAction("Index");
             }
 
-            ViewBag.DiscountTypes = new SelectList(DiscountTypes, promotion.DiscountType);
+            ViewBag.DiscountTypes = RestaurantWebsite.Infrastructure.ViewOptions.Choices(DiscountTypes, promotion.DiscountType);
             return View(promotion);
         }
 
@@ -197,7 +197,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Promotion model)
+        public ActionResult Edit([Bind(Include = "Id,Code,Name,Description,DiscountType,DiscountValue,MinimumOrderAmount,MaximumDiscount,StartDate,EndDate,UsageLimit,IsActive")] Promotion model)
         {
             var promotion = db.Promotions
                 .Include(p => p.OrderPromotions)
@@ -205,7 +205,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (promotion == null)
             {
-                TempData["Error"] = "Promotion was not found.";
+                TempData["Error"] = "Không tìm thấy khuyến mãi.";
                 return RedirectToAction("Index");
             }
 
@@ -217,51 +217,51 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             // Validation
             if (string.IsNullOrWhiteSpace(model.Code))
             {
-                ModelState.AddModelError("Code", "Promotion code is required.");
+                ModelState.AddModelError("Code", "Vui lòng nhập mã khuyến mãi.");
             }
             else if (db.Promotions.Any(p => p.Id != model.Id && p.Code.ToUpper() == model.Code))
             {
-                ModelState.AddModelError("Code", "Another promotion code with this value already exists.");
+                ModelState.AddModelError("Code", "Mã khuyến mãi đã tồn tại.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
-                ModelState.AddModelError("Name", "Promotion name is required.");
+                ModelState.AddModelError("Name", "Vui lòng nhập tên khuyến mãi.");
             }
 
             if (model.DiscountValue <= 0)
             {
-                ModelState.AddModelError("DiscountValue", "Discount value must be greater than 0.");
+                ModelState.AddModelError("DiscountValue", "Mức giảm phải lớn hơn 0.");
             }
 
             if (model.DiscountType == "Percentage" && model.DiscountValue > 100)
             {
-                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%.");
+                ModelState.AddModelError("DiscountValue", "Mức giảm phần trăm không được vượt quá 100%.");
             }
 
             if (model.MinimumOrderAmount < 0)
             {
-                ModelState.AddModelError("MinimumOrderAmount", "Minimum order amount cannot be negative.");
+                ModelState.AddModelError("MinimumOrderAmount", "Giá trị đơn tối thiểu không được âm.");
             }
 
             if (model.MaximumDiscount.HasValue && model.MaximumDiscount.Value < 0)
             {
-                ModelState.AddModelError("MaximumDiscount", "Maximum discount cannot be negative.");
+                ModelState.AddModelError("MaximumDiscount", "Mức giảm tối đa không được âm.");
             }
 
             if (model.EndDate <= model.StartDate)
             {
-                ModelState.AddModelError("EndDate", "End date must be later than start date.");
+                ModelState.AddModelError("EndDate", "Ngày kết thúc phải sau ngày bắt đầu.");
             }
 
             if (model.UsageLimit.HasValue && model.UsageLimit.Value < 1)
             {
-                ModelState.AddModelError("UsageLimit", "Usage limit must be at least 1 if set.");
+                ModelState.AddModelError("UsageLimit", "Giới hạn sử dụng cần ít nhất 1 lượt nếu có nhập.");
             }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.DiscountTypes = new SelectList(DiscountTypes, model.DiscountType);
+                ViewBag.DiscountTypes = RestaurantWebsite.Infrastructure.ViewOptions.Choices(DiscountTypes, model.DiscountType);
                 model.OrderPromotions = promotion.OrderPromotions;
                 model.UsedCount = promotion.UsedCount;
                 return View(model);
@@ -281,7 +281,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             db.SaveChanges();
 
-            TempData["Success"] = $"Promotion \"{promotion.Code}\" updated successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 
@@ -295,15 +295,15 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             var promotion = db.Promotions.Find(id);
             if (promotion == null)
             {
-                TempData["Error"] = "Promotion was not found.";
+                TempData["Error"] = "Không tìm thấy khuyến mãi.";
                 return RedirectToAction("Index");
             }
 
             promotion.IsActive = !promotion.IsActive;
             db.SaveChanges();
 
-            string statusText = promotion.IsActive ? "activated" : "deactivated";
-            TempData["Success"] = $"Promotion \"{promotion.Code}\" has been {statusText}.";
+            string statusText = promotion.IsActive ? "kích hoạt" : "ngừng hoạt động";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
 
             return RedirectToAction("Index");
         }
@@ -321,14 +321,14 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (promotion == null)
             {
-                TempData["Error"] = "Promotion was not found.";
+                TempData["Error"] = "Không tìm thấy khuyến mãi.";
                 return RedirectToAction("Index");
             }
 
             int linkedOrdersCount = promotion.OrderPromotions.Count;
             if (linkedOrdersCount > 0 || promotion.UsedCount > 0)
             {
-                TempData["Error"] = $"Cannot delete promotion \"{promotion.Code}\" because it has been used in {linkedOrdersCount} order(s) (UsedCount: {promotion.UsedCount}). You should deactivate it instead to preserve sales history.";
+                TempData["Error"] = "Dữ liệu đang được sử dụng. Hãy ngừng hoạt động thay vì xóa để giữ lịch sử.";
                 return RedirectToAction("Index");
             }
 
@@ -336,7 +336,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             db.Promotions.Remove(promotion);
             db.SaveChanges();
 
-            TempData["Success"] = $"Promotion \"{code}\" has been permanently deleted.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 

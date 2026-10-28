@@ -1,0 +1,35 @@
+# Kết quả kiểm chứng nhánh Yamy
+
+Các thay đổi được thực hiện trên nhánh Yamy, giữ MVC5/.NET Framework 4.8. Môi trường kiểm tra hiện tại là Debian Linux; chưa chạy IIS Express hoặc SQL Server LocalDB.
+
+## Đã chạy thành công
+
+Lệnh tái lập:
+
+```bash
+YAMY_DOTNET=/workspace/toolchains/dotnet/dotnet YAMY_VALIDATION_ROOT=/workspace/toolchains bash scripts/validate-linux.sh
+```
+
+- Restore các phiên bản NuGet từ packages.config, thêm PDFsharp 1.50.5147 (MIT).
+- Build ứng dụng đích net48 ở Debug và Release bằng reference assemblies chính thức.
+- 44 kiểm thử C# chạy thành công: quyền chuyển trạng thái, chặn hoàn tất chưa trả tiền, trạng thái cuối, điều kiện hủy đặt bàn, nhãn tiếng Việt, giảm giá/cap/số tiền lẻ, giao khoảng thời gian, URL ảnh, điều kiện suất ăn, thu/hoàn theo ngày, số thập phân từ HTML.
+- Kiểm thử JavaScript hồi quy chạy thành công khi thiếu phần tử năm trong footer và plugin tùy chọn.
+- Parse và biên dịch C# sinh từ 59 Razor view, không có lỗi.
+- Snapshot migration mới khớp mô hình EF6 thật; InitialCreate được giữ nguyên.
+- Bộ WindowsChecks đích net48 được biên dịch ở Release, 0 lỗi, 0 cảnh báo.
+- `git diff --check`, kiểm tra cú pháp JavaScript, shell và Python đã chạy.
+
+Công cụ RazorCheck phát cảnh báo NU1701 vì chạy parser Razor MVC5 net45 trong tiến trình net8 của công cụ. Mã Razor sinh ra được biên dịch đích net48; cảnh báo này không có nghĩa website đã chạy trên .NET8.
+
+## Đã rà soát
+
+Một tác nhân độc lập đã xem thay đổi theo thiết kế. Không có lỗi Critical/Important được xác nhận trong các luồng chính được rà soát. Ba phát hiện đã được sửa: nút chuyển trạng thái trên đơn đã kết thúc, nội dung tiếng Anh trong catalog và làm tròn giảm giá vượt giới hạn số tiền lẻ. Kiểm thử làm tròn đã tái hiện FAIL trước khi sửa và PASS sau khi sửa. Kiểm thử JavaScript cũng ghi nhận FAIL trước sửa và PASS sau sửa.
+
+## Chưa chạy — cần Windows
+
+- Thực thi migration và kiểm tra truy vấn/giao dịch thật trên LocalDB.
+- Thực thi WindowsChecks: route, quyền từ DB, tài khoản khóa, hai checkout tranh cùng bàn hoặc lượt khuyến mãi cuối, thu tiền trùng, đánh giá và PDF nhiều trang/Unicode.
+- Khởi động IIS Express, gửi yêu cầu HTTP đại diện và kiểm thử giao diện tương tác trên máy tính/điện thoại.
+- Mở và kiểm tra hiển thị dấu tiếng Việt trong PDF bằng font Windows.
+
+Workflow Windows đã được thêm, nhưng chưa được chạy qua GitHub Actions vì nhánh chưa được push. Migration mới chưa được áp dụng vào database của người dùng. Xem [hướng dẫn thực thi và nghiệm thu Windows](Windows-development.md).

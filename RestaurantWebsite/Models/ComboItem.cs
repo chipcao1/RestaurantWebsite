@@ -10,7 +10,8 @@ namespace RestaurantWebsite.Models
 
         public int DishId { get; set; }
 
-        [Range(1, 100)]
+        [Range(1, 100, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Số lượng")]
         public int Quantity { get; set; }
 
         public virtual Combo Combo { get; set; }

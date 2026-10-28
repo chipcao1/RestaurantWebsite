@@ -8,25 +8,31 @@ namespace RestaurantWebsite.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(50)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(50, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Mã khuyến mãi")]
         public string Code { get; set; }
 
-        [Required]
-        [StringLength(150)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(150, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Tên")]
         public string Name { get; set; }
 
-        [StringLength(500)]
+        [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Mô tả")]
         public string Description { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Loại giảm giá")]
         public string DiscountType { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Mức giảm")]
         public decimal DiscountValue { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Đơn tối thiểu")]
         public decimal MinimumOrderAmount { get; set; }
 
         public decimal? MaximumDiscount { get; set; }

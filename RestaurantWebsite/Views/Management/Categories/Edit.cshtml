@@ -1,0 +1,168 @@
+@{ Layout = "~/Views/Shared/_OperationsLayout.cshtml"; }
+@model RestaurantWebsite.Models.Category
+@{
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+    ViewBag.Title = "Sửa danh mục - " + Model.Name;
+
+    int dishCount = Model.Dishes != null ? Model.Dishes.Count : 0;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+        <div class="card card-info card-outline shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold">
+                    <i class="fa fa-pencil text-info mr-1"></i> Sửa danh mục: <strong>@Model.Name</strong>
+                </h3>
+                <div class="card-tools">
+                    <a href="@Url.Action("Index", "Categories", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) })" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left mr-1"></i> Về danh sách
+                    </a>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("Edit", "Categories", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) }, FormMethod.Post, new { @class = "form-horizontal" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Vui lòng kiểm tra lại các thông tin sau:</h5>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0 pl-3 text-white" })
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Đóng">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Linked Dishes Info Callout -->
+                    @if (dishCount > 0)
+                    {
+                        <div class="callout callout-info py-2 mb-3 bg-light">
+                            <i class="fa fa-info-circle text-info mr-1"></i>
+                            Danh mục hiện chứa <strong>@dishCount</strong> dish(es).
+                            Đổi trạng thái sang <em>Ngừng hoạt động</em> sẽ ẩn danh mục khỏi thực đơn và giữ nguyên dữ liệu món ăn.
+                        </div>
+                    }
+
+                    <!-- Mã danh mục (Display only) -->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label text-muted">
+                            Mã danh mục
+                        </label>
+                        <div class="col-sm-9 d-flex align-items-center">
+                            <span class="badge badge-light border px-3 py-2 font-weight-bold">#@Model.Id</span>
+                        </div>
+                    </div>
+
+                    <!-- Tên danh mục -->
+                    <div class="form-group row">
+                        <label for="Name" class="col-sm-3 col-form-label font-weight-bold">
+                            Tên danh mục <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.Name, new {
+                                @class = "form-control",
+                                placeholder = "Ví dụ: Khai vị, Món chính, Đồ uống...",
+                                maxlength = "100",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="form-group row">
+                        <label for="Description" class="col-sm-3 col-form-label font-weight-bold">
+                            Mô tả
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextAreaFor(m => m.Description, new {
+                                @class = "form-control",
+                                rows = "3",
+                                placeholder = "Mô tả ngắn các món trong danh mục...",
+                                maxlength = "500"
+                            })
+                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <!-- Image URL -->
+                    <div class="form-group row">
+                        <label for="ImageUrl" class="col-sm-3 col-form-label font-weight-bold">
+                            Đường dẫn ảnh
+                        </label>
+                        <div class="col-sm-9">
+                            @Html.TextBoxFor(m => m.ImageUrl, new {
+                                @class = "form-control",
+                                id = "categoryImageUrl",
+                                placeholder = "Ví dụ: /Resources/User/images/f1.png hoặc https://...",
+                                maxlength = "250"
+                            })
+                            @Html.ValidationMessageFor(m => m.ImageUrl, "", new { @class = "text-danger small" })
+
+                            <!-- Live preview block -->
+                            <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
+                                <span class="mr-2 small text-muted">Xem trước:</span>
+                                <img id="previewImg"
+                                     src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(Model.ImageUrl))"
+                                     alt="Xem trước"
+                                     class="img-thumbnail rounded"
+                                     style="width: 60px; height: 60px; object-fit: cover;"
+                                     onerror="this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IsActive -->
+                    <div class="form-group row align-items-center">
+                        <label class="col-sm-3 col-form-label font-weight-bold">
+                            Trạng thái hiển thị
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="custom-control custom-checkbox">
+                                @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "isActiveCheck" })
+                                <label class="custom-control-label font-weight-normal" for="isActiveCheck">
+                                    <strong>Đang hoạt động</strong> (Danh mục hiển thị trên thực đơn và trang chủ)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-light d-flex justify-content-between">
+                    <a href="@Url.Action("Index", "Categories", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]) })" class="btn btn-default">
+                        <i class="fa fa-times mr-1"></i> Hủy
+                    </a>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fa fa-check mr-1"></i> Cập nhật danh mục
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var $imgInput = $('#categoryImageUrl');
+            var $preview = $('#previewImg');
+
+            function updatePreview() {
+                var val = $imgInput.val().trim();
+                if (val) {
+                    $preview.attr('src', val);
+                } else {
+                    $preview.attr('src', '@Url.Content("~/Resources/Admin/img/default-150x150.png")');
+                }
+            }
+
+            $imgInput.on('input change blur', updatePreview);
+        });
+    </script>
+}

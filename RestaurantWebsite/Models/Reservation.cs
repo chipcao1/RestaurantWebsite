@@ -10,19 +10,25 @@ namespace RestaurantWebsite.Models
 
         public int UserId { get; set; }
 
+        public int? AssignedStaffId { get; set; }
+
         public int TableId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [Display(Name = "Ngày giờ đặt bàn")]
         public DateTime ReservationDate { get; set; }
 
-        [Range(1, 50)]
+        [Range(1, 50, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Số khách")]
         public int PartySize { get; set; }
 
-        [StringLength(500)]
+        [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Yêu cầu đặc biệt")]
         public string SpecialRequest { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Trạng thái")]
         public string Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
@@ -37,7 +43,7 @@ namespace RestaurantWebsite.Models
         {
             Orders = new HashSet<Order>();
             Status = "Pending";
-            CreatedAt = DateTime.Now;
+            CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
         }
     }
 }

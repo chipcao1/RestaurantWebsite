@@ -1,57 +1,57 @@
 @model RestaurantWebsite.Models.Reservation
 
 @{
-    ViewBag.Title = "Reservation Details #" + Model.Id;
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chi tiết đặt bàn #" + Model.Id;
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
     var availableTables = ViewBag.AvailableTables as List<RestaurantWebsite.Models.RestaurantTable> ?? new List<RestaurantWebsite.Models.RestaurantTable>();
 }
 
 <div class="row">
-    <!-- Left Column: Reservation & Customer Details -->
+    <!-- Left Column: Reservation & Chi tiết khách hàng -->
     <div class="col-lg-7">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title"><i class="fa fa-calendar-check-o mr-2"></i>Reservation Info #@Model.Id</h3>
+                <h3 class="card-title"><i class="fa fa-calendar-check-o mr-2"></i>Thông tin đặt bàn #@Model.Id</h3>
                 <div class="card-tools">
                     @if (Model.Status == "Pending")
                     {
-                        <span class="badge badge-warning text-dark"><i class="fa fa-hourglass-half mr-1"></i>Pending</span>
+                        <span class="badge badge-warning text-dark"><i class="fa fa-hourglass-half mr-1"></i>Chờ xác nhận</span>
                     }
                     else if (Model.Status == "Confirmed")
                     {
-                        <span class="badge badge-info"><i class="fa fa-check mr-1"></i>Confirmed</span>
+                        <span class="badge badge-info"><i class="fa fa-check mr-1"></i>Đã xác nhận</span>
                     }
                     else if (Model.Status == "Completed")
                     {
-                        <span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Completed</span>
+                        <span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Hoàn tất</span>
                     }
                     else if (Model.Status == "Cancelled")
                     {
-                        <span class="badge badge-secondary"><i class="fa fa-times-circle mr-1"></i>Cancelled</span>
+                        <span class="badge badge-secondary"><i class="fa fa-times-circle mr-1"></i>Đã hủy</span>
                     }
                 </div>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-sm-6">
-                        <h6 class="text-uppercase text-muted font-weight-bold">Customer Details</h6>
-                        <p class="mb-1"><strong>Name:</strong> @(Model.User != null ? Model.User.FullName : "Guest Customer")</p>
-                        <p class="mb-1"><strong>Email:</strong> @(Model.User != null ? Model.User.Email : "N/A")</p>
-                        <p class="mb-0"><strong>Phone:</strong> @(Model.User != null && !string.IsNullOrEmpty(Model.User.Phone) ? Model.User.Phone : "N/A")</p>
+                        <h6 class="text-uppercase text-muted font-weight-bold">Chi tiết khách hàng</h6>
+                        <p class="mb-1"><strong>Tên:</strong> @(Model.User != null ? Model.User.FullName : "Khách hàng")</p>
+                        <p class="mb-1"><strong>Email:</strong> @(Model.User != null ? Model.User.Email : "Chưa có")</p>
+                        <p class="mb-0"><strong>Điện thoại:</strong> @(Model.User != null && !string.IsNullOrEmpty(Model.User.Phone) ? Model.User.Phone : "Chưa có")</p>
                     </div>
                     <div class="col-sm-6">
-                        <h6 class="text-uppercase text-muted font-weight-bold">Schedule & Table</h6>
-                        <p class="mb-1"><strong>Date:</strong> @Model.ReservationDate.ToString("yyyy-MM-dd (dddd)")</p>
-                        <p class="mb-1"><strong>Time Window:</strong> <span class="text-success font-weight-bold">@Model.ReservationDate.ToString("HH:mm") - @Model.ReservationDate.AddHours(2).ToString("HH:mm")</span></p>
-                        <p class="mb-1"><strong>Party Size:</strong> <span class="badge badge-info">@Model.PartySize Seats</span></p>
-                        <p class="mb-0"><strong>Assigned Table:</strong> <span class="badge badge-primary font-weight-bold">Table @(Model.Table != null ? Model.Table.TableNumber : Model.TableId.ToString()) (@(Model.Table != null ? Model.Table.Zone : ""))</span></p>
+                        <h6 class="text-uppercase text-muted font-weight-bold">Lịch và bàn</h6>
+                        <p class="mb-1"><strong>Ngày:</strong> @Model.ReservationDate.ToString("yyyy-MM-dd (dddd)")</p>
+                        <p class="mb-1"><strong>Khung giờ phục vụ:</strong> <span class="text-success font-weight-bold">@Model.ReservationDate.ToString("HH:mm") - @Model.ReservationDate.AddHours(2).ToString("HH:mm")</span></p>
+                        <p class="mb-1"><strong>Số khách:</strong> <span class="badge badge-info">@Model.PartySize khách</span></p>
+                        <p class="mb-0"><strong>Bàn được xếp:</strong> <span class="badge badge-primary font-weight-bold">Bàn @(Model.Table != null ? Model.Table.TableNumber : Model.TableId.ToString()) (@(Model.Table != null ? Vietnamese.Label(Model.Table.Zone) : ""))</span></p>
                     </div>
                 </div>
 
                 <hr />
 
                 <div class="mb-3">
-                    <h6 class="text-uppercase text-muted font-weight-bold">Special Request</h6>
+                    <h6 class="text-uppercase text-muted font-weight-bold">Yêu cầu đặc biệt</h6>
                     @if (!string.IsNullOrEmpty(Model.SpecialRequest))
                     {
                         <div class="p-3 bg-light rounded border">
@@ -60,22 +60,22 @@
                     }
                     else
                     {
-                        <p class="text-muted font-italic mb-0">No special requests noted for this reservation.</p>
+                        <p class="text-muted font-italic mb-0">Không có yêu cầu đặc biệt.</p>
                     }
                 </div>
 
                 <div class="row text-muted text-sm">
                     <div class="col-6">
-                        <i class="fa fa-clock-o mr-1"></i> <strong>Booked At:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                        <i class="fa fa-clock-o mr-1"></i> <strong>Thời điểm gửi yêu cầu:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                     </div>
                     <div class="col-6 text-right">
-                        <i class="fa fa-shopping-cart mr-1"></i> <strong>Linked Orders:</strong> @(Model.Orders?.Count ?? 0)
+                        <i class="fa fa-shopping-cart mr-1"></i> <strong>Đơn liên quan:</strong> @(Model.Orders?.Count ?? 0)
                     </div>
                 </div>
             </div>
             <div class="card-footer">
                 <a href="@Url.Action("Index", "Reservations", new { area = "Admin" })" class="btn btn-default">
-                    <i class="fa fa-arrow-left mr-1"></i> Back to Reservations List
+                    <i class="fa fa-arrow-left mr-1"></i> Về danh sách đặt bàn
                 </a>
             </div>
         </div>
@@ -87,13 +87,13 @@
         <!-- Status Management Card -->
         <div class="card card-outline card-warning">
             <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-tasks text-warning mr-2"></i>Status Workflow</h3>
+                <h3 class="card-title font-weight-bold"><i class="fa fa-tasks text-warning mr-2"></i>Tiến trình xử lý</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-3">Update reservation lifecycle status:</p>
+                <p class="text-muted mb-3">Cập nhật tiến trình đặt bàn:</p>
 
                 <div class="d-flex flex-column gap-2">
-                    @if (Model.Status != "Confirmed")
+                    @if (RestaurantWebsite.Services.WorkflowRules.ReservationTransition(Model.Status,"Confirmed","Admin",Model.ReservationDate,RestaurantWebsite.Infrastructure.RestaurantClock.Now,Model.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered")))
                     {
                         using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin" }, FormMethod.Post, new { @class = "mb-2" }))
                         {
@@ -101,13 +101,13 @@
                             @Html.Hidden("id", Model.Id)
                             @Html.Hidden("newStatus", "Confirmed")
                             <button type="submit" class="btn btn-success btn-block text-left">
-                                <i class="fa fa-check-circle mr-2"></i> <strong>Confirm Reservation</strong>
-                                <small class="d-block text-white-50">Approve booking and lock table window.</small>
+                                <i class="fa fa-check-circle mr-2"></i> <strong>Xác nhận đặt bàn</strong>
+                                <small class="d-block text-white-50">Xác nhận đặt bàn và giữ khung giờ phục vụ.</small>
                             </button>
                         }
                     }
 
-                    @if (Model.Status != "Completed")
+                    @if (RestaurantWebsite.Services.WorkflowRules.ReservationTransition(Model.Status,"Completed","Admin",Model.ReservationDate,RestaurantWebsite.Infrastructure.RestaurantClock.Now,Model.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered")))
                     {
                         using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin" }, FormMethod.Post, new { @class = "mb-2" }))
                         {
@@ -115,27 +115,27 @@
                             @Html.Hidden("id", Model.Id)
                             @Html.Hidden("newStatus", "Completed")
                             <button type="submit" class="btn btn-primary btn-block text-left">
-                                <i class="fa fa-flag-checkered mr-2"></i> <strong>Mark as Completed</strong>
-                                <small class="d-block text-white-50">Customer arrived, dined, and finished visit.</small>
+                                <i class="fa fa-flag-checkered mr-2"></i> <strong>Đánh dấu hoàn tất</strong>
+                                <small class="d-block text-white-50">Khách đã dùng bữa và hoàn tất buổi phục vụ.</small>
                             </button>
                         }
                     }
 
-                    @if (Model.Status != "Cancelled")
+                    @if (RestaurantWebsite.Services.WorkflowRules.ReservationTransition(Model.Status,"Cancelled","Admin",Model.ReservationDate,RestaurantWebsite.Infrastructure.RestaurantClock.Now,Model.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered")))
                     {
-                        using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin" }, FormMethod.Post, new { @class = "mb-2", onsubmit = "return confirm('Are you sure you want to cancel reservation #" + Model.Id + "?');" }))
+                        using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin" }, FormMethod.Post, new { @class = "mb-2", onsubmit = "return confirm('Bạn xác nhận thực hiện thao tác này?');" }))
                         {
                             @Html.AntiForgeryToken()
                             @Html.Hidden("id", Model.Id)
                             @Html.Hidden("newStatus", "Cancelled")
                             <button type="submit" class="btn btn-danger btn-block text-left">
-                                <i class="fa fa-times-circle mr-2"></i> <strong>Cancel Reservation</strong>
-                                <small class="d-block text-white-50">Release table and mark booking cancelled.</small>
+                                <i class="fa fa-times-circle mr-2"></i> <strong>Hủy đặt bàn</strong>
+                                <small class="d-block text-white-50">Hủy đặt bàn và giải phóng khung giờ.</small>
                             </button>
                         }
                     }
 
-                    @if (Model.Status != "Pending")
+                    @if (RestaurantWebsite.Services.WorkflowRules.ReservationTransition(Model.Status,"Pending","Admin",Model.ReservationDate,RestaurantWebsite.Infrastructure.RestaurantClock.Now,Model.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered")))
                     {
                         using (Html.BeginForm("UpdateStatus", "Reservations", new { area = "Admin" }, FormMethod.Post, new { @class = "mb-0" }))
                         {
@@ -143,7 +143,7 @@
                             @Html.Hidden("id", Model.Id)
                             @Html.Hidden("newStatus", "Pending")
                             <button type="submit" class="btn btn-outline-secondary btn-block text-left">
-                                <i class="fa fa-undo mr-2"></i> Reset to Pending
+                                <i class="fa fa-undo mr-2"></i> Chuyển về chờ xác nhận
                             </button>
                         }
                     }
@@ -154,10 +154,10 @@
         <!-- Table Re-assignment Card -->
         <div class="card card-outline card-info">
             <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-table text-info mr-2"></i>Reassign / Change Table</h3>
+                <h3 class="card-title font-weight-bold"><i class="fa fa-table text-info mr-2"></i>Phân bàn / Đổi bàn</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-3">Reassign reservation to a different table (2-hour overlap safety check will be enforced):</p>
+                <p class="text-muted mb-3">Chuyển sang bàn khác; nhà hàng sẽ kiểm tra trùng lịch trong khung hai giờ.</p>
 
                 @using (Html.BeginForm("ChangeTable", "Reservations", new { area = "Admin" }, FormMethod.Post))
                 {
@@ -165,20 +165,20 @@
                     @Html.Hidden("id", Model.Id)
 
                     <div class="form-group">
-                        <label class="font-weight-bold">Select Target Table:</label>
+                        <label class="font-weight-bold">Chọn bàn mới:</label>
                         <select name="newTableId" class="form-control" required>
                             @foreach (var table in availableTables)
                             {
                                 bool isCurrent = table.Id == Model.TableId;
                                 <option value="@table.Id" @(isCurrent ? "selected" : "")>
-                                    Table @table.TableNumber (@table.Zone) - Cap: @table.Capacity seats @(isCurrent ? " (Current)" : "")
+                                    Bàn @table.TableNumber (@(Vietnamese.Label(table.Zone))) - Cap: @table.Capacity seats @(isCurrent ? " (Current)" : "")
                                 </option>
                             }
                         </select>
                     </div>
 
                     <button type="submit" class="btn btn-info btn-block">
-                        <i class="fa fa-exchange mr-1"></i> Reassign Table
+                        <i class="fa fa-exchange mr-1"></i> Đổi bàn
                     </button>
                 }
             </div>

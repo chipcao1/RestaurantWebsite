@@ -1,7 +1,7 @@
 @model RestaurantWebsite.Models.User
 
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Đăng ký";
     ViewBag.BodyClass = "sub_page";
 }
 
@@ -10,7 +10,7 @@
     <div class="container">
 
         <div class="heading_container heading_center mb-4">
-            <h2>Create Account</h2>
+            <h2>Tạo tài khoản</h2>
         </div>
 
         <div class="row justify-content-center">
@@ -27,13 +27,13 @@
                             new { @class = "alert alert-danger" })
                     }
 
-                    @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+                    @using (Html.BeginForm("Register", "Account", new { area = "" }, FormMethod.Post))
                     {
                         @Html.AntiForgeryToken()
 
                         <div class="form-group">
                             <label for="FullName" class="font-weight-bold">
-                                Full Name
+                                Họ và tên
                             </label>
 
                             @Html.TextBoxFor(
@@ -43,7 +43,7 @@
                                     @class = "form-control",
                                     id = "FullName",
                                     maxlength = "100",
-                                    placeholder = "Enter your full name"
+                                    placeholder = "Nhập họ và tên"
                                 })
 
                             @Html.ValidationMessageFor(
@@ -65,7 +65,7 @@
                                     id = "Email",
                                     type = "email",
                                     maxlength = "150",
-                                    placeholder = "Enter your email"
+                                    placeholder = "Nhập email của bạn"
                                 })
 
                             @Html.ValidationMessageFor(
@@ -76,7 +76,7 @@
 
                         <div class="form-group">
                             <label for="Phone" class="font-weight-bold">
-                                Phone Number
+                                Số điện thoại
                             </label>
 
                             @Html.TextBoxFor(
@@ -86,7 +86,7 @@
                                     @class = "form-control",
                                     id = "Phone",
                                     maxlength = "20",
-                                    placeholder = "Enter your phone number"
+                                    placeholder = "Nhập số điện thoại"
                                 })
 
                             @Html.ValidationMessageFor(
@@ -97,7 +97,7 @@
 
                         <div class="form-group">
                             <label for="Address" class="font-weight-bold">
-                                Address
+                                Địa chỉ
                             </label>
 
                             @Html.TextAreaFor(
@@ -108,7 +108,7 @@
                                     id = "Address",
                                     rows = "3",
                                     maxlength = "250",
-                                    placeholder = "Enter your address"
+                                    placeholder = "Nhập địa chỉ"
                                 })
 
                             @Html.ValidationMessageFor(
@@ -119,7 +119,7 @@
 
                         <div class="form-group">
                             <label for="Password" class="font-weight-bold">
-                                Password
+                                Mật khẩu
                             </label>
 
                             <input type="password"
@@ -128,7 +128,7 @@
                                    class="form-control"
                                    minlength="6"
                                    required
-                                   placeholder="At least 6 characters" />
+                                   placeholder="Ít nhất 6 ký tự" />
 
                             @Html.ValidationMessage(
                                 "Password",
@@ -138,7 +138,7 @@
 
                         <div class="form-group">
                             <label for="ConfirmPassword" class="font-weight-bold">
-                                Confirm Password
+                                Nhập lại mật khẩu
                             </label>
 
                             <input type="password"
@@ -147,7 +147,7 @@
                                    class="form-control"
                                    minlength="6"
                                    required
-                                   placeholder="Re-enter your password" />
+                                   placeholder="Nhập lại mật khẩu" />
 
                             @Html.ValidationMessage(
                                 "ConfirmPassword",
@@ -157,14 +157,14 @@
 
                         <button type="submit"
                                 class="btn btn-warning text-white btn-block font-weight-bold">
-                            Register
+                            Đăng ký
                         </button>
                     }
 
                     <div class="text-center mt-3">
-                        <span class="text-muted">Already have an account?</span>
-                        <a href="@Url.Action("Login", "Account")">
-                            Login
+                        <span class="text-muted">Bạn đã có tài khoản?</span>
+                        <a href="@Url.Action("Login", "Account", new { area = "" })">
+                            Đăng nhập
                         </a>
                     </div>
 

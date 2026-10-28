@@ -58,7 +58,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .OrderByDescending(r => r.ReservationDate)
                 .ToList();
 
-            ViewBag.StatusList = new SelectList(ValidStatuses, status);
+            ViewBag.StaffMembers = db.Users.Where(u => u.Role == "Staff" && u.IsActive).ToList();
+            ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidStatuses, status);
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SelectedDate = date;
             ViewBag.SearchTerm = search;
@@ -74,7 +75,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         {
             if (!id.HasValue)
             {
-                TempData["Error"] = "Reservation ID was not provided.";
+                TempData["Error"] = "Thiếu mã đặt bàn.";
                 return RedirectToAction("Index");
             }
 
@@ -86,7 +87,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (reservation == null)
             {
-                TempData["Error"] = "Reservation was not found.";
+                TempData["Error"] = "Không tìm thấy đặt bàn.";
                 return RedirectToAction("Index");
             }
 
@@ -107,53 +108,10 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UpdateStatus(int id, string newStatus)
         {
-            var reservation = db.Reservations
-                .Include(r => r.Table)
-                .FirstOrDefault(r => r.Id == id);
-
-            if (reservation == null)
-            {
-                TempData["Error"] = "Reservation was not found.";
-                return RedirectToAction("Index");
-            }
-
-            if (!ValidStatuses.Contains(newStatus))
-            {
-                TempData["Error"] = "Invalid status specified.";
-                return RedirectToAction("Details", new { id = id });
-            }
-
-            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
-            {
-                try
-                {
-                    // If Confirming reservation, check table overlap
-                    if (newStatus == "Confirmed")
-                    {
-                        bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, reservation.TableId, reservation.ReservationDate, reservation.Id);
-
-                        if (hasOverlap)
-                        {
-                            transaction.Rollback();
-                            TempData["Error"] = $"Cannot confirm reservation #{id}. Table {reservation.Table.TableNumber} is already reserved/occupied during this 2-hour window.";
-                            return RedirectToAction("Details", new { id = id });
-                        }
-                    }
-
-                    reservation.Status = newStatus;
-                    db.SaveChanges();
-                    transaction.Commit();
-
-                    TempData["Success"] = $"Reservation #{id} status updated to \"{newStatus}\".";
-                    return RedirectToAction("Details", new { id = id });
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    TempData["Error"] = $"Unable to update reservation #{id} due to concurrent activity. Please try again.";
-                    return RedirectToAction("Details", new { id = id });
-                }
-            }
+            try { new RestaurantWebsite.Services.ReservationService(db).ChangeStatus(id, newStatus, (int)Session["UserId"], Convert.ToString(Session["Role"])); TempData["Success"] = "Đã cập nhật đặt bàn."; }
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            catch (System.Data.DataException) { TempData["Error"] = "Dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại."; }
+            return RedirectToAction("Details", new { id });
         }
 
         // =====================================================
@@ -163,53 +121,20 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ChangeTable(int id, int newTableId)
         {
-            var reservation = db.Reservations
-                .Include(r => r.Table)
-                .FirstOrDefault(r => r.Id == id);
-
-            if (reservation == null)
-            {
-                TempData["Error"] = "Reservation was not found.";
-                return RedirectToAction("Index");
-            }
-
-            var targetTable = db.RestaurantTables.FirstOrDefault(t => t.Id == newTableId && t.IsActive);
-            if (targetTable == null)
-            {
-                TempData["Error"] = "Selected target table was not found or is inactive.";
-                return RedirectToAction("Details", new { id = id });
-            }
-
-            using (var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
-            {
-                try
-                {
-                    bool hasOverlap = ReservationConflictValidator.HasTimeConflict(db, targetTable.Id, reservation.ReservationDate, reservation.Id);
-
-                    if (hasOverlap)
-                    {
-                        transaction.Rollback();
-                        TempData["Error"] = $"Cannot reassign to Table {targetTable.TableNumber}. It is already reserved during the requested time window.";
-                        return RedirectToAction("Details", new { id = id });
-                    }
-
-                    string oldTableNum = reservation.Table != null ? reservation.Table.TableNumber : reservation.TableId.ToString();
-                    reservation.TableId = targetTable.Id;
-                    db.SaveChanges();
-                    transaction.Commit();
-
-                    TempData["Success"] = $"Reservation #{id} reassigned from Table {oldTableNum} to Table {targetTable.TableNumber}.";
-                    return RedirectToAction("Details", new { id = id });
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    TempData["Error"] = $"Unable to reassign table for reservation #{id} due to concurrent activity. Please try again.";
-                    return RedirectToAction("Details", new { id = id });
-                }
-            }
+            try { new RestaurantWebsite.Services.ReservationService(db).ChangeTable(id, newTableId, (int)Session["UserId"], Convert.ToString(Session["Role"])); TempData["Success"] = "Đã đổi bàn."; }
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            catch (System.Data.DataException) { TempData["Error"] = "Dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại."; }
+            return RedirectToAction("Details", new { id });
         }
 
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult Assign(int id, int staffId)
+        {
+            try { new RestaurantWebsite.Services.ReservationService(db).Assign(id, staffId); TempData["Success"] = "Đã phân công nhân viên."; }
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            catch (System.Data.DataException) { TempData["Error"] = "Phân công vừa thay đổi. Vui lòng thử lại."; }
+            return RedirectToAction("Index");
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

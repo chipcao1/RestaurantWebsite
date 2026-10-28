@@ -1,664 +1,73 @@
-﻿@using System.Linq
-@model IEnumerable<RestaurantWebsite.Models.Dish>
-
-@{
-    ViewBag.Title = "Home";
-    ViewBag.BodyClass = "home_page";
-
-    var categories =
-        ViewBag.HomeCategories as IEnumerable<RestaurantWebsite.Models.Category>;
-
-    var dishes =
-        ViewBag.HomeDishes as IEnumerable<RestaurantWebsite.Models.Dish>;
-
-    var promotion =
-        ViewBag.HomePromotion as RestaurantWebsite.Models.Promotion;
-
-    var combo =
-        ViewBag.HomeCombo as RestaurantWebsite.Models.Combo;
-}
-
-
-<!-- ================================================= -->
-<!-- HERO / SLIDER -->
-<!-- ================================================= -->
-
-@section Hero {
-
-    <section class="slider_section">
-
-        <div id="customCarousel1"
-             class="carousel slide"
-             data-ride="carousel">
-
-            <div class="carousel-inner">
-
-
-                <!-- SLIDE 1 -->
-                <div class="carousel-item active">
-
-                    <div class="container">
-
-                        <div class="row">
-
-                            <div class="col-md-7 col-lg-6">
-
-                                <div class="detail-box">
-
-                                    <h1>
-                                        Enjoy Your Meal
-                                    </h1>
-
-                                    <p>
-                                        Choose your favorite dishes,
-                                        place your order and enjoy your meal with us.
-                                    </p>
-
-                                    <div class="btn-box">
-
-                                        <a href="@Url.Action("Index", "Menu")"
-                                           class="btn1">
-
-                                            Order Now
-
-                                        </a>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SLIDE 2 -->
-                <div class="carousel-item">
-
-                    <div class="container">
-
-                        <div class="row">
-
-                            <div class="col-md-7 col-lg-6">
-
-                                <div class="detail-box">
-
-                                    <h1>
-                                        Delicious Food
-                                    </h1>
-
-                                    <p>
-                                        Discover delicious dishes
-                                        prepared especially for you.
-                                    </p>
-
-                                    <div class="btn-box">
-
-                                        <a href="@Url.Action("Index", "Menu")"
-                                           class="btn1">
-
-                                            Order Now
-
-                                        </a>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SLIDE 3 -->
-                <div class="carousel-item">
-
-                    <div class="container">
-
-                        <div class="row">
-
-                            <div class="col-md-7 col-lg-6">
-
-                                <div class="detail-box">
-
-                                    <h1>
-                                        Book Your Table
-                                    </h1>
-
-                                    <p>
-                                        Planning a meal with family or friends?
-                                        Reserve your table with us today.
-                                    </p>
-
-                                    <div class="btn-box">
-
-                                        <a href="@Url.Action("Index", "Reservation")"
-                                           class="btn1">
-
-                                            Book A Table
-
-                                        </a>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- Carousel Indicators -->
-            <div class="container">
-
-                <ol class="carousel-indicators">
-
-                    <li data-target="#customCarousel1"
-                        data-slide-to="0"
-                        class="active">
-                    </li>
-
-                    <li data-target="#customCarousel1"
-                        data-slide-to="1">
-                    </li>
-
-                    <li data-target="#customCarousel1"
-                        data-slide-to="2">
-                    </li>
-
-                </ol>
-
-            </div>
-
-        </div>
-
-    </section>
-
-}
-
-
-<!-- ================================================= -->
-<!-- OFFERS -->
-<!-- ================================================= -->
-
-<section class="offer_section layout_padding-bottom">
-
-    <div class="container">
-
-        <div class="row">
-
-
-            <!-- PROMOTION -->
-            <div class="col-md-6">
-
-                @if (promotion != null)
-                {
-                    <div class="box">
-
-                        <div class="img-box">
-
-                            <img src="@Url.Content("~/Resources/User/images/o1.jpg")"
-                                 alt="@promotion.Name" />
-
-                        </div>
-
-                        <div class="detail-box">
-
-                            <h5>
-                                @promotion.Name
-                            </h5>
-
-                            <h6>
-
-                                @if (promotion.DiscountType == "Percentage")
-                                {
-                                    <span>
-                                        @promotion.DiscountValue.ToString("0")%
-                                    </span>
-                                    @: Off
-                                }
-                                else
-                                {
-                                    <span>
-                                        @promotion.DiscountValue.ToString("N0")
-                                    </span>
-                                    @: VND Off
-                                }
-
-                            </h6>
-
-                            @if (!string.IsNullOrEmpty(promotion.Description))
-                            {
-                                <p class="mb-2">
-                                    @promotion.Description
-                                </p>
-                            }
-
-                            <a href="@Url.Action("Index", "Menu")">
-
-                                Order Now
-
-                                <i class="fa fa-arrow-right"
-                                   aria-hidden="true">
-                                </i>
-
-                            </a>
-
-                        </div>
-
-                    </div>
-                }
-                else
-                {
-                    <div class="box">
-
-                        <div class="img-box">
-
-                            <img src="@Url.Content("~/Resources/User/images/o1.jpg")"
-                                 alt="Promotion" />
-
-                        </div>
-
-                        <div class="detail-box">
-
-                            <h5>
-                                No Current Promotion
-                            </h5>
-
-                            <h6>
-                                Check our menu for delicious dishes.
-                            </h6>
-
-                            <a href="@Url.Action("Index", "Menu")">
-
-                                Order Now
-
-                                <i class="fa fa-arrow-right"
-                                   aria-hidden="true">
-                                </i>
-
-                            </a>
-
-                        </div>
-
-                    </div>
-                }
-
-            </div>
-
-
-            <!-- COMBO -->
-            <div class="col-md-6">
-
-                @if (combo != null)
-                {
-                    <div class="box">
-
-                        <div class="img-box">
-
-                            @if (!string.IsNullOrEmpty(combo.ImageUrl))
-                            {
-                                <img src="@Url.Content(combo.ImageUrl)"
-                                     alt="@combo.Name" />
-                            }
-                            else
-                            {
-                                <img src="@Url.Content("~/Resources/User/images/o2.jpg")"
-                                     alt="@combo.Name" />
-                            }
-
-                        </div>
-
-                        <div class="detail-box">
-
-                            <h5>
-                                @combo.Name
-                            </h5>
-
-                            <h6>
-
-                                <span>
-                                    @combo.Price.ToString("N0") VND
-                                </span>
-
-                            </h6>
-
-                            @if (!string.IsNullOrEmpty(combo.Description))
-                            {
-                                <p class="mb-2">
-                                    @combo.Description
-                                </p>
-                            }
-
-                            <a href="@Url.Action("Index", "Menu")">
-
-                                Explore Combo
-
-                                <i class="fa fa-arrow-right"
-                                   aria-hidden="true">
-                                </i>
-
-                            </a>
-
-                        </div>
-
-                    </div>
-                }
-                else
-                {
-                    <div class="box">
-
-                        <div class="img-box">
-
-                            <img src="@Url.Content("~/Resources/User/images/o2.jpg")"
-                                 alt="Combo" />
-
-                        </div>
-
-                        <div class="detail-box">
-
-                            <h5>
-                                Special Combo
-                            </h5>
-
-                            <h6>
-                                Check our menu for available dishes.
-                            </h6>
-
-                            <a href="@Url.Action("Index", "Menu")">
-
-                                Explore Combo
-
-                                <i class="fa fa-arrow-right"
-                                   aria-hidden="true">
-                                </i>
-
-                            </a>
-
-                        </div>
-
-                    </div>
-                }
-
-            </div>
-
-
-        </div>
-
-    </div>
-
+@using System.Linq
+@using RestaurantWebsite.Models
+@using RestaurantWebsite.Infrastructure
+@{ViewBag.Title="Bữa ngon cho những cuộc gặp gỡ";var dishes=ViewBag.HomeDishes as IEnumerable<Dish>??new List<Dish>();var categories=ViewBag.HomeCategories as IEnumerable<Category>??new List<Category>();var combo=ViewBag.HomeCombo as Combo;}
+@section Hero {<section class="container">
+<div class="customer-hero">
+<span class="section-kicker">BẾP ẤM · MÓN NGON · KHOẢNH KHẮC ĐẸP</span>
+<h1>Một bữa ngon.<br/>Nhiều điều đáng nhớ.</h1>
+<p>Từ bữa trưa nhẹ nhàng đến buổi tối sum vầy, Feane chuẩn bị từng món ăn để bạn tận hưởng khoảng thời gian bên những người thân yêu.</p>
+<div class="hero-actions">
+<a class="btn btn-warning" href="@Url.Action("Index", "Menu",new{area="Customer"})">Khám phá thực đơn <i class="fa fa-arrow-right">
+</i>
+</a>
+<a class="btn btn-outline-light" href="@Url.Action("Index", "Reservation",new{area="Customer"})">Đặt bàn trước</a>
+</div>
+</div>
+</section>}
+<section class="food_section layout_padding">
+<div class="container">
+<div class="page-heading">
+<div>
+<p class="eyebrow">TỪ CĂN BẾP FEANE</p>
+<h2>Món ngon cho hôm nay</h2>
+<p>Chọn món yêu thích, dùng tại bàn, mang về hoặc nhận giao tận nơi.</p>
+</div>
+<a href="@Url.Action("Index", "Menu",new{area="Customer"})" class="btn btn-outline-dark">Xem toàn bộ thực đơn</a>
+</div>
+<div class="account-nav">@foreach(var category in categories){<a href="@Url.Action("Index", "Menu",new{area="Customer",categoryId=category.Id})">@category.Name</a>}</div>
+<div class="row grid">
+@foreach(var dish in dishes){var image=dish.DishImages.FirstOrDefault(i=>i.IsPrimary)??dish.DishImages.FirstOrDefault();<div class="col-sm-6 col-lg-4 mb-4">
+<div class="box">
+<div class="img-box">
+<img src="@(image==null?Url.Content("~/Resources/User/images/f1.png"):Url.Content(image.ImageUrl))" alt="@dish.Name" loading="lazy"/>
+</div>
+<div class="detail-box">
+<h3>@dish.Name</h3>
+<p>@dish.Description</p>
+<div class="d-flex align-items-center justify-content-between">
+<strong>@Vietnamese.Money(dish.Price)</strong>
+<a href="@Url.Action("Index", "Menu",new{area="Customer",search=dish.Name})" class="btn btn-warning btn-sm">Chọn món</a>
+</div>
+</div>
+</div>
+</div>}
+</div>@if(!dishes.Any()){<p class="empty-state">Nhà hàng đang cập nhật thực đơn. Vui lòng quay lại sau.</p>}</div>
 </section>
-
-
-<!-- ================================================= -->
-<!-- FOOD SECTION -->
-<!-- ================================================= -->
-
-<section class="food_section layout_padding-bottom">
-
-    <div class="container">
-
-        <div class="heading_container heading_center">
-
-            <h2>
-                Our Menu
-            </h2>
-
-        </div>
-
-
-        <!-- CATEGORIES FROM DATABASE -->
-        <ul class="filters_menu">
-
-            <li class="active"
-                data-filter="*">
-
-                All
-
-            </li>
-
-            @if (categories != null)
-            {
-                foreach (var category in categories)
-                {
-                    <li data-filter=".category-@category.Id">
-
-                        @category.Name
-
-                    </li>
-                }
-            }
-
-        </ul>
-
-
-        <!-- FOOD ITEMS FROM DATABASE -->
-        <div class="filters-content">
-
-            <div class="row grid">
-
-                @if (dishes != null && dishes.Any())
-                {
-                    foreach (var item in dishes)
-                    {
-                        <div class="col-sm-6 col-lg-4 all category-@item.CategoryId">
-
-                            <div class="box">
-
-                                <div>
-
-
-                                    <!-- FOOD IMAGE -->
-                                    <div class="img-box">
-
-                                        @if (item.DishImages != null &&
-                                             item.DishImages.Any())
-                                        {
-                                            var primaryImg =
-                                                item.DishImages.FirstOrDefault(
-                                                    img => img.IsPrimary)
-                                                ?? item.DishImages.First();
-
-                                            if (!string.IsNullOrEmpty(primaryImg.ImageUrl))
-                                            {
-                                                <img src="@Url.Content(primaryImg.ImageUrl)"
-                                                     alt="@item.Name" />
-                                            }
-                                            else
-                                            {
-                                                <img src="@Url.Content("/Resources/User/images/f1.png")"
-                                                     alt="@item.Name" />
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <img src="@Url.Content("/Resources/User/images/f1.png")"
-                                                 alt="@item.Name" />
-                                        }
-
-                                    </div>
-
-
-                                    <!-- FOOD INFORMATION -->
-                                    <div class="detail-box">
-
-                                        <h5>
-                                            @item.Name
-                                        </h5>
-
-                                        <p>
-                                            @item.Description
-                                        </p>
-
-                                        <div class="options">
-
-                                            <h6>
-                                                @item.Price.ToString("N0") VND
-                                            </h6>
-
-                                            <a href="@Url.Action(
-                                                        "Details",
-                                                        "Menu",
-                                                        new { id = item.Id })"
-                                               title="View Details">
-
-                                                <i class="fa fa-shopping-cart"
-                                                   aria-hidden="true">
-                                                </i>
-
-                                            </a>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="col-12 text-center">
-
-                        <p class="text-muted">
-                            No menu items available at the moment.
-                        </p>
-
-                    </div>
-                }
-
-            </div>
-
-        </div>
-
-
-        <div class="btn-box">
-
-            <a href="@Url.Action("Index", "Menu")">
-
-                View More
-
-            </a>
-
-        </div>
-
-    </div>
-
+@if(combo!=null){<section class="layout_padding" style="background:#253229;color:white">
+<div class="container">
+<div class="row align-items-center">
+<div class="col-md-7">
+<p class="section-kicker">CÙNG NHAU THƯỞNG THỨC</p>
+<h2>@combo.Name</h2>
+<p>@combo.Description</p>
+<strong>@Vietnamese.Money(combo.Price)</strong>
+</div>
+<div class="col-md-5 text-md-right mt-3">
+<a class="btn btn-warning" href="@Url.Action("Index", "Menu",new{area="Customer"})">Khám phá suất ăn kết hợp</a>
+</div>
+</div>
+</div>
+</section>}
+<section class="layout_padding">
+<div class="container">
+<div class="page-heading">
+<div>
+<p class="eyebrow">DÀNH CHỖ CHO NIỀM VUI</p>
+<h2>Hẹn nhau ở Feane</h2>
+<p>Chọn ngày giờ, số khách và bàn phù hợp. Chúng tôi sẽ xác nhận để bạn yên tâm ghé thăm.</p>
+</div>
+<a class="btn btn-warning" href="@Url.Action("Index", "Reservation",new{area="Customer"})">Đặt bàn ngay</a>
+</div>
+</div>
 </section>
-
-
-<!-- ================================================= -->
-<!-- ABOUT -->
-<!-- ================================================= -->
-
-<section class="about_section layout_padding-bottom">
-
-    <div class="container">
-
-        <div class="row align-items-center">
-
-            <div class="col-md-6">
-
-                <div class="img-box">
-
-                    <img src="@Url.Content("~/Resources/User/images/about-img.png")"
-                         alt="About Restaurant" />
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <div class="detail-box">
-
-                    <div class="heading_container">
-
-                        <h2>
-                            About Our Project
-                        </h2>
-
-                    </div>
-
-                    <p>
-                        Our project is a web application
-                        for restaurant and food order management,
-                        designed to provide customers with
-                        a convenient and simple online experience.
-                    </p>
-
-                    <a href="@Url.Action("About", "Home")">
-
-                        Read More
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-
-@section scripts {
-
-    <script>
-
-                                $(document).ready(function () {
-
-                                    var $grid = $(".grid").isotope({
-
-                                        itemSelector: ".all",
-
-                                        layoutMode: "fitRows"
-
-                                    });
-
-
-                                    $(".filters_menu li").on("click", function () {
-
-                                        $(".filters_menu li").removeClass("active");
-
-                                        $(this).addClass("active");
-
-                                        var filterValue =
-                                            $(this).attr("data-filter");
-
-                                        $grid.isotope({
-
-                                            filter: filterValue
-
-                                        });
-
-                                    });
-
-                                });
-
-    </script>
-
-}

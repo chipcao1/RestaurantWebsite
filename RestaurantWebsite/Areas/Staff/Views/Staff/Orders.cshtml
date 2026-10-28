@@ -1,0 +1,208 @@
+@model IEnumerable<RestaurantWebsite.Models.Order>
+
+@{
+    ViewBag.Title = "Nhân viên - Hàng đợi đơn";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+}
+
+<div class="card card-warning card-outline">
+    <div class="card-header">
+        <h3 class="card-title font-weight-bold"><i class="fa fa-shopping-cart text-warning mr-2"></i>Hàng đợi xử lý đơn</h3>
+        <div class="card-tools">
+            <span class="badge badge-warning text-dark font-weight-bold">Khu vực nhân viên</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Orders", "Staff", new { area = "Staff" }, FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label class="mr-2 font-weight-bold">Trạng thái:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "Tất cả trạng thái", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Mã đơn, khách hàng, điện thoại..." value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedStatus != "All")
+            {
+                <a href="@Url.Action("Orders", "Staff", new { area = "Staff" })" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Xóa bộ lọc
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>Chưa có đơn trong hàng đợi.</h5>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 50px;" class="text-center">#ID</th>
+                            <th>Khách hàng và liên hệ</th>
+                            <th>Các món đã đặt</th>
+                            <th class="text-right">Tổng cộng</th>
+                            <th class="text-center">Thanh toán</th>
+                            <th class="text-center">Trạng thái đơn</th>
+                            <th>Thời điểm đặt</th>
+                            <th style="width: 220px;" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">@(item.User != null ? item.User.FullName : "Khách hàng")</div>
+                                    <small class="text-muted d-block"><i class="fa fa-phone mr-1"></i>@(item.Phone ?? "Chưa có")</small>
+                                    @if (!string.IsNullOrEmpty(item.DeliveryAddress))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 220px;" title="@item.DeliveryAddress"><i class="fa fa-map-marker mr-1"></i>@item.DeliveryAddress</small>
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled mb-0 font-size-13">
+                                        @foreach (var oi in item.OrderItems)
+                                        {
+                                            <li>
+                                                <strong class="text-primary">@oi.Quantity x</strong>
+                                                @(oi.Dish != null ? oi.Dish.Name : (oi.Combo != null ? oi.Combo.Name + " (suất ăn)" : "Món ăn"))
+                                            </li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td class="text-right font-weight-bold text-success">@item.TotalAmount.ToString("N0") ₫</td>
+                                <td class="text-center">
+                                    @{
+                                        var pmt = item.Payments?.OrderByDescending(p => p.Id).FirstOrDefault();
+                                    }
+                                    @if (pmt != null)
+                                    {
+                                        <div>
+                                            <small class="font-weight-bold d-block text-muted">@(Vietnamese.Label(pmt.PaymentMethod))</small><small class="d-block">@Vietnamese.Label(pmt.Status)</small>
+                                            @if (pmt.Status == "Completed")
+                                            {
+                                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Đã thanh toán</span>
+                                                if(item.Status=="Pending" || item.Status=="Confirmed")
+                                                { using(Html.BeginForm("UpdatePaymentStatus", "Staff",new{area="Staff",paymentId=pmt.Id,newPaymentStatus="Refunded"},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-danger mt-2" onclick="return confirm('Xác nhận đã hoàn toàn bộ tiền cho khách và hủy đơn?')">Hoàn tiền và hủy đơn</button>} }
+
+                                            }
+                                            else if(pmt.Status!="Refunded" && item.Status!="Cancelled" && item.Status!="Delivered")
+                                            {
+                                                <span class="badge badge-warning text-dark px-2 py-1 mb-1"><i class="fa fa-clock-o mr-1"></i>Chưa thanh toán</span>
+                                                using (Html.BeginForm("UpdatePaymentStatus", "Staff", new { area = "Staff",  paymentId = pmt.Id, newPaymentStatus = "Completed" }, FormMethod.Post, new { style = "display:block;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()<input name="transactionCode" maxlength="100" class="form-control form-control-sm" placeholder="Mã giao dịch (nếu có)"/>
+                                                    <button type="submit" class="btn btn-xs btn-outline-success mt-1" title="Ghi nhận đã thu tiền" onclick="return confirm('Bạn xác nhận thực hiện thao tác này?');">
+                                                        <i class="fa fa-money mr-1"></i> Ghi nhận đã thu tiền
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Chưa có thanh toán</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-clock-o mr-1"></i>Chờ xác nhận</span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-info px-2 py-1"><i class="fa fa-check mr-1"></i>Đã xác nhận</span>
+                                    }
+                                    else if (item.Status == "Preparing")
+                                    {
+                                        <span class="badge badge-primary px-2 py-1"><i class="fa fa-cog fa-spin mr-1"></i>Đang chế biến</span>
+                                    }
+                                    else if (item.Status == "Ready")
+                                    {
+                                        <span class="badge badge-info px-2 py-1"><i class="fa fa-check-circle mr-1"></i>Sẵn sàng phục vụ</span>
+                                    }
+                                    else if (item.Status == "Delivered")
+                                    {
+                                        <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i>Hoàn tất</span>
+                                    }
+                                    else if (item.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-secondary px-2 py-1"><i class="fa fa-times-circle mr-1"></i>Đã hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark">@(Vietnamese.Label(item.Status))</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="d-block font-weight-bold">@item.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                    <small class="text-muted">@item.CreatedAt.ToString("HH:mm")</small>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { area = "Staff",  id = item.Id, newStatus = "Confirmed" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-check mr-1"></i> Xác nhận</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { area = "Staff",  id = item.Id, newStatus = "Preparing" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-cog mr-1"></i> Chế biến</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Preparing")
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { area = "Staff",  id = item.Id, newStatus = "Ready" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-info btn-sm"><i class="fa fa-check-circle mr-1"></i> Sẵn sàng phục vụ</button>
+                                        }
+                                    }
+                                    else if (item.Status == "Ready" && item.Payments.Any(p=>p.Status=="Completed"))
+                                    {
+                                        using (Html.BeginForm("UpdateOrderStatus", "Staff", new { area = "Staff",  id = item.Id, newStatus = "Delivered" }, FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-truck mr-1"></i> Hoàn tất</button>
+                                        }
+                                    }
+
+                                    @if((item.Status=="Pending"||item.Status=="Confirmed")&&!item.Payments.Any(p=>p.Status=="Completed"))
+                                    {using(Html.BeginForm("UpdateOrderStatus","Staff",new{area="Staff",id=item.Id,newStatus="Cancelled"},FormMethod.Post,new{@class="d-inline"})){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn xác nhận hủy đơn hàng này?')">Hủy đơn</button>}}
+
+                                    <a href="@Url.Action("Receipt", "Order", new { area = "Customer",  id = item.Id })" target="_blank" class="btn btn-default btn-sm ml-1" title="Xem / In hóa đơn">
+                                        <i class="fa fa-print text-muted"></i> Hóa đơn
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

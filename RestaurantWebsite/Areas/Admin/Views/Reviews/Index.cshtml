@@ -1,0 +1,43 @@
+@model IEnumerable<RestaurantWebsite.Models.Review>
+@{ ViewBag.Title = "Đánh giá của khách hàng"; Layout = "~/Views/Shared/_OperationsLayout.cshtml"; bool canModerate=Convert.ToString(Session["Role"])=="Admin"; }
+<div class="page-heading">
+<div>
+<p class="eyebrow">CHẤT LƯỢNG PHỤC VỤ</p>
+<h1>Đánh giá của khách hàng</h1>
+<p>Theo dõi phản hồi để cải thiện trải nghiệm tại nhà hàng.</p>
+</div>
+</div>
+@if(canModerate) { <form method="get" class="filter-bar">
+<input class="form-control" name="search" value="@ViewBag.Search" placeholder="Tìm khách hàng, món ăn, bình luận" aria-label="Tìm đánh giá"/>
+<select class="form-control" name="approved" aria-label="Trạng thái duyệt">
+<option value="">Tất cả</option>
+<option value="false" @(Request.QueryString["approved"]=="false"?"selected":"")>Đang ẩn</option>
+<option value="true" @(Request.QueryString["approved"]=="true"?"selected":"")>Đang hiển thị</option>
+</select>
+<button class="btn btn-warning">Lọc đánh giá</button>
+</form> }
+<div class="table-responsive">
+<table class="table">
+<thead>
+<tr>
+<th>Khách hàng</th>
+<th>Món ăn</th>
+<th>Số sao</th>
+<th>Bình luận</th>
+<th>Hiển thị</th>@if(canModerate){<th>Thao tác</th>}</tr>
+</thead>
+<tbody>
+@foreach(var review in Model) { <tr>
+<td>@review.User.FullName<br/>
+<small>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+</td>
+<td>@(review.Dish==null?"Món đã ngừng bán":review.Dish.Name)</td>
+<td>@review.Rating/5</td>
+<td>@review.Comment</td>
+<td>@(review.IsApproved?"Công khai":"Đang ẩn")</td>@if(canModerate){<td>@using(Html.BeginForm("Moderate", "Reviews",new{area="Admin"},FormMethod.Post,null)){@Html.AntiForgeryToken()<input type="hidden" name="id" value="@review.Id"/>
+<input type="hidden" name="approved" value="@(!review.IsApproved?"true":"false")"/>
+<button class="btn btn-sm btn-outline-secondary">@(review.IsApproved?"Ẩn đánh giá":"Duyệt hiển thị")</button>}</td>}</tr> }
+</tbody>
+</table>
+</div>
+@if(!Model.Any()){<p class="empty-state">Chưa có đánh giá phù hợp.</p>}

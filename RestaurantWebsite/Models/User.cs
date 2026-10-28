@@ -8,26 +8,31 @@ namespace RestaurantWebsite.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(100, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Họ và tên")]
         public string FullName { get; set; }
 
-        [Required]
-        [StringLength(150)]
-        [EmailAddress]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(150, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
         public string PasswordHash { get; set; }
 
-        [StringLength(20)]
+        [StringLength(20, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Điện thoại")]
         public string Phone { get; set; }
 
-        [StringLength(250)]
+        [StringLength(250, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Địa chỉ")]
         public string Address { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Vai trò")]
         public string Role { get; set; }
 
         public bool IsActive { get; set; }
@@ -44,7 +49,7 @@ namespace RestaurantWebsite.Models
             Reservations = new HashSet<Reservation>();
             Reviews = new HashSet<Review>();
             IsActive = true;
-            CreatedAt = DateTime.Now;
+            CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="vi">
 
 <head>
 
@@ -30,6 +30,7 @@
     <link rel="stylesheet"
           href="@Url.Content("~/Resources/User/css/responsive.css")" />
 
+    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css")" />
     @RenderSection("Styles", required: false)
 
 </head>
@@ -42,7 +43,7 @@
         <!-- Background -->
         <div class="bg-box">
             <img src="@Url.Content("~/Resources/User/images/hero-bg.jpg")"
-                 alt="Restaurant Background" />
+                 alt="Không gian nhà hàng" />
         </div>
 
         <!-- Header -->
@@ -55,6 +56,7 @@
     <!-- ================ END HERO AREA ================ -->
     <!-- ================= PAGE CONTENT ================= -->
 
+    @Html.Partial("~/Views/Shared/_Alerts.cshtml")
     @RenderBody()
 
     <!-- ================ END PAGE CONTENT ================ -->
@@ -86,6 +88,6 @@
 
     @RenderSection("scripts", required: false)
 
-</body>
+<script src="@Url.Content("~/Scripts/yamy.js")"></script></body>
 
 </html>

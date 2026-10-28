@@ -2,18 +2,19 @@ using System.Web.Mvc;
 
 namespace RestaurantWebsite.Areas.Admin
 {
-    public class AdminAreaRegistration : AreaRegistration 
+    public class AdminAreaRegistration : AreaRegistration
     {
-        public override string AreaName 
+        public override string AreaName
         {
-            get 
+            get
             {
                 return "Admin";
             }
         }
 
-        public override void RegisterArea(AreaRegistrationContext context) 
+        public override void RegisterArea(AreaRegistrationContext context)
         {
+            context.MapRoute("AdminHome", "admin", new { controller = "Dashboard", action = "Index" }, new[] { "RestaurantWebsite.Areas.Admin.Controllers" });
             context.MapRoute(
                 "Admin_default",
                 "admin/{controller}/{action}/{id}",

@@ -1,0 +1,42 @@
+name: Windows MVC5 validation
+on:
+  push:
+    branches: [Yamy, main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - uses: NuGet/setup-nuget@v2
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore pinned web dependencies
+        run: nuget restore RestaurantWebsite/packages.config -PackagesDirectory packages -NonInteractive
+      - name: Build Debug
+        run: msbuild RestaurantWebsite/RestaurantWebsite.csproj /t:Build /p:Configuration=Debug /m:2
+      - name: Build Release and precompile Razor
+        run: msbuild RestaurantWebsite/RestaurantWebsite.csproj /t:Build /p:Configuration=Release /p:MvcBuildViews=true /m:2
+      - name: Run domain checks
+        run: dotnet run --project tests/RestaurantWebsite.Tests
+      - name: Check shared frontend regression
+        run: node tests/frontend-smoke.cjs
+      - name: Start isolated LocalDB
+        shell: pwsh
+        run: |
+          sqllocaldb start MSSQLLocalDB
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to start LocalDB' }
+      - name: Build Windows integration checks
+        run: dotnet build tests/WindowsChecks/WindowsChecks.csproj -c Release
+      - name: Run role, database concurrency and Unicode PDF checks
+        shell: pwsh
+        run: |
+          & tests/WindowsChecks/bin/Release/net48/WindowsChecks.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Windows checks failed' }

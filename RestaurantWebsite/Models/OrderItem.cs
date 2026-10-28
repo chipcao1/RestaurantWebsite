@@ -12,16 +12,17 @@ namespace RestaurantWebsite.Models
 
         public int? ComboId { get; set; }
 
-        [Range(1, 100)]
+        [Range(1, 100, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Số lượng")]
         public int Quantity { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal UnitPrice { get; set; }
 
-        [StringLength(500)]
+        [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string Note { get; set; }
 
-        [Range(0, 999999999)]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
         public decimal SubTotal { get; set; }
 
         public virtual Order Order { get; set; }

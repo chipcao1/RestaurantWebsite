@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version='1.0' encoding='utf-8'?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0" DefaultTargets="Build">
   <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -124,55 +124,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="App_Start\FilterConfig.cs" />
-    <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\ComboController.cs" />
-    <Compile Include="Controllers\ErrorController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\MenuController.cs" />
-    <Compile Include="Controllers\OrderController.cs" />
-    <Compile Include="Controllers\ReservationController.cs" />
-    <Compile Include="Controllers\CustomerController.cs" />
-    <Compile Include="Controllers\StaffController.cs" />
-    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
-    <Compile Include="Areas\Admin\Controllers\CategoriesController.cs" />
-    <Compile Include="Areas\Admin\Controllers\DashboardController.cs" />
-    <Compile Include="Areas\Admin\Controllers\DishesController.cs" />
-    <Compile Include="Areas\Admin\Controllers\OrdersController.cs" />
-    <Compile Include="Areas\Admin\Controllers\PromotionsController.cs" />
-    <Compile Include="Areas\Admin\Controllers\ReservationsController.cs" />
-    <Compile Include="Areas\Admin\Controllers\TablesController.cs" />
-    <Compile Include="Areas\Admin\Controllers\UsersController.cs" />
-    <Compile Include="Filters\RoleAuthorizeAttribute.cs" />
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202609281435011_InitialCreate.cs" />
-    <Compile Include="Migrations\202609281435011_InitialCreate.Designer.cs">
-      <DependentUpon>202609281435011_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\AppDbContext.cs" />
-    <Compile Include="Models\Category.cs" />
-    <Compile Include="Models\Combo.cs" />
-    <Compile Include="Models\ComboItem.cs" />
-    <Compile Include="Models\Dish.cs" />
-    <Compile Include="Models\DishImage.cs" />
-    <Compile Include="Models\Order.cs" />
-    <Compile Include="Models\OrderItem.cs" />
-    <Compile Include="Models\OrderPromotion.cs" />
-    <Compile Include="Models\Payment.cs" />
-    <Compile Include="Models\Promotion.cs" />
-    <Compile Include="Models\Reservation.cs" />
-    <Compile Include="Models\RestaurantTable.cs" />
-    <Compile Include="Models\Review.cs" />
-    <Compile Include="Models\User.cs" />
-    <Compile Include="Security\PasswordHasher.cs" />
-    <Compile Include="Security\ReservationConflictValidator.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
+    </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -278,56 +230,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Views\Web.config" />
-    <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Staff\Index.cshtml" />
-    <Content Include="Views\Reservation\Index.cshtml" />
-    <Content Include="Views\Staff\Dishes.cshtml" />
-    <Content Include="Views\Staff\Orders.cshtml" />
-    <Content Include="Views\Staff\Reservations.cshtml" />
-    <Content Include="Views\Shared\Error404.cshtml" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Shared\_AdminLayout.cshtml" />
-    <Content Include="Views\Shared\_Header.cshtml" />
-    <Content Include="Views\Shared\_Footer.cshtml" />
-    <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Areas\Admin\Views\web.config" />
-    <Content Include="Areas\Admin\Views\_ViewStart.cshtml" />
-    <Content Include="Areas\Admin\Views\Categories\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\Categories\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\Categories\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Dashboard\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Dishes\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\Dishes\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\Dishes\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Orders\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\Orders\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Promotions\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\Promotions\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\Promotions\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Reservations\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\Reservations\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Tables\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\Tables\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\Tables\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Users\CreateStaff.cshtml" />
-    <Content Include="Areas\Admin\Views\Users\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\Users\Index.cshtml" />
-    <Content Include="Views\Account\ChangePassword.cshtml" />
-    <Content Include="Views\Account\MyOrders.cshtml" />
-    <Content Include="Views\Account\MyReservations.cshtml" />
-    <Content Include="Views\Account\MyReviews.cshtml" />
-    <Content Include="Views\Account\Profile.cshtml" />
-    <Content Include="Views\Combo\Details.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Menu\Cart.cshtml" />
-    <Content Include="Views\Menu\Details.cshtml" />
-    <Content Include="Views\Menu\Index.cshtml" />
-    <Content Include="Views\Order\Checkout.cshtml" />
-    <Content Include="Views\Order\Receipt.cshtml" />
-    <Content Include="Views\Order\Success.cshtml" />
-    <Content Include="Views\Shared\AccessDenied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -392,12 +295,6 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target> -->
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
@@ -407,4 +304,182 @@
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.2\build\EntityFramework.targets'))" />
   </Target>
   <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202610280900000_YamyWorkflow.resx">
+      <DependentUpon>202610280900000_YamyWorkflow.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PdfSharp">
+      <HintPath>..\packages\PDFsharp.1.50.5147\lib\net20\PdfSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Content\yamy.css" />
+    <Content Include="Areas\Customer\Views\Web.config" />
+    <Content Include="Areas\Staff\Views\Web.config" />
+    <Content Include="Resources\**\*" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\yamy.js" />
+  </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\CategoriesController.cs" />
+    <Compile Include="Areas\Admin\Controllers\CombosController.cs" />
+    <Compile Include="Areas\Admin\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Admin\Controllers\DishesController.cs" />
+    <Compile Include="Areas\Admin\Controllers\OrdersController.cs" />
+    <Compile Include="Areas\Admin\Controllers\PromotionsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ReportsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ReservationsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ReviewsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\TablesController.cs" />
+    <Compile Include="Areas\Admin\Controllers\UsersController.cs" />
+    <Content Include="Areas\Admin\Views\Combos\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Combos\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Dashboard\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Orders\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Orders\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Promotions\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Promotions\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Promotions\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Reports\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Reservations\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Reservations\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Reviews\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Tables\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Tables\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Tables\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Users\CreateStaff.cshtml" />
+    <Content Include="Areas\Admin\Views\Users\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Users\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\_ViewStart.cshtml" />
+    <Compile Include="Areas\Customer\Controllers\AccountController.cs" />
+    <Compile Include="Areas\Customer\Controllers\ComboController.cs" />
+    <Compile Include="Areas\Customer\Controllers\CustomerController.cs" />
+    <Compile Include="Areas\Customer\Controllers\MenuController.cs" />
+    <Compile Include="Areas\Customer\Controllers\OrderController.cs" />
+    <Compile Include="Areas\Customer\Controllers\ReservationController.cs" />
+    <Compile Include="Areas\Customer\CustomerAreaRegistration.cs" />
+    <Content Include="Areas\Customer\Views\Account\ChangePassword.cshtml" />
+    <Content Include="Areas\Customer\Views\Account\MyOrders.cshtml" />
+    <Content Include="Areas\Customer\Views\Account\MyReservations.cshtml" />
+    <Content Include="Areas\Customer\Views\Account\MyReviews.cshtml" />
+    <Content Include="Areas\Customer\Views\Account\Profile.cshtml" />
+    <Content Include="Areas\Customer\Views\Combo\Details.cshtml" />
+    <Content Include="Areas\Customer\Views\Menu\Cart.cshtml" />
+    <Content Include="Areas\Customer\Views\Menu\Details.cshtml" />
+    <Content Include="Areas\Customer\Views\Menu\Index.cshtml" />
+    <Content Include="Areas\Customer\Views\Order\Checkout.cshtml" />
+    <Content Include="Areas\Customer\Views\Order\Receipt.cshtml" />
+    <Content Include="Areas\Customer\Views\Order\Success.cshtml" />
+    <Content Include="Areas\Customer\Views\Reservation\Index.cshtml" />
+    <Content Include="Areas\Customer\Views\_ViewStart.cshtml" />
+    <Compile Include="Areas\Staff\Controllers\CategoriesController.cs" />
+    <Compile Include="Areas\Staff\Controllers\DishesController.cs" />
+    <Compile Include="Areas\Staff\Controllers\ReportsController.cs" />
+    <Compile Include="Areas\Staff\Controllers\ReviewsController.cs" />
+    <Compile Include="Areas\Staff\Controllers\StaffController.cs" />
+    <Compile Include="Areas\Staff\StaffAreaRegistration.cs" />
+    <Content Include="Areas\Staff\Views\Staff\Dishes.cshtml" />
+    <Content Include="Areas\Staff\Views\Staff\Index.cshtml" />
+    <Content Include="Areas\Staff\Views\Staff\Orders.cshtml" />
+    <Content Include="Areas\Staff\Views\Staff\Reservations.cshtml" />
+    <Content Include="Areas\Staff\Views\_ViewStart.cshtml" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\Management\CategoriesManagementController.cs" />
+    <Compile Include="Controllers\Management\DishesManagementController.cs" />
+    <Compile Include="Filters\RoleAuthorizeAttribute.cs" />
+    <Compile Include="Filters\VietnameseValidationFilter.cs" />
+    <Compile Include="Global.asax.cs" />
+    <Compile Include="Infrastructure\DecimalModelBinder.cs" />
+    <Compile Include="Infrastructure\RestaurantClock.cs" />
+    <Compile Include="Infrastructure\Vietnamese.cs" />
+    <Compile Include="Infrastructure\ViewOptions.cs" />
+    <Compile Include="Migrations\202609281435011_InitialCreate.Designer.cs" />
+    <Compile Include="Migrations\202609281435011_InitialCreate.cs" />
+    <Compile Include="Migrations\202610280900000_YamyWorkflow.Designer.cs" />
+    <Compile Include="Migrations\202610280900000_YamyWorkflow.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AppDbContext.cs" />
+    <Compile Include="Models\Category.cs" />
+    <Compile Include="Models\Combo.cs" />
+    <Compile Include="Models\ComboItem.cs" />
+    <Compile Include="Models\Dish.cs" />
+    <Compile Include="Models\DishImage.cs" />
+    <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\OrderItem.cs" />
+    <Compile Include="Models\OrderPromotion.cs" />
+    <Compile Include="Models\Payment.cs" />
+    <Compile Include="Models\Promotion.cs" />
+    <Compile Include="Models\Reservation.cs" />
+    <Compile Include="Models\RestaurantTable.cs" />
+    <Compile Include="Models\Review.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\PasswordHasher.cs" />
+    <Compile Include="Security\ReservationConflictValidator.cs" />
+    <Compile Include="Services\CatalogRules.cs" />
+    <Compile Include="Services\CheckoutService.cs" />
+    <Compile Include="Services\NumericRules.cs" />
+    <Compile Include="Services\OrderWorkflowService.cs" />
+    <Compile Include="Services\PdfService.cs" />
+    <Compile Include="Services\PricingRules.cs" />
+    <Compile Include="Services\ReportMath.cs" />
+    <Compile Include="Services\ReportService.cs" />
+    <Compile Include="Services\ReservationService.cs" />
+    <Compile Include="Services\ReviewService.cs" />
+    <Compile Include="Services\WorkflowRules.cs" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Logout.cshtml" />
+    <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Management\Categories\Create.cshtml" />
+    <Content Include="Views\Management\Categories\Edit.cshtml" />
+    <Content Include="Views\Management\Categories\Index.cshtml" />
+    <Content Include="Views\Management\Dishes\Create.cshtml" />
+    <Content Include="Views\Management\Dishes\Edit.cshtml" />
+    <Content Include="Views\Management\Dishes\Index.cshtml" />
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
+    <Content Include="Views\Shared\Error404.cshtml" />
+    <Content Include="Views\Shared\ServerError.cshtml" />
+    <Content Include="Views\Shared\_AdminLayout.cshtml" />
+    <Content Include="Views\Shared\_Alerts.cshtml" />
+    <Content Include="Views\Shared\_Footer.cshtml" />
+    <Content Include="Views\Shared\_Header.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_OperationsLayout.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
 </Project>

@@ -1,8 +1,8 @@
 @model RestaurantWebsite.Models.Order
 
 @{
-    ViewBag.Title = "Order Details #" + Model.Id;
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chi tiết đơn #" + Model.Id;
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
 
     var validOrderStatuses = ViewBag.ValidOrderStatuses as string[] ?? new string[0];
     var validPaymentStatuses = ViewBag.ValidPaymentStatuses as string[] ?? new string[0];
@@ -16,37 +16,37 @@
         <!-- Order Header & Customer Card -->
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title"><i class="fa fa-shopping-cart mr-2"></i>Order Invoice #@Model.Id</h3>
+                <h3 class="card-title"><i class="fa fa-shopping-cart mr-2"></i>Hóa đơn #@Model.Id</h3>
                 <div class="card-tools">
-                    <a href="@Url.Action("Receipt", "Order", new { area = "", id = Model.Id })" target="_blank" class="btn btn-tool text-white" title="Print Receipt">
-                        <i class="fa fa-print mr-1"></i> Print Receipt
+                    <a href="@Url.Action("Receipt", "Order", new { area = "Customer", id = Model.Id })" target="_blank" class="btn btn-tool text-white" title="In hóa đơn">
+                        <i class="fa fa-print mr-1"></i> In hóa đơn
                     </a>
-                    <span class="badge badge-light px-2 py-1 font-weight-bold">Type: @Model.OrderType</span>
+                    <span class="badge badge-light px-2 py-1 font-weight-bold">Loại: @(Vietnamese.Label(Model.OrderType))</span>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-sm-6">
-                        <h6 class="text-uppercase text-muted font-weight-bold">Customer Information</h6>
-                        <p class="mb-1"><strong>Name:</strong> @(Model.User != null ? Model.User.FullName : "Guest Customer")</p>
-                        <p class="mb-1"><strong>Email:</strong> @(Model.User != null ? Model.User.Email : "N/A")</p>
-                        <p class="mb-1"><strong>Phone:</strong> <span class="text-primary font-weight-bold">@(Model.Phone ?? "N/A")</span></p>
+                        <h6 class="text-uppercase text-muted font-weight-bold">Thông tin khách hàng</h6>
+                        <p class="mb-1"><strong>Tên:</strong> @(Model.User != null ? Model.User.FullName : "Khách hàng")</p>
+                        <p class="mb-1"><strong>Email:</strong> @(Model.User != null ? Model.User.Email : "Chưa có")</p>
+                        <p class="mb-1"><strong>Điện thoại:</strong> <span class="text-primary font-weight-bold">@(Model.Phone ?? "Chưa có")</span></p>
                         @if (!string.IsNullOrEmpty(Model.DeliveryAddress))
                         {
-                            <p class="mb-0"><strong>Delivery Address:</strong> @Model.DeliveryAddress</p>
+                            <p class="mb-0"><strong>Địa chỉ nhận hàng:</strong> @Model.DeliveryAddress</p>
                         }
                     </div>
                     <div class="col-sm-6">
-                        <h6 class="text-uppercase text-muted font-weight-bold">Order Metadata</h6>
-                        <p class="mb-1"><strong>Placed At:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</p>
-                        <p class="mb-1"><strong>Current Status:</strong> <span class="badge badge-info px-2 py-1">@Model.Status</span></p>
+                        <h6 class="text-uppercase text-muted font-weight-bold">Thông tin đơn hàng</h6>
+                        <p class="mb-1"><strong>Thời điểm đặt:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                        <p class="mb-1"><strong>Trạng thái hiện tại:</strong> <span class="badge badge-info px-2 py-1">@(Vietnamese.Label(Model.Status))</span></p>
                         @if (Model.ReservationId.HasValue)
                         {
-                            <p class="mb-1"><strong>Linked Reservation:</strong> <a href="@Url.Action("Details", "Reservations", new { area = "Admin", id = Model.ReservationId.Value })">#@Model.ReservationId.Value</a></p>
+                            <p class="mb-1"><strong>Đặt bàn liên quan:</strong> <a href="@Url.Action("Details", "Reservations", new { area = "Admin", id = Model.ReservationId.Value })">#@Model.ReservationId.Value</a></p>
                         }
                         @if (Model.TableId.HasValue && Model.Table != null)
                         {
-                            <p class="mb-0"><strong>Assigned Table:</strong> Table @Model.Table.TableNumber (@Model.Table.Zone)</p>
+                            <p class="mb-0"><strong>Bàn được xếp:</strong> Bàn @Model.Table.TableNumber (@Vietnamese.Label(Model.Table.Zone))</p>
                         }
                     </div>
                 </div>
@@ -54,23 +54,23 @@
                 @if (!string.IsNullOrEmpty(Model.Note))
                 {
                     <div class="alert alert-secondary py-2">
-                        <i class="fa fa-comment-o mr-2"></i><strong>Customer Note:</strong> "@Model.Note"
+                        <i class="fa fa-comment-o mr-2"></i><strong>Ghi chú của khách:</strong> "@Model.Note"
                     </div>
                 }
 
                 <hr />
 
-                <!-- Order Items Table -->
-                <h6 class="text-uppercase text-muted font-weight-bold mb-3">Order Items</h6>
+                <!-- Chi tiết món Table -->
+                <h6 class="text-uppercase text-muted font-weight-bold mb-3">Chi tiết món</h6>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped align-middle">
                         <thead class="thead-light">
                             <tr>
-                                <th>Item Name</th>
-                                <th class="text-center">Type</th>
-                                <th class="text-right">Unit Price</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-right">Subtotal</th>
+                                <th>Tên món</th>
+                                <th class="text-center">Loại</th>
+                                <th class="text-right">Đơn giá</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-right">Tạm tính</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,55 +88,55 @@
                                         }
                                         else
                                         {
-                                            <span class="font-weight-bold text-muted">Unknown Item</span>
+                                            <span class="font-weight-bold text-muted">Món không còn tồn tại</span>
                                         }
 
                                         @if (!string.IsNullOrEmpty(item.Note))
                                         {
-                                            <small class="d-block text-muted">Note: @item.Note</small>
+                                            <small class="d-block text-muted">Ghi chú: @item.Note</small>
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-light border">@(item.DishId.HasValue ? "Dish" : "Combo")</span>
+                                        <span class="badge badge-light border">@(item.DishId.HasValue ? "Món lẻ" : "Suất ăn")</span>
                                     </td>
-                                    <td class="text-right">$@item.UnitPrice.ToString("N2")</td>
+                                    <td class="text-right">@item.UnitPrice.ToString("N0") ₫</td>
                                     <td class="text-center font-weight-bold">@item.Quantity</td>
-                                    <td class="text-right font-weight-bold">$@item.SubTotal.ToString("N2")</td>
+                                    <td class="text-right font-weight-bold">@item.SubTotal.ToString("N0") ₫</td>
                                 </tr>
                             }
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="4" class="text-right">SubTotal:</th>
-                                <td class="text-right font-weight-bold">$@Model.SubTotal.ToString("N2")</td>
+                                <th colspan="4" class="text-right">Tạm tính:</th>
+                                <td class="text-right font-weight-bold">@Model.SubTotal.ToString("N0") ₫</td>
                             </tr>
 
                             @if (Model.DiscountAmount > 0)
                             {
                                 <tr class="text-danger">
                                     <th colspan="4" class="text-right">
-                                        Discount
+                                        Giảm giá
                                         @if (promoInfo != null && promoInfo.Promotion != null)
                                         {
-                                            <span>(Code: <strong>@promoInfo.Promotion.Code</strong> - @promoInfo.Promotion.Name)</span>
+                                            <span>(Mã: <strong>@promoInfo.Promotion.Code</strong> - @promoInfo.Promotion.Name)</span>
                                         }
                                         :
                                     </th>
-                                    <td class="text-right font-weight-bold">-$@Model.DiscountAmount.ToString("N2")</td>
+                                    <td class="text-right font-weight-bold">-@Model.DiscountAmount.ToString("N0") ₫</td>
                                 </tr>
                             }
 
                             @if (Model.DeliveryFee > 0)
                             {
                                 <tr>
-                                    <th colspan="4" class="text-right">Delivery Fee:</th>
-                                    <td class="text-right font-weight-bold">+$@Model.DeliveryFee.ToString("N2")</td>
+                                    <th colspan="4" class="text-right">Phí giao hàng:</th>
+                                    <td class="text-right font-weight-bold">+@Model.DeliveryFee.ToString("N0") ₫</td>
                                 </tr>
                             }
 
                             <tr class="bg-light">
-                                <th colspan="4" class="text-right font-size-18 text-primary">Grand Total:</th>
-                                <td class="text-right font-size-18 text-primary font-weight-bold">$@Model.TotalAmount.ToString("N2")</td>
+                                <th colspan="4" class="text-right font-size-18 text-primary">Tổng thanh toán:</th>
+                                <td class="text-right font-size-18 text-primary font-weight-bold">@Model.TotalAmount.ToString("N0") ₫</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -144,7 +144,7 @@
             </div>
             <div class="card-footer">
                 <a href="@Url.Action("Index", "Orders", new { area = "Admin" })" class="btn btn-default">
-                    <i class="fa fa-arrow-left mr-1"></i> Back to Orders List
+                    <i class="fa fa-arrow-left mr-1"></i> Về danh sách đơn
                 </a>
             </div>
         </div>
@@ -153,13 +153,13 @@
     <!-- Right Column: Status & Payment Controls -->
     <div class="col-lg-4">
 
-        <!-- Order Status Control Card -->
+        <!-- Trạng thái đơn Control Card -->
         <div class="card card-outline card-primary">
             <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-truck text-primary mr-2"></i>Order Status</h3>
+                <h3 class="card-title font-weight-bold"><i class="fa fa-truck text-primary mr-2"></i>Trạng thái đơn</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-2">Current Order Status: <strong class="text-dark">@Model.Status</strong></p>
+                <p class="text-muted mb-2">Trạng thái đơn hiện tại: <strong class="text-dark">@(Vietnamese.Label(Model.Status))</strong></p>
 
                 @using (Html.BeginForm("UpdateStatus", "Orders", new { area = "Admin" }, FormMethod.Post))
                 {
@@ -167,17 +167,17 @@
                     @Html.Hidden("id", Model.Id)
 
                     <div class="form-group mb-3">
-                        <label class="font-weight-bold">Update Order Status:</label>
+                        <label class="font-weight-bold">Cập nhật trạng thái đơn:</label>
                         <select name="newStatus" class="form-control" required>
-                            @foreach (var st in validOrderStatuses)
+                            @foreach (var st in validOrderStatuses.Where(next => RestaurantWebsite.Services.WorkflowRules.OrderTransition(Model.Status,next,"Admin",Model.Payments.Any(p=>p.Status=="Completed"))))
                             {
-                                <option value="@st" @(st == Model.Status ? "selected" : "")>@st</option>
+                                <option value="@st" @(st == Model.Status ? "selected" : "")>@(Vietnamese.Label(st))</option>
                             }
                         </select>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fa fa-save mr-1"></i> Save Order Status
+                        <i class="fa fa-save mr-1"></i> Lưu trạng thái đơn
                     </button>
                 }
             </div>
@@ -186,49 +186,49 @@
         <!-- Payment Info & Control Card -->
         <div class="card card-outline card-success">
             <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-money text-success mr-2"></i>Payment Details</h3>
+                <h3 class="card-title font-weight-bold"><i class="fa fa-money text-success mr-2"></i>Chi tiết thanh toán</h3>
             </div>
             <div class="card-body">
                 @if (latestPayment == null)
                 {
                     <div class="alert alert-warning mb-0">
-                        <i class="fa fa-warning mr-1"></i> No payment transaction found for this order.
+                        <i class="fa fa-warning mr-1"></i> Chưa có giao dịch thanh toán cho đơn này.
                     </div>
                 }
                 else
                 {
                     <ul class="list-group list-group-unbordered mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>Payment Method</span>
-                            <strong class="text-primary">@latestPayment.PaymentMethod</strong>
+                            <span>Phương thức thanh toán</span>
+                            <strong class="text-primary">@Vietnamese.Label(latestPayment.PaymentMethod)</strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>Payment Amount</span>
-                            <strong class="text-success">$@latestPayment.Amount.ToString("N2")</strong>
+                            <span>Số tiền thanh toán</span>
+                            <strong class="text-success">@latestPayment.Amount.ToString("N0") ₫</strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>Current Status</span>
+                            <span>Trạng thái hiện tại</span>
                             @if (latestPayment.Status == "Completed")
                             {
-                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Completed (Paid)</span>
+                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Hoàn tất (đã thanh toán)</span>
                             }
                             else if (latestPayment.Status == "Pending")
                             {
-                                <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-clock-o mr-1"></i>Pending</span>
+                                <span class="badge badge-warning text-dark px-2 py-1"><i class="fa fa-clock-o mr-1"></i>Chờ xác nhận</span>
                             }
                             else
                             {
-                                <span class="badge badge-secondary px-2 py-1">@latestPayment.Status</span>
+                                <span class="badge badge-secondary px-2 py-1">@Vietnamese.Label(latestPayment.Status)</span>
                             }
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>Payment Date</span>
+                            <span>Ngày thanh toán</span>
                             <small class="text-muted">@latestPayment.PaymentDate.ToString("yyyy-MM-dd HH:mm")</small>
                         </li>
                         @if (!string.IsNullOrEmpty(latestPayment.TransactionCode))
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Transaction Code</span>
+                                <span>Mã giao dịch</span>
                                 <small class="font-weight-bold">@latestPayment.TransactionCode</small>
                             </li>
                         }
@@ -237,20 +237,20 @@
                     using (Html.BeginForm("UpdatePaymentStatus", "Orders", new { area = "Admin" }, FormMethod.Post))
                     {
                         @Html.AntiForgeryToken()
-                        @Html.Hidden("paymentId", latestPayment.Id)
+                        @Html.Hidden("paymentId", latestPayment.Id)<label for="transactionCode">Mã giao dịch (nếu có)</label><input id="transactionCode" name="transactionCode" maxlength="100" class="form-control mb-3"/>
 
                         <div class="form-group mb-3">
-                            <label class="font-weight-bold">Update Payment Status:</label>
+                            <label class="font-weight-bold">Cập nhật thanh toán:</label>
                             <select name="newPaymentStatus" class="form-control" required>
-                                @foreach (var pst in validPaymentStatuses)
+                                @foreach (var pst in validPaymentStatuses.Where(next => RestaurantWebsite.Services.WorkflowRules.PaymentTransition(latestPayment.Status,next) && (next!="Refunded" || Model.Status=="Pending" || Model.Status=="Confirmed")))
                                 {
-                                    <option value="@pst" @(pst == latestPayment.Status ? "selected" : "")>@pst</option>
+                                    <option value="@pst" @(pst == latestPayment.Status ? "selected" : "")>@Vietnamese.Label(pst)</option>
                                 }
                             </select>
                         </div>
 
                         <button type="submit" class="btn btn-success btn-block">
-                            <i class="fa fa-check-square-o mr-1"></i> Save Payment Status
+                            <i class="fa fa-check-square-o mr-1"></i> Lưu thanh toán
                         </button>
                     }
                 }

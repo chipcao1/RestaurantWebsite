@@ -1,358 +1,67 @@
+@using RestaurantWebsite.Infrastructure
 @using RestaurantWebsite.Areas.Admin.Controllers
-@{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.Title = "Dashboard & Analytics";
-
-    string currentRole = ViewBag.CurrentRole != null ? ViewBag.CurrentRole.ToString() : "Admin";
-    string userName = ViewBag.UserName != null ? ViewBag.UserName.ToString() : "Administrator";
-
-    int totalCategories = ViewBag.TotalCategories ?? 0;
-    int totalDishes = ViewBag.TotalDishes ?? 0;
-    int totalTables = ViewBag.TotalTables ?? 0;
-    int totalReservations = ViewBag.TotalReservations ?? 0;
-    int totalOrders = ViewBag.TotalOrders ?? 0;
-    int totalPromotions = ViewBag.TotalPromotions ?? 0;
-    int totalUsers = ViewBag.TotalUsers ?? 0;
-
-    decimal todayRevenue = ViewBag.TodayRevenue ?? 0m;
-    decimal monthRevenue = ViewBag.MonthRevenue ?? 0m;
-    int ordersToday = ViewBag.OrdersToday ?? 0;
-    string peakBusinessHour = ViewBag.PeakBusinessHour ?? "N/A";
-
-    var dailyLabels = ViewBag.DailyLabels as List<string> ?? new List<string>();
-    var dailyRevenues = ViewBag.DailyRevenues as List<decimal> ?? new List<decimal>();
-    var orderTypeDist = ViewBag.OrderTypeDistribution as Dictionary<string, int> ?? new Dictionary<string, int>();
-    var topDishes = ViewBag.TopDishes as List<TopDishItem> ?? new List<TopDishItem>();
-    var hourlyDist = ViewBag.HourlyDistribution as List<PeakHourItem> ?? new List<PeakHourItem>();
-}
-
-<!-- Welcome Banner -->
-<div class="row">
-    <div class="col-12">
-        <div class="callout callout-info elevation-1 bg-white">
-            <h5><i class="fa fa-tachometer text-info mr-2"></i> Welcome back, <strong>@userName</strong>!</h5>
-            <p class="mb-0 text-muted">
-                Admin Analytics & Restaurant Performance Monitor. All figures are dynamically calculated from live customer orders and sales history.
-            </p>
-        </div>
-    </div>
+@{ViewBag.Title="Tổng quan nhà hàng";var top=ViewBag.TopDishes as IEnumerable<TopDishItem>??new List<TopDishItem>();var daily=ViewBag.DailyRevenues as List<decimal>??new List<decimal>();var labels=ViewBag.DailyLabels as List<string>??new List<string>();decimal peak=daily.Count>0?daily.Max():0m;}
+<div class="page-heading">
+<div>
+<p class="eyebrow">NHÀ HÀNG FEANE · HÔM NAY</p>
+<h1>Chào ngày mới, @Session["UserName"]</h1>
+<p>Nắm tình hình phục vụ và kết quả kinh doanh tại một nơi.</p>
 </div>
-
-<!-- Sales Key Metrics Row -->
-<div class="row">
-    <!-- Today's Revenue -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-success">
-            <div class="inner">
-                <h3>$@todayRevenue.ToString("N2")</h3>
-                <p>Today's Revenue</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-dollar"></i>
-            </div>
-            <a href="@Url.Action("Index", "Orders", new { area = "Admin" })" class="small-box-footer">
-                View Today Orders <i class="fa fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- Current Month Revenue -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h3>$@monthRevenue.ToString("N2")</h3>
-                <p>This Month Revenue</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-calendar-check-o"></i>
-            </div>
-            <a href="@Url.Action("Index", "Orders", new { area = "Admin" })" class="small-box-footer">
-                Manage All Orders <i class="fa fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- Today's Orders -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-warning">
-            <div class="inner">
-                <h3>@ordersToday</h3>
-                <p>Orders Placed Today</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-shopping-cart"></i>
-            </div>
-            <a href="@Url.Action("Index", "Orders", new { area = "Admin" })" class="small-box-footer">
-                Track Orders <i class="fa fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- Peak Business Hour -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-primary">
-            <div class="inner">
-                <h4 class="font-weight-bold mb-1">@peakBusinessHour</h4>
-                <p class="mb-0">Peak Business Hour</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-clock-o"></i>
-            </div>
-            <a href="javascript:void(0)" class="small-box-footer">
-                Hourly Peak Analysis <i class="fa fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
+<a class="btn btn-warning" href="@Url.Action("Index", "Reports",new{area="Admin"})">Xem báo cáo doanh thu</a>
 </div>
-
-<!-- Secondary Directory Quick Counts Row -->
-<div class="row">
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-light">
-            <span class="info-box-icon bg-info"><i class="fa fa-th-list"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Categories</span>
-                <span class="info-box-number">@totalCategories</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-light">
-            <span class="info-box-icon bg-success"><i class="fa fa-cutlery"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Dishes</span>
-                <span class="info-box-number">@totalDishes</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-light">
-            <span class="info-box-icon bg-primary"><i class="fa fa-table"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Tables</span>
-                <span class="info-box-number">@totalTables</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-light">
-            <span class="info-box-icon bg-warning"><i class="fa fa-calendar"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Bookings</span>
-                <span class="info-box-number">@totalReservations</span>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-purple" style="background-color:#6f42c1; color:white;"><i class="fa fa-tags"></i></span>
-        <div class="info-box-content">
-            <span class="info-box-text">Promos</span>
-            <span class="info-box-number">@totalPromotions</span>
-        </div>
-    </div>
-    <div class="col-lg-2 col-4">
-        <div class="info-box bg-light">
-            <span class="info-box-icon bg-dark"><i class="fa fa-users"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Users</span>
-                <span class="info-box-number">@totalUsers</span>
-            </div>
-        </div>
-    </div>
+<div class="metric-grid">
+<div class="metric">
+<span>Thu ròng hôm nay</span>
+<strong>@Vietnamese.Money((decimal)ViewBag.TodayRevenue)</strong>
 </div>
-
-<!-- Main Analytics Visuals Row -->
-<div class="row">
-    <!-- Daily Revenue Chart (Left Column) -->
-    <div class="col-lg-8">
-        <div class="card card-primary card-outline">
-            <div class="card-header border-0">
-                <div class="d-flex justify-content-between">
-                    <h3 class="card-title font-weight-bold">
-                        <i class="fa fa-line-chart text-primary mr-2"></i> Current Month Daily Revenue ($)
-                    </h3>
-                    <span class="badge badge-info">@DateTime.Now.ToString("MMMM yyyy")</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="position-relative mb-4">
-                    <canvas id="dailyRevenueChart" height="230"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hourly Peak Analysis Distribution Card -->
-        <div class="card card-outline card-info">
-            <div class="card-header border-0">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fa fa-clock-o text-info mr-2"></i> Hourly Order Peak Distribution (This Month)
-                </h3>
-            </div>
-            <div class="card-body p-0">
-                @if (!hourlyDist.Any())
-                {
-                    <p class="text-muted p-3 mb-0">No order time data available for this month yet.</p>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0 align-middle">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Time Slot</th>
-                                    <th class="text-center">Order Count</th>
-                                    <th class="text-right">Total Revenue</th>
-                                    <th>Volume Distribution</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int maxHourOrders = hourlyDist.Max(x => x.OrderCount);
-                                }
-                                @foreach (var hour in hourlyDist)
-                                {
-                                    int pct = maxHourOrders > 0 ? (int)((double)hour.OrderCount / maxHourOrders * 100) : 0;
-                                    <tr>
-                                        <td class="font-weight-bold">@hour.Hour:00 - @(hour.Hour + 1):00</td>
-                                        <td class="text-center"><span class="badge badge-primary px-2 py-1">@hour.OrderCount orders</span></td>
-                                        <td class="text-right font-weight-bold text-success">$@hour.Revenue.ToString("N2")</td>
-                                        <td>
-                                            <div class="progress progress-xs mt-2" style="height: 10px;">
-                                                <div class="progress-bar bg-info" style="width: @pct%"></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Column: Order Type Breakdown & Top Dishes -->
-    <div class="col-lg-4">
-        <!-- Order Type Distribution Card -->
-        <div class="card card-outline card-success">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fa fa-pie-chart text-success mr-2"></i> Order Types Breakdown
-                </h3>
-            </div>
-            <div class="card-body">
-                @if (!orderTypeDist.Any())
-                {
-                    <p class="text-muted mb-0">No orders recorded for this month.</p>
-                }
-                else
-                {
-                    <ul class="list-group list-group-unbordered mb-3">
-                        @foreach (var kvp in orderTypeDist)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="fa fa-tag text-muted mr-2"></i>@kvp.Key</span>
-                                <span class="badge badge-success badge-pill font-weight-bold">@kvp.Value order(s)</span>
-                            </li>
-                        }
-                    </ul>
-                }
-            </div>
-        </div>
-
-        <!-- Top 5 Dishes by Quantity Sold -->
-        <div class="card card-outline card-warning">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fa fa-trophy text-warning mr-2"></i> Top 5 Best-Selling Dishes
-                </h3>
-            </div>
-            <div class="card-body p-0">
-                @if (!topDishes.Any())
-                {
-                    <p class="text-muted p-3 mb-0">No dish sales recorded yet.</p>
-                }
-                else
-                {
-                    <ul class="list-group list-group-flush">
-                        @foreach (var dish in topDishes)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong class="d-block text-dark">@dish.DishName</strong>
-                                    <small class="text-muted">Rev: $@dish.TotalRevenue.ToString("N2")</small>
-                                </div>
-                                <span class="badge badge-warning text-dark font-weight-bold px-2 py-1">
-                                    <i class="fa fa-fire mr-1"></i>@dish.TotalQuantity sold
-                                </span>
-                            </li>
-                        }
-                    </ul>
-                }
-            </div>
-        </div>
-
-        <!-- Roadmap Status Reference -->
-        <div class="card card-outline card-secondary">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fa fa-check-circle text-success mr-2"></i> Admin Modules Complete
-                </h3>
-            </div>
-            <div class="card-body p-2">
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Food Categories Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Dishes & Menu Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Restaurant Tables Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Promotions Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Reservations Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Orders & Payments Tracking</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Users & Staff Management</small>
-                <small class="text-muted d-block mb-1"><i class="fa fa-check text-success mr-1"></i> Live Sales Analytics & Dashboard</small>
-            </div>
-        </div>
-    </div>
+<div class="metric">
+<span>Thu ròng tháng này</span>
+<strong>@Vietnamese.Money((decimal)ViewBag.MonthRevenue)</strong>
 </div>
-
-@section scripts {
-    <!-- Chart.js (Local / AdminLTE Bundle) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-    <script>
-        $(function () {
-            var labels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyLabels));
-            var revenues = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dailyRevenues));
-
-            var ctx = document.getElementById('dailyRevenueChart').getContext('2d');
-            var chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Daily Revenue ($)',
-                        backgroundColor: 'rgba(40, 167, 69, 0.15)',
-                        borderColor: '#28a745',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#28a745',
-                        pointRadius: 3,
-                        data: revenues
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    legend: { display: false },
-                    scales: {
-                        xAxes: [{
-                            gridLines: { display: false }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                callback: function (value) { return '$' + value; }
-                            }
-                        }]
-                    }
-                }
-            });
-        });
-    </script>
-}
+<div class="metric">
+<span>Đơn đang chờ xác nhận</span>
+<strong>@ViewBag.PendingOrdersCount</strong>
+<a href="@Url.Action("Index", "Orders",new{area="Admin",status="Pending"})">Đến hàng đợi →</a>
+</div>
+</div>
+<div class="row mt-4">
+<div class="col-lg-8">
+<section class="surface">
+<div class="page-heading">
+<div>
+<h2>Dòng tiền trong tháng</h2>
+<p>Số tiền đã thu trừ khoản đã hoàn theo ngày giao dịch.</p>
+</div>
+</div>
+<div class="revenue-bars" role="img" aria-label="Doanh thu ròng từng ngày trong tháng">
+@for(int i=0;i<daily.Count;i++){<div class="revenue-bar">
+<span>@labels[i]</span>
+<div style="width:@(peak>0?Math.Max(0,daily[i])/peak*100:0)%">
+</div>
+<strong>@Vietnamese.Money(daily[i])</strong>
+</div>}
+</div>
+</section>
+</div>
+<div class="col-lg-4">
+<section class="surface">
+<p class="eyebrow">CẦN THEO DÕI</p>
+<h2>Vận hành hôm nay</h2>
+<p>
+<strong>@ViewBag.TodayOrderCount</strong> đơn đã đặt</p>
+<p>
+<strong>@ViewBag.TodayReservationsCount</strong> lượt đặt bàn</p>
+<p>
+<strong>@ViewBag.TotalCustomersCount</strong> khách hàng</p>
+<p>
+<strong>@ViewBag.ActivePromotionsCount</strong> khuyến mãi đang áp dụng</p>
+<a href="@Url.Action("Index", "Reservations",new{area="Admin"})">Xem lịch đặt bàn →</a>
+</section>
+<section class="surface">
+<h2>Món được yêu thích</h2>
+<p class="text-muted">Từ các đơn đã thanh toán.</p>@foreach(var dish in top){<div class="d-flex justify-content-between border-top py-3">
+<span>@dish.DishName</span>
+<strong>@dish.TotalQuantity phần</strong>
+</div>}@if(!top.Any()){<p>Chưa có dữ liệu món đã bán.</p>}</section>
+</div>
+</div>

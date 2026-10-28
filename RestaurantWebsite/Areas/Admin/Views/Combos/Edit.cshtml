@@ -1,0 +1,37 @@
+@using System.Linq
+@model RestaurantWebsite.Models.Combo
+@{ ViewBag.Title = Model.Id == 0 ? "Thêm suất ăn kết hợp" : "Sửa suất ăn kết hợp"; var dishes = (IEnumerable<RestaurantWebsite.Models.Dish>)ViewBag.Dishes; var selected = Request.HttpMethod == "POST" ? Request.Form.GetValues("dishIds") ?? new string[0] : Model.ComboItems.Select(i=>i.DishId.ToString()).ToArray(); var postedQuantities = Request.Form.GetValues("quantities") ?? new string[0]; }
+<h1>@ViewBag.Title</h1>
+@using (Html.BeginForm()) { @Html.AntiForgeryToken() @Html.HiddenFor(m=>m.Id) @Html.ValidationSummary(false,"",new { @class="text-danger" })
+<div class="form-group">
+<label for="Name">Tên suất ăn</label>@Html.TextBoxFor(m=>m.Name,new { @class="form-control",maxlength=150,required="required" })</div>
+<div class="form-group">
+<label for="Description">Mô tả</label>@Html.TextAreaFor(m=>m.Description,new { @class="form-control",maxlength=500 })</div>
+<div class="form-group">
+<label for="Price">Giá bán (đồng)</label>@Html.TextBox("Price", Model.Price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new { @class="form-control",type="number",min=0,max=999999999,step=1,required="required" })</div>
+<div class="form-group">
+<label for="ImageUrl">Đường dẫn ảnh</label>@Html.TextBoxFor(m=>m.ImageUrl,new { @class="form-control",maxlength=500 })</div>
+<div class="row">
+<div class="col-md-6">
+<label for="StartDate">Bắt đầu</label>@Html.TextBoxFor(m=>m.StartDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })</div>
+<div class="col-md-6">
+<label for="EndDate">Kết thúc</label>@Html.TextBoxFor(m=>m.EndDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })</div>
+</div>
+<p class="mt-3">
+<label>@Html.CheckBoxFor(m=>m.IsActive) Đang bán</label>
+</p>
+<fieldset>
+<legend>Món thành phần</legend>
+<p>Chọn món và số lượng trong mỗi suất.</p>
+@foreach(var dish in dishes) { var index=Array.IndexOf(selected,dish.Id.ToString()); var quantity=index>=0 && postedQuantities.Length>index ? postedQuantities[index] : Model.ComboItems.Where(i=>i.DishId==dish.Id).Select(i=>i.Quantity.ToString()).FirstOrDefault() ?? "1";
+<div class="form-row align-items-center mb-2">
+<div class="col-8">
+<label>
+<input type="checkbox" name="dishIds" value="@dish.Id" @(index>=0 ? "checked" : "") onchange="this.closest('.form-row').querySelector('input[type=number]').disabled=!this.checked" /> @dish.Name</label>
+</div>
+<div class="col-4">
+<input aria-label="Số lượng @dish.Name" type="number" name="quantities" value="@quantity" min="1" max="100" class="form-control" @(index>=0 ? "" : "disabled") />
+</div>
+</div> }
+</fieldset>
+<button class="btn btn-warning mt-3">Lưu suất ăn</button> <a class="btn btn-outline-secondary mt-3" href="@Url.Action("Index")">Quay lại</a> }

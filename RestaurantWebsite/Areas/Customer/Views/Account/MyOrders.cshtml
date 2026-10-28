@@ -1,0 +1,134 @@
+@using System.Linq
+@model IEnumerable<RestaurantWebsite.Models.Order>
+
+@{
+    ViewBag.Title = "Đơn hàng của tôi";
+    ViewBag.BodyClass = "sub_page";
+}
+
+<section class="layout_padding">
+    <div class="container">
+        <div class="heading_container heading_center">
+            <h2>Đơn hàng của tôi</h2>
+        </div>
+
+
+
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="mt-4">
+                @foreach (var order in Model)
+                {
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Order #@order.Id</strong>
+                                <span class="badge badge-info ml-2">@(Vietnamese.Label(order.OrderType))</span>
+                                <span class="badge badge-secondary ml-1">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div>
+                                <span class="badge @(order.Status == "Delivered" ? "badge-success" : (order.Status == "Cancelled" ? "badge-secondary" : "badge-warning")) p-2">@(Vietnamese.Label(order.Status))</span>
+                                <strong class="ml-2 text-danger">@order.TotalAmount.ToString("N0") VNĐ</strong>
+                                <a href="@Url.Action("Receipt", "Order", new { area = "Customer",  id = order.Id })" target="_blank" class="btn btn-sm btn-outline-info ml-2" title="Xem hóa đơn">
+                                    <i class="fa fa-print"></i> Hóa đơn
+                                </a>
+                                @if (order.Status == "Pending" && !order.Payments.Any(p => p.Status == "Completed"))
+                                {
+                                    using (Html.BeginForm("CancelOrder", "Account", new { area = "Customer",  id = order.Id }, FormMethod.Post, new { @class = "d-inline ml-1", onsubmit = "return confirm('Bạn xác nhận thực hiện thao tác này?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy đơn này">
+                                            <i class="fa fa-times"></i> Hủy
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <h6 class="card-title text-muted mb-2">Các món đã đặt:</h6>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <div>
+                                            @if (item.Dish != null)
+                                            {
+                                                <span class="font-weight-bold">@item.Dish.Name</span>
+                                            }
+                                            else if (item.Combo != null)
+                                            {
+                                                <span class="font-weight-bold">@item.Combo.Name (suất ăn)</span>
+                                            }
+                                            <small class="text-muted ml-2">x @item.Quantity (@item.UnitPrice.ToString("N0") VNĐ)</small>
+                                        </div>
+                                        <div>
+                                            @if (item.DishId.HasValue && order.Status == "Delivered" && !order.Reviews.Any(r => r.DishId == item.DishId))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-warning text-dark" data-toggle="modal" data-target="#reviewModal-@order.Id-@item.DishId.Value">
+                                                    <i class="fa fa-star text-warning"></i> Viết đánh giá
+                                                </button>
+
+                                                <!-- Review Modal for Dish -->
+                                                <div class="modal fade" id="reviewModal-@order.Id-@item.DishId.Value" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel-@order.Id-@item.DishId.Value" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            @using (Html.BeginForm("CreateReview", "Account", new { area = "Customer" }, FormMethod.Post))
+                                                            {
+                                                                @Html.AntiForgeryToken()
+                                                                <input type="hidden" name="orderId" value="@order.Id" />
+                                                                <input type="hidden" name="dishId" value="@item.DishId.Value" />
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="reviewModalLabel-@order.Id-@item.DishId.Value">
+                                                                        Đánh giá: @(item.Dish != null ? item.Dish.Name : "Món ăn")
+                                                                    </h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="form-group text-left">
+                                                                        <label class="font-weight-bold">Điểm đánh giá (1 đến 5 sao):</label>
+                                                                        <select name="rating" class="form-control" required>
+                                                                            <option value="5" selected>5 - Tuyệt vời</option>
+                                                                            <option value="4">4 - Rất hài lòng</option>
+                                                                            <option value="3">3 - Hài lòng</option>
+                                                                            <option value="2">2 - Tạm được</option>
+                                                                            <option value="1">1 - Chưa hài lòng</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-group text-left">
+                                                                        <label class="font-weight-bold">Nhận xét của bạn:</label>
+                                                                        <textarea name="comment" class="form-control" rows="4" maxlength="1000" placeholder="Chia sẻ trải nghiệm của bạn về món ăn..."></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                                                    <button type="submit" class="btn btn-warning text-dark font-weight-bold">Gửi đánh giá</button>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border mt-4 text-center">
+                Bạn chưa có đơn hàng nào.
+            </div>
+        }
+
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Profile", "Account", new { area = "Customer" })" class="btn btn-outline-secondary">Về hồ sơ</a>
+        </div>
+    </div>
+</section>

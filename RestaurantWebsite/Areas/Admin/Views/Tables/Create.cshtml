@@ -1,7 +1,7 @@
 @model RestaurantWebsite.Models.RestaurantTable
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.Title = "Add New Restaurant Table";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+    ViewBag.Title = "Thêm bàn nhà hàng";
 
     SelectList zones = ViewBag.Zones as SelectList;
     SelectList statuses = ViewBag.Statuses as SelectList;
@@ -12,11 +12,11 @@
         <div class="card card-primary card-outline shadow-sm">
             <div class="card-header">
                 <h3 class="card-title font-weight-bold">
-                    <i class="fa fa-plus-circle text-primary mr-1"></i> Create Restaurant Table
+                    <i class="fa fa-plus-circle text-primary mr-1"></i> Tạo bàn nhà hàng
                 </h3>
                 <div class="card-tools">
                     <a href="@Url.Action("Index", "Tables", new { area = "Admin" })" class="btn btn-outline-secondary btn-sm">
-                        <i class="fa fa-arrow-left mr-1"></i> Back to Tables List
+                        <i class="fa fa-arrow-left mr-1"></i> Về danh sách bàn
                     </a>
                 </div>
             </div>
@@ -29,18 +29,18 @@
                     @if (!ViewData.ModelState.IsValid)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Please correct the following errors:</h5>
+                            <h5><i class="fa fa-exclamation-triangle mr-2"></i> Vui lòng kiểm tra lại các thông tin sau:</h5>
                             @Html.ValidationSummary(false, "", new { @class = "mb-0 pl-3 text-white" })
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Đóng">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                     }
 
-                    <!-- Table Number -->
+                    <!-- Số bàn -->
                     <div class="form-group row">
                         <label for="TableNumber" class="col-sm-3 col-form-label font-weight-bold">
-                            Table Number <span class="text-danger">*</span>
+                            Số bàn <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
                             @Html.TextBoxFor(m => m.TableNumber, new {
@@ -51,14 +51,14 @@
                                 required = "required"
                             })
                             @Html.ValidationMessageFor(m => m.TableNumber, "", new { @class = "text-danger small" })
-                            <small class="form-text text-muted">A unique identifier for this table (up to 20 characters).</small>
+                            <small class="form-text text-muted">Số bàn không trùng, tối đa 20 ký tự.</small>
                         </div>
                     </div>
 
                     <!-- Capacity -->
                     <div class="form-group row">
                         <label for="Capacity" class="col-sm-3 col-form-label font-weight-bold">
-                            Capacity (Seats) <span class="text-danger">*</span>
+                            Sức chứa (chỗ) <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
                             <div class="input-group">
@@ -70,18 +70,18 @@
                                     required = "required"
                                 })
                                 <div class="input-group-append">
-                                    <span class="input-group-text"><i class="fa fa-users"></i> seats</span>
+                                    <span class="input-group-text"><i class="fa fa-users"></i> chỗ</span>
                                 </div>
                             </div>
                             @Html.ValidationMessageFor(m => m.Capacity, "", new { @class = "text-danger small" })
-                            <small class="form-text text-muted">Maximum seating capacity (1 to 50 persons).</small>
+                            <small class="form-text text-muted">Sức chứa tối đa, từ 1 đến 50 khách.</small>
                         </div>
                     </div>
 
                     <!-- Zone -->
                     <div class="form-group row">
                         <label for="Zone" class="col-sm-3 col-form-label font-weight-bold">
-                            Zone / Area <span class="text-danger">*</span>
+                            Khu vực phục vụ <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
                             @Html.DropDownListFor(m => m.Zone, zones, "-- Select Zone --", new {
@@ -92,10 +92,10 @@
                         </div>
                     </div>
 
-                    <!-- Operational Status -->
+                    <!-- Trạng thái phục vụ -->
                     <div class="form-group row">
                         <label for="Status" class="col-sm-3 col-form-label font-weight-bold">
-                            Operational Status
+                            Trạng thái phục vụ
                         </label>
                         <div class="col-sm-9">
                             @Html.DropDownListFor(m => m.Status, statuses, new { @class = "form-control" })
@@ -106,13 +106,13 @@
                     <!-- IsActive -->
                     <div class="form-group row align-items-center">
                         <label class="col-sm-3 col-form-label font-weight-bold">
-                            Active Status
+                            Tình trạng hoạt động
                         </label>
                         <div class="col-sm-9">
                             <div class="custom-control custom-checkbox">
                                 @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "isActiveCheck" })
                                 <label class="custom-control-label font-weight-normal" for="isActiveCheck">
-                                    <strong>Active</strong> (Table is active and available for customer reservations)
+                                    <strong>Đang hoạt động</strong> (Bàn đang hoạt động và khách có thể đặt)
                                 </label>
                             </div>
                         </div>
@@ -122,10 +122,10 @@
 
                 <div class="card-footer bg-light d-flex justify-content-between">
                     <a href="@Url.Action("Index", "Tables", new { area = "Admin" })" class="btn btn-default">
-                        <i class="fa fa-times mr-1"></i> Cancel
+                        <i class="fa fa-times mr-1"></i> Hủy
                     </a>
                     <button type="submit" class="btn btn-primary font-weight-bold px-4">
-                        <i class="fa fa-save mr-1"></i> Save Table
+                        <i class="fa fa-save mr-1"></i> Lưu bàn
                     </button>
                 </div>
             }

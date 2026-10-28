@@ -8,24 +8,30 @@ namespace RestaurantWebsite.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(150)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(150, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Tên")]
         public string Name { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(1000, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Mô tả")]
         public string Description { get; set; }
 
-        [Required]
-        [Range(0, 999999999)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [Range(0, 999999999, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Giá")]
         public decimal Price { get; set; }
 
-        [Range(1, 300)]
+        [Range(1, 300, ErrorMessage = "{0} phải từ {1} đến {2}.")]
+        [Display(Name = "Thời gian chế biến")]
         public int PreparationTime { get; set; }
 
-        [Required]
-        [StringLength(30)]
+        [Required(ErrorMessage = "Vui lòng nhập {0}.")]
+        [StringLength(30, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Trạng thái")]
         public string Status { get; set; }
 
+        [Display(Name = "Danh mục")]
         public int CategoryId { get; set; }
 
         public DateTime CreatedAt { get; set; }
@@ -44,7 +50,7 @@ namespace RestaurantWebsite.Models
             ComboItems = new HashSet<ComboItem>();
             Reviews = new HashSet<Review>();
             Status = "Available";
-            CreatedAt = DateTime.Now;
+            CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
         }
     }
 }

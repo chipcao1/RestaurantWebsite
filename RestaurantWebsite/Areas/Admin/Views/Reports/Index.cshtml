@@ -1,0 +1,38 @@
+@model RestaurantWebsite.Services.SalesReport
+@{ ViewBag.Title="Báo cáo doanh thu"; }
+<div class="page-heading">
+<div>
+<p class="eyebrow">HIỆU QUẢ KINH DOANH</p>
+<h1>Báo cáo doanh thu</h1>
+<p>Thu theo ngày xác nhận thanh toán, hoàn theo ngày xác nhận hoàn tiền.</p>
+</div>
+<a class="btn btn-outline-secondary" href="@Url.Action("Menu")">Tải thực đơn PDF</a>
+</div>
+<form method="get" class="filter-bar">
+<div>
+<label for="from">Từ ngày</label>
+<input type="date" name="from" id="from" class="form-control" value="@Model.From.ToString("yyyy-MM-dd")" required/>
+</div>
+<div>
+<label for="to">Đến ngày</label>
+<input type="date" name="to" id="to" class="form-control" value="@Model.To.ToString("yyyy-MM-dd")" required/>
+</div>
+<button class="btn btn-warning">Xem báo cáo</button>
+<button name="pdf" value="true" class="btn btn-outline-dark">Tải PDF</button>
+</form>
+<div class="metric-grid">
+<div class="metric">
+<span>Tổng tiền đã thu</span>
+<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Collected)</strong>
+</div>
+<div class="metric">
+<span>Tiền đã hoàn</span>
+<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Refunded)</strong>
+</div>
+<div class="metric">
+<span>Thu ròng</span>
+<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Net)</strong>
+</div>
+</div>
+<div class="surface">
+<h2>Chi tiết giao dịch</h2>@if(!Model.Lines.Any()){<p class="empty-state">Chưa có giao dịch trong khoảng ngày này.</p>}else{<ul class="transaction-list">@foreach(var line in Model.Lines){<li>@line</li>}</ul>}</div>

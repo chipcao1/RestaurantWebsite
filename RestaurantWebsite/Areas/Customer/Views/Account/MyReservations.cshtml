@@ -1,0 +1,75 @@
+@using System.Linq
+@model IEnumerable<RestaurantWebsite.Models.Reservation>
+
+@{
+    ViewBag.Title = "Lịch đặt bàn của tôi";
+    ViewBag.BodyClass = "sub_page";
+}
+
+<section class="layout_padding">
+    <div class="container">
+        <div class="heading_container heading_center">
+            <h2>Lịch đặt bàn của tôi</h2>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered bg-white">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Bàn</th>
+                            <th>Ngày</th>
+                            <th>Khách</th>
+                            <th>Trạng thái</th>
+                            <th>Yêu cầu đặc biệt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reservation in Model)
+                        {
+                            <tr>
+                                <td>@(reservation.Table != null ? "Bàn " + reservation.Table.TableNumber : "-")</td>
+                                <td>@reservation.ReservationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@reservation.PartySize</td>
+                                <td>
+                                    <span class="badge @(reservation.Status == "Confirmed" ? "badge-success" : (reservation.Status == "Cancelled" ? "badge-secondary" : "badge-warning")) p-2">
+                                        @(Vietnamese.Label(reservation.Status))
+                                    </span>
+                                </td>
+                                <td>@reservation.SpecialRequest</td>
+                                <td>
+                                    @if ((reservation.Status == "Pending" || reservation.Status == "Confirmed") && reservation.ReservationDate > RestaurantWebsite.Infrastructure.RestaurantClock.Now)
+                                    {
+                                        using (Html.BeginForm("CancelReservation", "Account", new { area = "Customer",  id = reservation.Id }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Bạn xác nhận thực hiện thao tác này?');" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fa fa-times"></i> Hủy
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border mt-4 text-center">
+                Bạn chưa có lịch đặt bàn.
+            </div>
+        }
+
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Profile", "Account", new { area = "Customer" })" class="btn btn-outline-secondary">Về hồ sơ</a>
+        </div>
+    </div>
+</section>

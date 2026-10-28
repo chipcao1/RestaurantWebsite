@@ -1,0 +1,33 @@
+@model IEnumerable<RestaurantWebsite.Models.Combo>
+@{ ViewBag.Title = "Suất ăn kết hợp"; }
+<div class="page-heading">
+<div>
+<p class="eyebrow">THỰC ĐƠN</p>
+<h1>Suất ăn kết hợp</h1>
+<p>Gom các món thành một lựa chọn tiện lợi cho khách hàng.</p>
+</div>
+<a class="btn btn-warning" href="@Url.Action("Edit")">Thêm suất ăn</a>
+</div>
+<div class="table-responsive">
+<table class="table">
+<thead>
+<tr>
+<th>Tên</th>
+<th>Giá</th>
+<th>Trạng thái</th>
+<th>Thao tác</th>
+</tr>
+</thead>
+<tbody>
+@foreach (var item in Model) { <tr>
+<td>@item.Name</td>
+<td>@RestaurantWebsite.Infrastructure.Vietnamese.Money(item.Price)</td>
+<td>@(item.IsActive ? "Đang bán" : "Ngừng bán")</td>
+<td>
+<a href="@Url.Action("Edit", new { id=item.Id })">Chỉnh sửa</a> @using(Html.BeginForm("ToggleStatus", "Combos",FormMethod.Post,new { @class="d-inline" })) { @Html.AntiForgeryToken()<input type="hidden" name="id" value="@item.Id"/>
+<button class="btn btn-sm btn-outline-secondary">@(item.IsActive ? "Ngừng bán" : "Mở bán")</button> }</td>
+</tr> }
+</tbody>
+</table>
+</div>
+@if (!Model.Any()) { <p class="empty-state">Chưa có suất ăn kết hợp. Hãy thêm suất ăn đầu tiên.</p> }

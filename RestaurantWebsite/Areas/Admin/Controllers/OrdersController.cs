@@ -70,8 +70,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .OrderByDescending(o => o.CreatedAt)
                 .ToList();
 
-            ViewBag.StatusList = new SelectList(ValidOrderStatuses, status);
-            ViewBag.OrderTypeList = new SelectList(ValidOrderTypes, orderType);
+            ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidOrderStatuses, status);
+            ViewBag.OrderTypeList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidOrderTypes, orderType);
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SelectedOrderType = orderType ?? "All";
             ViewBag.SelectedDate = date;
@@ -88,7 +88,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         {
             if (!id.HasValue)
             {
-                TempData["Error"] = "Order ID was not provided.";
+                TempData["Error"] = "Thiếu mã đơn hàng.";
                 return RedirectToAction("Index");
             }
 
@@ -104,7 +104,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (order == null)
             {
-                TempData["Error"] = "Order was not found.";
+                TempData["Error"] = "Không tìm thấy đơn hàng.";
                 return RedirectToAction("Index");
             }
 
@@ -121,24 +121,10 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UpdateStatus(int id, string newStatus)
         {
-            var order = db.Orders.FirstOrDefault(o => o.Id == id);
-            if (order == null)
-            {
-                TempData["Error"] = "Order was not found.";
-                return RedirectToAction("Index");
-            }
-
-            if (!ValidOrderStatuses.Contains(newStatus))
-            {
-                TempData["Error"] = "Invalid order status specified.";
-                return RedirectToAction("Details", new { id = id });
-            }
-
-            order.Status = newStatus;
-            db.SaveChanges();
-
-            TempData["Success"] = $"Order #{id} status updated to \"{newStatus}\".";
-            return RedirectToAction("Details", new { id = id });
+            try { new RestaurantWebsite.Services.OrderWorkflowService(db).ChangeStatus(id, newStatus, (int)Session["UserId"], Convert.ToString(Session["Role"])); TempData["Success"] = "Đã cập nhật đơn hàng."; }
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            catch (System.Data.DataException) { TempData["Error"] = "Dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại."; }
+            return RedirectToAction("Details", new { id });
         }
 
         // =====================================================
@@ -148,32 +134,10 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UpdatePaymentStatus(int paymentId, string newPaymentStatus)
         {
-            var payment = db.Payments
-                .Include(p => p.Order)
-                .FirstOrDefault(p => p.Id == paymentId);
-
-            if (payment == null)
-            {
-                TempData["Error"] = "Payment record was not found.";
-                return RedirectToAction("Index");
-            }
-
-            if (!ValidPaymentStatuses.Contains(newPaymentStatus))
-            {
-                TempData["Error"] = "Invalid payment status specified.";
-                return RedirectToAction("Details", new { id = payment.OrderId });
-            }
-
-            payment.Status = newPaymentStatus;
-            if (newPaymentStatus == "Completed" && payment.PaymentDate == default(DateTime))
-            {
-                payment.PaymentDate = DateTime.Now;
-            }
-
-            db.SaveChanges();
-
-            TempData["Success"] = $"Payment #{payment.Id} for Order #{payment.OrderId} updated to \"{newPaymentStatus}\".";
-            return RedirectToAction("Details", new { id = payment.OrderId });
+            try { new RestaurantWebsite.Services.OrderWorkflowService(db).ChangePayment(paymentId, newPaymentStatus, (int)Session["UserId"], Request.Form["transactionCode"]); TempData["Success"] = "Đã ghi nhận thanh toán."; }
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            catch (System.Data.DataException) { TempData["Error"] = "Dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại."; }
+            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)

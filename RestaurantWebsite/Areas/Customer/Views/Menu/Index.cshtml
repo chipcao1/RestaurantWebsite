@@ -1,0 +1,692 @@
+@using System.Collections.Generic
+@using System.Linq
+@using RestaurantWebsite.Models
+
+@model IEnumerable<RestaurantWebsite.Models.Dish>
+
+@{
+    ViewBag.Title = "Thực đơn";
+    ViewBag.BodyClass = "sub_page";
+
+    var combos =
+        ViewBag.Combos as IEnumerable<Combo>
+        ?? new List<Combo>();
+
+    var search =
+        ViewBag.Search as string
+        ?? "";
+}
+
+<section class="food_section layout_padding">
+
+    <div class="container">
+
+        <!-- ================================================= -->
+        <!-- TITLE -->
+        <!-- ================================================= -->
+
+        <div class="heading_container heading_center">
+
+            <h2>
+                Thực đơn của nhà hàng
+            </h2>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- SEARCH -->
+        <!-- ================================================= -->
+
+        <div class="row justify-content-center mb-4">
+
+            <div class="col-md-8 col-lg-7">
+
+                @using (Html.BeginForm(
+                    "Index", "Menu", new { area = "Customer" },
+                    FormMethod.Get,
+                    new
+                    {
+                        @class = "menu-search-form"
+                    }))
+                {
+                    <div class="input-group">
+
+                        <input type="text"
+                               name="search"
+                               value="@search"
+                               class="form-control"
+                               placeholder="Tìm món hoặc suất ăn kết hợp..."
+                               autocomplete="off" />
+
+                        <div class="input-group-append">
+
+                            <button type="submit"
+                                    class="btn btn-warning text-white">
+
+                                <i class="fa fa-search"></i>
+
+                                Tìm kiếm
+
+                            </button>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- CATEGORY FILTER -->
+        <!-- ================================================= -->
+
+        <ul class="filters_menu">
+
+            <!-- ALL -->
+
+            <li class="active"
+                data-filter="*">
+
+                Tất cả
+
+            </li>
+
+
+            <!-- DISH CATEGORIES -->
+
+            @if (ViewBag.Categories != null)
+            {
+                foreach (var category in ViewBag.Categories)
+                {
+                    <li data-filter=".category-@category.Id">
+
+                        @category.Name
+
+                    </li>
+                }
+            }
+
+
+            <!-- COMBO -->
+
+            <li data-filter=".combo-item">
+
+                Suất ăn kết hợp
+
+            </li>
+
+        </ul>
+
+
+        <!-- ================================================= -->
+        <!-- MENU ITEMS -->
+        <!-- ================================================= -->
+
+        <div class="filters-content">
+
+            <div class="row grid">
+
+                <!-- ================================================= -->
+                <!-- DISH -->
+                <!-- ================================================= -->
+
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <div class="col-sm-6 col-lg-4 all category-@item.CategoryId">
+
+                            <div class="box">
+
+                                <div>
+
+                                    <!-- DISH IMAGE -->
+
+                                    <div class="img-box">
+
+                                        @if (
+                                            item.DishImages != null &&
+                                            item.DishImages.Any())
+                                        {
+                                            var primaryImg =
+                                                item.DishImages
+                                                    .FirstOrDefault(
+                                                        img => img.IsPrimary)
+                                                ??
+                                                item.DishImages.First();
+
+                                            <img src="@Url.Content(primaryImg.ImageUrl)"
+                                                 alt="@item.Name" />
+                                        }
+                                        else
+                                        {
+                                            <img src="@Url.Content(
+                                                "~/Resources/User/images/f1.png")"
+                                                 alt="@item.Name" />
+                                        }
+
+                                    </div>
+
+
+                                    <!-- DISH INFORMATION -->
+
+                                    <div class="detail-box">
+
+                                        <h5>
+                                            @item.Name
+                                        </h5>
+
+
+                                        <p>
+                                            @item.Description
+                                        </p>
+
+
+                                        <div class="options">
+
+                                            <h6>
+                                                @item.Price.ToString("N0") VNĐ
+                                            </h6>
+
+
+                                            <!-- DISH DETAILS -->
+
+                                            <a href="javascript:void(0);"
+                                               onclick="openDishDetails(@item.Id)"
+                                               title="Xem chi tiết">
+
+                                                <i class="fa fa-shopping-cart"></i>
+
+                                            </a>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+
+
+                <!-- ================================================= -->
+                <!-- COMBO -->
+                <!-- ================================================= -->
+                @foreach (var combo in combos)
+                {
+                    <div class="col-sm-6 col-lg-4 all combo-item">
+
+                        <div class="box">
+
+                            <div>
+
+                                <div class="img-box">
+
+                                    @if (!string.IsNullOrEmpty(combo.ImageUrl))
+                                    {
+                                        <img src="@Url.Content(combo.ImageUrl)"
+                                             alt="@combo.Name" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@Url.Content("~/Resources/User/images/o2.jpg")"
+                                             alt="@combo.Name" />
+                                    }
+
+                                </div>
+
+                                <div class="detail-box">
+
+                                    <h5>
+                                        @combo.Name
+                                    </h5>
+
+                                    <p>
+                                        @(
+                            !string.IsNullOrEmpty(combo.Description)
+                                ? combo.Description
+                                : "Delicious combo prepared for you."
+                        )
+                                    </p>
+
+                                    <div class="options">
+
+                                        <h6>
+                                            @combo.Price.ToString("N0") VNĐ
+                                        </h6>
+
+                                        <a href="javascript:void(0);"
+                                           onclick="openComboDetails(@combo.Id)"
+                                           title="Xem chi tiết suất ăn">
+
+                                            <i class="fa fa-shopping-cart"></i>
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+
+                <!-- ================================================= -->
+                <!-- NO RESULT -->
+                <!-- ================================================= -->
+
+                @if (
+                    (Model == null || !Model.Any()) &&
+                    !combos.Any())
+                {
+                    <div class="col-12 text-center py-5">
+
+                        <h5>
+                            Không tìm thấy món phù hợp.
+                        </h5>
+
+                        @if (!string.IsNullOrWhiteSpace(search))
+                        {
+                            <p class="text-muted">
+
+                                Không tìm thấy món hoặc suất ăn phù hợp:
+                                <strong>@search</strong>
+
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-muted">
+
+                                Hiện chưa có món hoặc suất ăn đang phục vụ.
+
+                            </p>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- DISH DETAILS MODAL -->
+<!-- ===================================================== -->
+
+<div class="modal fade"
+     id="dishDetailsModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="dishDetailsModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered"
+         role="document">
+
+        <div class="modal-content"
+             style="border-radius:15px;overflow:hidden;">
+
+            <div class="modal-header bg-warning text-white">
+
+                <h5 class="modal-title font-weight-bold"
+                    id="dishDetailsModalLabel">
+
+                    Chi tiết món ăn
+
+                </h5>
+
+
+                <button type="button"
+                        class="close text-white"
+                        data-dismiss="modal"
+                        aria-label="Đóng">
+
+                    <span aria-hidden="true">
+                        &times;
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div class="modal-body"
+                 id="modalBodyContent">
+
+                <div class="text-center p-4">
+
+                    <div class="spinner-border text-warning"
+                         role="status">
+
+                        <span class="sr-only">
+                            Đang tải...
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- COMBO DETAILS MODAL -->
+<!-- ===================================================== -->
+
+<div class="modal fade"
+     id="comboDetailsModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="comboDetailsModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered"
+         role="document">
+
+        <div class="modal-content"
+             style="border-radius:15px;overflow:hidden;">
+
+            <div class="modal-header bg-warning text-white">
+
+                <h5 class="modal-title font-weight-bold"
+                    id="comboDetailsModalLabel">
+
+                    Chi tiết suất ăn
+
+                </h5>
+
+
+                <button type="button"
+                        class="close text-white"
+                        data-dismiss="modal"
+                        aria-label="Đóng">
+
+                    <span aria-hidden="true">
+                        &times;
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div class="modal-body"
+                 id="comboModalBodyContent">
+
+                <div class="text-center p-4">
+
+                    <div class="spinner-border text-warning"
+                         role="status">
+
+                        <span class="sr-only">
+                            Đang tải...
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .menu-search-form {
+        margin-bottom: 20px;
+    }
+
+        .menu-search-form .form-control {
+            height: 48px;
+        }
+
+        .menu-search-form .btn {
+            height: 48px;
+            min-width: 110px;
+        }
+</style>
+
+
+@section scripts {
+
+    <script>
+
+        /*
+         * =====================================================
+         * MENU FILTER - ISOTOPE
+         * =====================================================
+         */
+
+        $(document).ready(function () {
+
+            var $grid = $(".grid");
+            if ($.fn.isotope) $grid.isotope({
+
+                itemSelector: ".all",
+
+                layoutMode: "fitRows"
+
+            });
+
+
+            $(".filters_menu li").on("click", function () {
+
+                $(".filters_menu li")
+                    .removeClass("active");
+
+                $(this)
+                    .addClass("active");
+
+
+                var filterValue =
+                    $(this).attr("data-filter");
+
+
+                if ($.fn.isotope) $grid.isotope({ filter: filterValue });
+                else { $grid.children(".all").hide().filter(filterValue).show(); }
+
+            });
+
+        });
+
+
+        /*
+         * =====================================================
+         * OPEN DISH DETAILS
+         * =====================================================
+         */
+
+        function openDishDetails(dishId) {
+
+            var $modalBody =
+                $("#modalBodyContent");
+
+
+            $modalBody.html(
+
+                '<div class="text-center p-4">' +
+
+                    '<div class="spinner-border text-warning" role="status">' +
+
+                        '<span class="sr-only">' +
+                            'Đang tải...' +
+                        '</span>' +
+
+                    '</div>' +
+
+                '</div>'
+
+            );
+
+
+            $("#dishDetailsModal").modal("show");
+
+
+            $.ajax({
+
+                url: '@Url.Action("Details", "Menu", new { area = "Customer" })',
+
+                type: "GET",
+
+                dataType: "html",
+
+                cache: false,
+
+                data: {
+                    id: dishId
+                },
+
+
+                success: function (response) {
+
+                    $modalBody.html(response);
+
+                },
+
+
+                error: function (xhr) {
+
+                    console.error(
+                        "Chi tiết món ăn Error:",
+                        xhr.responseText
+                    );
+
+
+                    $modalBody.html(
+
+                        '<div class="text-center text-danger p-4">' +
+
+                            '<h5>' +
+                                'Không thể tải chi tiết món.' +
+                            '</h5>' +
+
+                            '<p>Yêu cầu trả về mã ' +
+                                xhr.status +
+                            '.</p>' +
+
+                        '</div>'
+
+                    );
+
+                }
+
+            });
+
+        }
+
+
+        /*
+         * =====================================================
+         * OPEN COMBO DETAILS
+         * =====================================================
+         */
+
+        function openComboDetails(comboId) {
+
+            var $modalBody =
+                $("#comboModalBodyContent");
+
+
+            $modalBody.html(
+
+                '<div class="text-center p-4">' +
+
+                    '<div class="spinner-border text-warning" role="status">' +
+
+                        '<span class="sr-only">' +
+                            'Đang tải...' +
+                        '</span>' +
+
+                    '</div>' +
+
+                '</div>'
+
+            );
+
+
+            $("#comboDetailsModal").modal("show");
+
+
+            $.ajax({
+
+                url: '@Url.Action("Details", "Combo", new { area = "Customer" })',
+
+                type: "GET",
+
+                dataType: "html",
+
+                cache: false,
+
+                data: {
+                    id: comboId
+                },
+
+
+                success: function (response) {
+
+                    $modalBody.html(response);
+
+                },
+
+
+                error: function (xhr) {
+
+                    console.error(
+                        "Chi tiết suất ăn Error:",
+                        xhr.responseText
+                    );
+
+
+                    $modalBody.html(
+
+                        '<div class="text-center text-danger p-4">' +
+
+                            '<h5>' +
+                                'Không thể tải chi tiết suất ăn.' +
+                            '</h5>' +
+
+                            '<p>Yêu cầu trả về mã ' +
+                                xhr.status +
+                            '.</p>' +
+
+                        '</div>'
+
+                    );
+
+                }
+
+            });
+
+        }
+
+    </script>
+
+}

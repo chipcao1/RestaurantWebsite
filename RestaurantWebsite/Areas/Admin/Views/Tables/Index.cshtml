@@ -1,7 +1,7 @@
 @model IEnumerable<RestaurantWebsite.Models.RestaurantTable>
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewBag.Title = "Restaurant Tables Management";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+    ViewBag.Title = "Quản lý bàn nhà hàng";
 
     int totalCount = Model != null ? Model.Count() : 0;
     int availableCount = Model != null ? Model.Count(t => t.IsActive && t.Status == "Available") : 0;
@@ -21,7 +21,7 @@
         <div class="info-box shadow-sm mb-2">
             <span class="info-box-icon bg-primary"><i class="fa fa-table"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Total Tables</span>
+                <span class="info-box-text">Tổng số bàn</span>
                 <span class="info-box-number font-weight-bold">@totalCount</span>
             </div>
         </div>
@@ -30,7 +30,7 @@
         <div class="info-box shadow-sm mb-2">
             <span class="info-box-icon bg-success"><i class="fa fa-check-circle"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Available & Ready</span>
+                <span class="info-box-text">Sẵn sàng phục vụ</span>
                 <span class="info-box-number font-weight-bold">@availableCount</span>
             </div>
         </div>
@@ -39,7 +39,7 @@
         <div class="info-box shadow-sm mb-2">
             <span class="info-box-icon bg-warning"><i class="fa fa-user"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Occupied / Reserved</span>
+                <span class="info-box-text">Đang sử dụng / đã đặt</span>
                 <span class="info-box-number font-weight-bold">@occupiedCount</span>
             </div>
         </div>
@@ -48,7 +48,7 @@
         <div class="info-box shadow-sm mb-2">
             <span class="info-box-icon bg-secondary"><i class="fa fa-wrench"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Maintenance / Hidden</span>
+                <span class="info-box-text">Bảo trì / đang ẩn</span>
                 <span class="info-box-number font-weight-bold">@maintenanceCount</span>
             </div>
         </div>
@@ -61,22 +61,22 @@
         @using (Html.BeginForm("Index", "Tables", new { area = "Admin" }, FormMethod.Get, new { @class = "form-inline flex-wrap" }))
         {
             <div class="form-group mr-3 mb-2">
-                <label for="zone" class="mr-2 font-weight-bold small"><i class="fa fa-map-marker mr-1"></i> Zone:</label>
+                <label for="zone" class="mr-2 font-weight-bold small"><i class="fa fa-map-marker mr-1"></i> Khu vực:</label>
                 @Html.DropDownList("zone", zones, "-- All Zones --", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
             </div>
 
             <div class="form-group mr-3 mb-2">
-                <label for="status" class="mr-2 font-weight-bold small"><i class="fa fa-info-circle mr-1"></i> Status:</label>
-                @Html.DropDownList("status", statuses, "-- All Statuses --", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+                <label for="status" class="mr-2 font-weight-bold small"><i class="fa fa-info-circle mr-1"></i> Trạng thái:</label>
+                @Html.DropDownList("status", statuses, "-- Tất cả trạng thái --", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
             </div>
 
             <div class="form-group mr-2 mb-2">
-                <label for="search" class="sr-only">Search</label>
+                <label for="search" class="sr-only">Tìm kiếm</label>
                 <div class="input-group input-group-sm">
-                    <input type="text" name="search" class="form-control" placeholder="Search table number..." value="@searchTerm" />
+                    <input type="text" name="search" class="form-control" placeholder="Tìm theo số bàn..." value="@searchTerm" />
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-secondary">
-                            <i class="fa fa-search"></i> Search
+                            <i class="fa fa-search"></i> Tìm kiếm
                         </button>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
             if (zones.SelectedValue != null || statuses.SelectedValue != null || !string.IsNullOrWhiteSpace(searchTerm))
             {
                 <a href="@Url.Action("Index", "Tables", new { area = "Admin" })" class="btn btn-outline-dark btn-sm mb-2">
-                    <i class="fa fa-undo mr-1"></i> Reset Filters
+                    <i class="fa fa-undo mr-1"></i> Xóa bộ lọc
                 </a>
             }
         }
@@ -96,11 +96,11 @@
 <div class="card card-primary card-outline shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title font-weight-bold mb-0">
-            <i class="fa fa-table mr-1 text-primary"></i> Restaurant Tables List
+            <i class="fa fa-table mr-1 text-primary"></i> Danh sách bàn nhà hàng
         </h3>
         <div class="card-tools ml-auto">
             <a href="@Url.Action("Create", "Tables", new { area = "Admin" })" class="btn btn-primary btn-sm">
-                <i class="fa fa-plus-circle mr-1"></i> Add New Table
+                <i class="fa fa-plus-circle mr-1"></i> Thêm bàn mới
             </a>
         </div>
     </div>
@@ -112,10 +112,10 @@
                 <div class="text-muted mb-3" style="font-size: 48px;">
                     <i class="fa fa-table"></i>
                 </div>
-                <h5 class="text-muted">No tables found</h5>
-                <p class="text-muted">Try adjusting your filters or add a new restaurant table.</p>
+                <h5 class="text-muted">Không tìm thấy bàn</h5>
+                <p class="text-muted">Thử đổi bộ lọc hoặc thêm bàn mới.</p>
                 <a href="@Url.Action("Create", "Tables", new { area = "Admin" })" class="btn btn-primary">
-                    <i class="fa fa-plus-circle mr-1"></i> Add First Table
+                    <i class="fa fa-plus-circle mr-1"></i> Thêm bàn đầu tiên
                 </a>
             </div>
         }
@@ -126,12 +126,12 @@
                     <thead class="thead-light">
                         <tr>
                             <th style="width: 60px;" class="text-center">#</th>
-                            <th style="width: 140px;">Table Number</th>
-                            <th style="width: 120px;" class="text-center">Capacity</th>
-                            <th style="width: 140px;" class="text-center">Zone</th>
-                            <th style="width: 140px;" class="text-center">Operational Status</th>
-                            <th style="width: 120px;" class="text-center">Active Status</th>
-                            <th style="width: 220px;" class="text-center">Actions</th>
+                            <th style="width: 140px;">Số bàn</th>
+                            <th style="width: 120px;" class="text-center">Sức chứa</th>
+                            <th style="width: 140px;" class="text-center">Khu vực</th>
+                            <th style="width: 140px;" class="text-center">Trạng thái phục vụ</th>
+                            <th style="width: 120px;" class="text-center">Tình trạng hoạt động</th>
+                            <th style="width: 220px;" class="text-center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,35 +155,35 @@
                                 </td>
                                 <td class="text-center align-middle">
                                     <span class="badge badge-info px-2 py-1">
-                                        <i class="fa fa-map-marker mr-1"></i> @item.Zone
+                                        <i class="fa fa-map-marker mr-1"></i> @(Vietnamese.Label(item.Zone))
                                     </span>
                                 </td>
                                 <td class="text-center align-middle">
                                     @if (item.Status == "Available")
                                     {
-                                        <span class="badge badge-success px-2 py-1">Available</span>
+                                        <span class="badge badge-success px-2 py-1">Sẵn sàng</span>
                                     }
                                     else if (item.Status == "Occupied")
                                     {
-                                        <span class="badge badge-danger px-2 py-1">Occupied</span>
+                                        <span class="badge badge-danger px-2 py-1">Đang sử dụng</span>
                                     }
                                     else if (item.Status == "Reserved")
                                     {
-                                        <span class="badge badge-warning px-2 py-1">Reserved</span>
+                                        <span class="badge badge-warning px-2 py-1">Đã đặt</span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-secondary px-2 py-1">@item.Status</span>
+                                        <span class="badge badge-secondary px-2 py-1">@(Vietnamese.Label(item.Status))</span>
                                     }
                                 </td>
                                 <td class="text-center align-middle">
                                     @if (item.IsActive)
                                     {
-                                        <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i> Active</span>
+                                        <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i> Đang hoạt động</span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-secondary px-2 py-1"><i class="fa fa-eye-slash mr-1"></i> Inactive</span>
+                                        <span class="badge badge-secondary px-2 py-1"><i class="fa fa-eye-slash mr-1"></i> Ngừng hoạt động</span>
                                     }
                                 </td>
                                 <td class="text-center align-middle">
@@ -191,7 +191,7 @@
                                         <!-- Edit -->
                                         <a href="@Url.Action("Edit", "Tables", new { area = "Admin", id = item.Id })"
                                            class="btn btn-outline-primary btn-sm mr-1"
-                                           title="Edit table">
+                                           title="Sửa bàn">
                                             <i class="fa fa-pencil"></i>
                                         </a>
 
@@ -202,7 +202,7 @@
                                             <button type="submit"
                                                     class="btn @(item.IsActive ? "btn-outline-warning" : "btn-outline-success") btn-sm"
                                                     title="@(item.IsActive ? "Deactivate (Hide from booking menu)" : "Activate (Show on booking menu)")"
-                                                    onclick="return confirm('Change active status of table \'@item.TableNumber\' to @(item.IsActive ? "Inactive" : "Active")?');">
+                                                    onclick="return confirm('Bạn xác nhận thực hiện thao tác này?');">
                                                 <i class="fa @(item.IsActive ? "fa-pause" : "fa-play")"></i>
                                             </button>
                                         }
@@ -215,8 +215,8 @@
                                             {
                                                 <button type="button"
                                                         class="btn btn-outline-danger btn-sm"
-                                                        title="Cannot delete: Table is referenced by reservations or orders. Set to Inactive instead."
-                                                        onclick="alert('Cannot delete table \'@item.TableNumber\' because it is referenced by @resCount reservation(s) and @orderCount order(s). Please use Deactivate or Maintenance status instead.');">
+                                                        title="Bàn đang được tham chiếu. Hãy ngừng hoạt động thay vì xóa."
+                                                        onclick="alert('Dữ liệu đang được sử dụng. Hãy ngừng hoạt động thay vì xóa.');">
                                                     <i class="fa fa-trash-o"></i>
                                                 </button>
                                             }
@@ -224,8 +224,8 @@
                                             {
                                                 <button type="submit"
                                                         class="btn btn-outline-danger btn-sm"
-                                                        title="Delete table permanently"
-                                                        onclick="return confirm('Are you sure you want to delete table \'@item.TableNumber\'?');">
+                                                        title="Xóa bàn"
+                                                        onclick="return confirm('Bạn xác nhận thực hiện thao tác này?');">
                                                     <i class="fa fa-trash-o"></i>
                                                 </button>
                                             }
@@ -244,10 +244,10 @@
     {
         <div class="card-footer bg-light d-flex justify-content-between align-items-center">
             <span class="text-muted small">
-                Showing <strong>@totalCount</strong> restaurant tables (@availableCount available)
+                Đang hiển thị <strong>@totalCount</strong> bàn (@availableCount sẵn sàng)
             </span>
             <a href="@Url.Action("Create", "Tables", new { area = "Admin" })" class="btn btn-primary btn-sm">
-                <i class="fa fa-plus-circle mr-1"></i> Add Table
+                <i class="fa fa-plus-circle mr-1"></i> Thêm bàn
             </a>
         </div>
     }

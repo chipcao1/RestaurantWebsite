@@ -35,12 +35,12 @@ namespace RestaurantWebsite.Controllers
 
             if (string.IsNullOrWhiteSpace(email))
             {
-                ModelState.AddModelError("Email", "Email is required.");
+                ModelState.AddModelError("Email", "Vui lòng nhập email.");
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                ModelState.AddModelError("Password", "Password is required.");
+                ModelState.AddModelError("Password", "Vui lòng nhập mật khẩu.");
             }
 
             if (!ModelState.IsValid)
@@ -54,7 +54,7 @@ namespace RestaurantWebsite.Controllers
 
             if (user == null || !user.IsActive)
             {
-                ModelState.AddModelError("", "Invalid email or password.");
+                ModelState.AddModelError("", "Email hoặc mật khẩu không chính xác.");
                 ViewBag.ReturnUrl = returnUrl;
                 return View();
             }
@@ -64,7 +64,7 @@ namespace RestaurantWebsite.Controllers
 
             if (!isPasswordValid)
             {
-                ModelState.AddModelError("", "Invalid email or password.");
+                ModelState.AddModelError("", "Email hoặc mật khẩu không chính xác.");
                 ViewBag.ReturnUrl = returnUrl;
                 return View();
             }
@@ -101,7 +101,7 @@ namespace RestaurantWebsite.Controllers
                 return RedirectToRoute("AdminHome");
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", new { area = "" });
         }
 
         // =====================================================
@@ -132,25 +132,25 @@ namespace RestaurantWebsite.Controllers
 
             if (string.IsNullOrWhiteSpace(model.Email))
             {
-                ModelState.AddModelError("Email", "Email is required.");
+                ModelState.AddModelError("Email", "Vui lòng nhập email.");
             }
             else if (db.Users.Any(u => u.Email.ToLower() == model.Email.ToLower()))
             {
-                ModelState.AddModelError("Email", "This email is already registered.");
+                ModelState.AddModelError("Email", "Email đã được đăng ký.");
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                ModelState.AddModelError("Password", "Password is required.");
+                ModelState.AddModelError("Password", "Vui lòng nhập mật khẩu.");
             }
             else if (password.Length < 6)
             {
-                ModelState.AddModelError("Password", "Password must contain at least 6 characters.");
+                ModelState.AddModelError("Password", "Mật khẩu phải có ít nhất 6 ký tự.");
             }
 
             if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
             {
-                ModelState.AddModelError("ConfirmPassword", "Password confirmation does not match.");
+                ModelState.AddModelError("ConfirmPassword", "Mật khẩu nhập lại không khớp.");
             }
 
             if (!ModelState.IsValid)
@@ -167,13 +167,13 @@ namespace RestaurantWebsite.Controllers
                 Address = model.Address,
                 Role = "Customer",
                 IsActive = true,
-                CreatedAt = DateTime.Now
+                CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now
             };
 
             db.Users.Add(user);
             db.SaveChanges();
 
-            TempData["AccountSuccess"] = "Registration successful. Please log in.";
+            TempData["AccountSuccess"] = "Đăng ký thành công. Vui lòng đăng nhập.";
             return RedirectToAction("Login");
         }
 
@@ -181,312 +181,14 @@ namespace RestaurantWebsite.Controllers
         // GET: Account/Logout
         // =====================================================
         [HttpGet]
-        public ActionResult Logout()
+        public ActionResult Logout() { return View(); }
+
+        [HttpPost, ValidateAntiForgeryToken, ActionName("Logout")]
+        public ActionResult ConfirmLogout()
         {
             Session.Clear();
             Session.Abandon();
-            return RedirectToAction("Login", "Account");
-        }
-
-        // =====================================================
-        // CUSTOMER PROFILE
-        // =====================================================
-
-        [HttpGet]
-        [RoleAuthorize("Customer")]
-        public new ActionResult Profile()
-        {
-            var user = GetCurrentCustomer();
-            if (user == null)
-            {
-                return RedirectToAction("Logout");
-            }
-
-            return View("~/Views/Account/Profile.cshtml", user);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RoleAuthorize("Customer")]
-        public new ActionResult Profile(User model)
-        {
-            var user = GetCurrentCustomer();
-            if (user == null)
-            {
-                return RedirectToAction("Logout");
-            }
-
-            ModelState.Remove("PasswordHash");
-            ModelState.Remove("Role");
-            ModelState.Remove("IsActive");
-            ModelState.Remove("CreatedAt");
-            ModelState.Remove("Email");
-
-            user.FullName = string.IsNullOrWhiteSpace(model.FullName) ? null : model.FullName.Trim();
-            user.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
-            user.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
-
-            if (string.IsNullOrWhiteSpace(user.FullName))
-            {
-                ModelState.AddModelError("FullName", "Full name is required.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View("~/Views/Account/Profile.cshtml", user);
-            }
-
-            db.SaveChanges();
-            Session["UserName"] = user.FullName;
-
-            TempData["ProfileSuccess"] = "Personal information updated successfully.";
-            return RedirectToAction("Profile");
-        }
-
-        [HttpGet]
-        [RoleAuthorize("Customer")]
-        public ActionResult ChangePassword()
-        {
-            return View("~/Views/Account/ChangePassword.cshtml");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RoleAuthorize("Customer")]
-        public ActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
-        {
-            var user = GetCurrentCustomer();
-            if (user == null)
-            {
-                return RedirectToAction("Logout");
-            }
-
-            if (string.IsNullOrWhiteSpace(currentPassword))
-            {
-                ModelState.AddModelError("CurrentPassword", "Current password is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(newPassword))
-            {
-                ModelState.AddModelError("NewPassword", "New password is required.");
-            }
-            else if (newPassword.Length < 6)
-            {
-                ModelState.AddModelError("NewPassword", "New password must contain at least 6 characters.");
-            }
-
-            if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
-            {
-                ModelState.AddModelError("ConfirmPassword", "Password confirmation does not match.");
-            }
-
-            if (!string.IsNullOrWhiteSpace(currentPassword))
-            {
-                if (!PasswordHasher.VerifyPassword(user.PasswordHash, currentPassword))
-                {
-                    ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
-                }
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View("~/Views/Account/ChangePassword.cshtml");
-            }
-
-            user.PasswordHash = PasswordHasher.HashPassword(newPassword);
-            db.SaveChanges();
-
-            // logout the user after changing password
-            Session.Clear();
-            Session.Abandon();
-
-            return RedirectToAction("Login");
-        }
-
-        [HttpGet]
-        [RoleAuthorize("Customer")]
-        public ActionResult MyOrders()
-        {
-            int userId = (int)Session["UserId"];
-
-            var orders = db.Orders
-                .Include(o => o.OrderItems.Select(oi => oi.Dish))
-                .Include(o => o.OrderItems.Select(oi => oi.Combo))
-                .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToList();
-
-            return View("~/Views/Account/MyOrders.cshtml", orders);
-        }
-
-        [HttpGet]
-        [RoleAuthorize("Customer")]
-        public ActionResult MyReservations()
-        {
-            int userId = (int)Session["UserId"];
-
-            var reservations = db.Reservations
-                .Include(r => r.Table)
-                .Where(r => r.UserId == userId)
-                .OrderByDescending(r => r.ReservationDate)
-                .ToList();
-
-            return View("~/Views/Account/MyReservations.cshtml", reservations);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RoleAuthorize("Customer")]
-        public ActionResult CancelOrder(int id)
-        {
-            int userId = (int)Session["UserId"];
-
-            var order = db.Orders.FirstOrDefault(o => o.Id == id && o.UserId == userId);
-            if (order == null)
-            {
-                TempData["Error"] = "Order not found or access denied.";
-                return RedirectToAction("MyOrders");
-            }
-
-            if (order.Status != "Pending")
-            {
-                TempData["Error"] = $"Cannot cancel order #{id}. Only orders in 'Pending' status can be cancelled.";
-                return RedirectToAction("MyOrders");
-            }
-
-            order.Status = "Cancelled";
-
-            // If payment was recorded as Pending, mark as Failed
-            var payments = db.Payments.Where(p => p.OrderId == order.Id).ToList();
-            foreach (var p in payments)
-            {
-                if (p.Status == "Pending")
-                {
-                    p.Status = "Failed";
-                }
-            }
-
-            db.SaveChanges();
-
-            TempData["Success"] = $"Order #{id} has been cancelled successfully.";
-            return RedirectToAction("MyOrders");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RoleAuthorize("Customer")]
-        public ActionResult CancelReservation(int id)
-        {
-            int userId = (int)Session["UserId"];
-
-            var reservation = db.Reservations.FirstOrDefault(r => r.Id == id && r.UserId == userId);
-            if (reservation == null)
-            {
-                TempData["Error"] = "Reservation not found or access denied.";
-                return RedirectToAction("MyReservations");
-            }
-
-            if (reservation.Status != "Pending" && reservation.Status != "Confirmed")
-            {
-                TempData["Error"] = $"Cannot cancel reservation #{id}. Current status is '{reservation.Status}'.";
-                return RedirectToAction("MyReservations");
-            }
-
-            reservation.Status = "Cancelled";
-            db.SaveChanges();
-
-            TempData["Success"] = $"Reservation #{id} has been cancelled successfully.";
-            return RedirectToAction("MyReservations");
-        }
-
-        [HttpGet]
-        [RoleAuthorize("Customer")]
-        public ActionResult MyReviews()
-        {
-            int userId = (int)Session["UserId"];
-
-            var reviews = db.Reviews
-                .Include(r => r.Dish)
-                .OrderByDescending(r => r.CreatedAt)
-                .Where(r => r.UserId == userId)
-                .ToList();
-
-            return View("~/Views/Account/MyReviews.cshtml", reviews);
-        }
-
-        [HttpPost]
-        [RoleAuthorize("Customer")]
-        [ValidateAntiForgeryToken]
-        public ActionResult CreateReview(int orderId, int dishId, int rating, string comment)
-        {
-            int userId = (int)Session["UserId"];
-
-            // Server-side rating validation
-            if (rating < 1 || rating > 5)
-            {
-                TempData["Error"] = "Rating must be between 1 and 5 stars.";
-                return RedirectToAction("MyOrders");
-            }
-
-            // Verify the order belongs to this customer
-            var order = db.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefault(o => o.Id == orderId && o.UserId == userId);
-
-            if (order == null)
-            {
-                TempData["Error"] = "Order not found or access denied.";
-                return RedirectToAction("MyOrders");
-            }
-
-            // Verify the dish is part of this order
-            bool isDishInOrder = order.OrderItems.Any(oi => oi.DishId == dishId);
-            if (!isDishInOrder)
-            {
-                TempData["Error"] = "The specified dish is not part of this order.";
-                return RedirectToAction("MyOrders");
-            }
-
-            // Check for duplicate review for this Order + Dish combination
-            bool reviewExists = db.Reviews.Any(r => r.UserId == userId && r.OrderId == orderId && r.DishId == dishId);
-            if (reviewExists)
-            {
-                TempData["Error"] = "You have already submitted a review for this dish on this order.";
-                return RedirectToAction("MyOrders");
-            }
-
-            // Create and persist the review
-            var review = new Review
-            {
-                UserId = userId,
-                OrderId = orderId,
-                DishId = dishId,
-                Rating = rating,
-                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim(),
-                CreatedAt = DateTime.Now,
-                IsApproved = true
-            };
-
-            db.Reviews.Add(review);
-            db.SaveChanges();
-
-            TempData["Success"] = "Thank you! Your review has been submitted successfully.";
-            return RedirectToAction("MyReviews");
-        }
-
-        private User GetCurrentCustomer()
-        {
-            if (Session["UserId"] == null)
-            {
-                return null;
-            }
-
-            int userId = (int)Session["UserId"];
-
-            return db.Users.FirstOrDefault(u =>
-                u.Id == userId &&
-                u.IsActive &&
-                u.Role == "Customer");
+            return RedirectToAction("Login", "Account", new { area = "" });
         }
 
         protected override void Dispose(bool disposing)

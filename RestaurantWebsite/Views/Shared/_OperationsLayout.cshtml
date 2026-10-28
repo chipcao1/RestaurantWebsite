@@ -1,0 +1,90 @@
+@using RestaurantWebsite.Infrastructure
+@{ var role=Convert.ToString(Session["Role"]); bool admin=role=="Admin"; string area=admin?"Admin":"Staff"; }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>@ViewBag.Title · Feane</title>
+<link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")"/>
+<link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")"/>
+<link rel="stylesheet" href="@Url.Content("~/Content/yamy.css")"/>@RenderSection("Styles",false)</head>
+<body class="operations">
+<a class="skip-link" href="#main-content">Đến nội dung chính</a>
+<div class="workspace">
+<aside class="workspace-sidebar"><button type="button" class="sidebar-close btn btn-outline-light" aria-label="Đóng menu">×</button>
+<a class="workspace-brand" href="@Url.RouteUrl(admin?"AdminHome":"StaffHome")">Feane<span>VẬN HÀNH NHÀ HÀNG</span>
+</a>
+<div class="workspace-identity">
+<span class="avatar-circle">
+<i class="fa fa-user">
+</i>
+</span>
+<strong>@Session["UserName"]</strong>
+<small>@Vietnamese.Label(role)</small>
+</div>
+<nav aria-label="Chức năng theo vai trò">
+<a href="@Url.RouteUrl(admin?"AdminHome":"StaffHome")">
+<i class="fa fa-dashboard">
+</i> Tổng quan</a>
+<a href="@(admin?Url.Action("Index", "Orders",new{area="Admin"}):Url.Action("Orders", "Staff",new{area="Staff"}))">
+<i class="fa fa-cutlery">
+</i> Xử lý đơn hàng</a>
+<a href="@(admin?Url.Action("Index", "Reservations",new{area="Admin"}):Url.Action("Reservations", "Staff",new{area="Staff"}))">
+<i class="fa fa-calendar">
+</i> Đặt bàn</a>
+<p class="nav-group">THỰC ĐƠN & CHẤT LƯỢNG</p>
+<a href="@Url.Action("Index", "Categories",new{area})">
+<i class="fa fa-list">
+</i> Danh mục món</a>
+<a href="@Url.Action("Index", "Dishes",new{area})">
+<i class="fa fa-book">
+</i> Món ăn</a>
+<a href="@Url.Action("Index", "Reviews",new{area})">
+<i class="fa fa-star-o">
+</i> Đánh giá</a>
+@if(admin){<a href="@Url.Action("Index", "Combos",new{area="Admin"})">
+<i class="fa fa-cubes">
+</i> Suất ăn kết hợp</a>
+<a href="@Url.Action("Index", "Promotions",new{area="Admin"})">
+<i class="fa fa-tag">
+</i> Khuyến mãi</a>
+<p class="nav-group">QUẢN TRỊ</p>
+<a href="@Url.Action("Index", "Tables",new{area="Admin"})">
+<i class="fa fa-th-large">
+</i> Bàn & khu vực</a>
+<a href="@Url.Action("Index", "Users",new{area="Admin"})">
+<i class="fa fa-users">
+</i> Tài khoản & phân quyền</a>
+<a href="@Url.Action("Index", "Reports",new{area="Admin"})">
+<i class="fa fa-bar-chart">
+</i> Báo cáo doanh thu</a>}
+else {<a href="@Url.Action("Menu", "Reports",new{area="Staff"})">
+<i class="fa fa-file-pdf-o">
+</i> Tải thực đơn PDF</a>}
+</nav>
+<div class="sidebar-bottom">
+<a href="@Url.Action("Index", "Home",new{area=""})">Xem website nhà hàng <i class="fa fa-external-link">
+</i>
+</a>@using(Html.BeginForm("Logout", "Account",new{area=""},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-outline-light btn-block mt-3">Đăng xuất</button>}</div>
+</aside>
+<div class="workspace-body">
+<header class="workspace-topbar">
+<button class="btn btn-outline-secondary sidebar-toggle" type="button" aria-label="Mở hoặc đóng menu" aria-expanded="false">☰</button>
+<span>@(admin?"Khu vực quản trị":"Khu vực nhân viên")</span>
+<span class="workspace-date">@RestaurantClock.Now.ToString("dd/MM/yyyy") · Giờ Việt Nam</span>
+</header>
+<main id="main-content" class="workspace-main">@Html.Partial("~/Views/Shared/_Alerts.cshtml")@RenderBody()</main>
+<footer class="workspace-footer">Feane · Phục vụ tận tâm, vận hành rõ ràng.</footer>
+</div>
+</div>
+<script src="@Url.Content("~/Resources/User/js/jquery-3.4.1.min.js")">
+</script>
+<script src="@Url.Content("~/Resources/User/js/bootstrap.js")">
+</script>
+<script>document.querySelector('.sidebar-toggle').addEventListener('click',function(){var open=document.body.classList.toggle('sidebar-open');this.setAttribute('aria-expanded',open?'true':'false');});</script>
+<script>function closeSidebar(){document.body.classList.remove('sidebar-open');document.querySelector('.sidebar-toggle').setAttribute('aria-expanded','false');}document.querySelector('.sidebar-close').addEventListener('click',closeSidebar);document.addEventListener('keydown',function(event){if(event.key==='Escape')closeSidebar();});</script>
+@RenderSection("scripts",false)<script src="@Url.Content("~/Scripts/yamy.js")">
+</script>
+</body>
+</html>

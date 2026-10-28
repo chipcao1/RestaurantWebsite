@@ -1,5 +1,5 @@
-﻿@{
-    ViewBag.Title = "Page Not Found";
+@{
+    ViewBag.Title = "Không tìm thấy trang";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -14,22 +14,21 @@
             </h2>
 
             <h3>
-                Page Not Found
+                Không tìm thấy trang
             </h3>
 
             <p>
-                Sorry, the page you are looking for does not exist
-                or may have been moved.
+                Trang bạn tìm không tồn tại hoặc đã được chuyển sang địa chỉ khác.
             </p>
 
             <div class="btn-box">
 
-                <a href="@Url.Action("Index", "Home")">
-                    Back To Home
+                <a href="@Url.Action("Index", "Home", new { area = "" })">
+                    Về trang chủ
                 </a>
 
-                <a href="@Url.Action("Index", "Menu")">
-                    View Menu
+                <a href="@Url.Action("Index", "Menu", new { area = "Customer" })">
+                    Xem thực đơn
                 </a>
 
             </div>

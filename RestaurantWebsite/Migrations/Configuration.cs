@@ -15,6 +15,10 @@ namespace RestaurantWebsite.Migrations
 
         protected override void Seed(RestaurantWebsite.Models.AppDbContext context)
         {
+            if (!string.Equals(System.Environment.GetEnvironmentVariable("RESTAURANT_SEED_DEMO"), "true", System.StringComparison.OrdinalIgnoreCase)) return;
+            if (context.Users.Any()) return;
+            var demoPassword = System.Environment.GetEnvironmentVariable("RESTAURANT_DEMO_PASSWORD");
+            if (string.IsNullOrWhiteSpace(demoPassword) || demoPassword.Length < 12) throw new System.InvalidOperationException("Thiết lập RESTAURANT_DEMO_PASSWORD dài ít nhất 12 ký tự trước khi tạo dữ liệu minh họa.");
             // =====================================================
             // 1. USERS (1 Admin, 3 Staff, 15 Customers = 19 Total)
             // =====================================================
@@ -23,49 +27,49 @@ namespace RestaurantWebsite.Migrations
                 // Admin (1)
                 new User
                 {
-                    FullName = "Administrator",
+                    FullName = "Quản trị viên",
                     Email = "admin@gmail.com",
-                    PasswordHash = HashPassword("123456"),
+                    PasswordHash = RestaurantWebsite.Security.PasswordHasher.HashPassword(demoPassword),
                     Phone = "0901000000",
-                    Address = "123 Admin Street, District 1, HCMC",
+                    Address = "123 đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
                     Role = "Admin",
                     IsActive = true,
-                    CreatedAt = DateTime.Now.AddDays(-60)
+                    CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-60)
                 },
 
                 // Staff (3)
                 new User
                 {
-                    FullName = "Nguyen Van Staff",
+                    FullName = "Nguyễn Văn An",
                     Email = "staff@gmail.com",
-                    PasswordHash = HashPassword("123456"),
+                    PasswordHash = RestaurantWebsite.Security.PasswordHasher.HashPassword(demoPassword),
                     Phone = "0901000001",
-                    Address = "45 Staff Lane, District 3, HCMC",
+                    Address = "45 đường Võ Văn Tần, Quận 3, TP. Hồ Chí Minh",
                     Role = "Staff",
                     IsActive = true,
-                    CreatedAt = DateTime.Now.AddDays(-55)
+                    CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-55)
                 },
                 new User
                 {
-                    FullName = "Tran Thi Staff Two",
+                    FullName = "Trần Thị Bình",
                     Email = "staff2@gmail.com",
-                    PasswordHash = HashPassword("123456"),
+                    PasswordHash = RestaurantWebsite.Security.PasswordHasher.HashPassword(demoPassword),
                     Phone = "0901000002",
-                    Address = "78 Staff Road, District 5, HCMC",
+                    Address = "78 đường Trần Phú, Quận 5, TP. Hồ Chí Minh",
                     Role = "Staff",
                     IsActive = true,
-                    CreatedAt = DateTime.Now.AddDays(-50)
+                    CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-50)
                 },
                 new User
                 {
-                    FullName = "Le Hoang Staff Three",
+                    FullName = "Lê Hoàng Minh",
                     Email = "staff3@gmail.com",
-                    PasswordHash = HashPassword("123456"),
+                    PasswordHash = RestaurantWebsite.Security.PasswordHasher.HashPassword(demoPassword),
                     Phone = "0901000003",
-                    Address = "12 Staff Blvd, Binh Thanh District, HCMC",
+                    Address = "12 đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
                     Role = "Staff",
                     IsActive = true,
-                    CreatedAt = DateTime.Now.AddDays(-45)
+                    CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-45)
                 }
             };
 
@@ -74,14 +78,14 @@ namespace RestaurantWebsite.Migrations
             {
                 users.Add(new User
                 {
-                    FullName = $"Customer User {i:D2}",
+                    FullName = $"Khách hàng {i:D2}",
                     Email = i == 1 ? "customer@gmail.com" : $"customer{i}@gmail.com",
-                    PasswordHash = HashPassword("123456"),
+                    PasswordHash = RestaurantWebsite.Security.PasswordHasher.HashPassword(demoPassword),
                     Phone = $"09020000{i:D2}",
-                    Address = $"{i * 10} Customer Street, District {((i % 10) + 1)}, HCMC",
+                    Address = $"{i * 10} đường Nguyễn Trãi, Quận {((i % 10) + 1)}, TP. Hồ Chí Minh",
                     Role = "Customer",
                     IsActive = true,
-                    CreatedAt = DateTime.Now.AddDays(-40 + i)
+                    CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-40 + i)
                 });
             }
 
@@ -97,12 +101,12 @@ namespace RestaurantWebsite.Migrations
             // =====================================================
             var categories = new List<Category>
             {
-                new Category { Name = "Appetizers", Description = "Fresh appetizers & starters", ImageUrl = "/Content/images/categories/appetizers.jpg", IsActive = true },
-                new Category { Name = "Main Dishes", Description = "Hearty meat & poultry entrees", ImageUrl = "/Content/images/categories/main-dishes.jpg", IsActive = true },
-                new Category { Name = "Rice & Noodles", Description = "Traditional rice & noodle dishes", ImageUrl = "/Content/images/categories/rice-noodles.jpg", IsActive = true },
-                new Category { Name = "Seafood", Description = "Fresh coastal seafood delicacies", ImageUrl = "/Content/images/categories/seafood.jpg", IsActive = true },
-                new Category { Name = "Drinks", Description = "Refreshing beverages & juices", ImageUrl = "/Content/images/categories/drinks.jpg", IsActive = true },
-                new Category { Name = "Desserts", Description = "Sweet cakes & cold treats", ImageUrl = "/Content/images/categories/desserts.jpg", IsActive = true }
+                new Category { Name = "Khai vị", Description = "Các món khai vị tươi ngon.", ImageUrl = "/Content/images/categories/appetizers.jpg", IsActive = true },
+                new Category { Name = "Món chính", Description = "Món chính từ thịt bò, heo và gà.", ImageUrl = "/Content/images/categories/main-dishes.jpg", IsActive = true },
+                new Category { Name = "Cơm và phở", Description = "Các món cơm và phở truyền thống.", ImageUrl = "/Content/images/categories/rice-noodles.jpg", IsActive = true },
+                new Category { Name = "Hải sản", Description = "Hải sản tươi ngon từ biển.", ImageUrl = "/Content/images/categories/seafood.jpg", IsActive = true },
+                new Category { Name = "Đồ uống", Description = "Nước giải khát và nước ép trái cây.", ImageUrl = "/Content/images/categories/drinks.jpg", IsActive = true },
+                new Category { Name = "Tráng miệng", Description = "Bánh ngọt và các món tráng miệng mát lạnh.", ImageUrl = "/Content/images/categories/desserts.jpg", IsActive = true }
             };
 
             foreach (var category in categories)
@@ -115,56 +119,56 @@ namespace RestaurantWebsite.Migrations
             // =====================================================
             // 3. DISHES (30 Dishes)
             // =====================================================
-            var appetizers = context.Categories.First(c => c.Name == "Appetizers");
-            var mainDishes = context.Categories.First(c => c.Name == "Main Dishes");
-            var riceNoodles = context.Categories.First(c => c.Name == "Rice & Noodles");
-            var seafood = context.Categories.First(c => c.Name == "Seafood");
-            var drinks = context.Categories.First(c => c.Name == "Drinks");
-            var desserts = context.Categories.First(c => c.Name == "Desserts");
+            var appetizers = context.Categories.First(c => c.Name == "Khai vị");
+            var mainDishes = context.Categories.First(c => c.Name == "Món chính");
+            var riceNoodles = context.Categories.First(c => c.Name == "Cơm và phở");
+            var seafood = context.Categories.First(c => c.Name == "Hải sản");
+            var drinks = context.Categories.First(c => c.Name == "Đồ uống");
+            var desserts = context.Categories.First(c => c.Name == "Tráng miệng");
 
             var dishes = new List<Dish>
             {
                 // APPETIZERS (5)
-                new Dish { Name = "Spring Rolls", Description = "Fresh Vietnamese spring rolls with shrimp.", Price = 45000, PreparationTime = 10, Status = "Available", CategoryId = appetizers.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Fried Chicken Wings", Description = "Crispy wings served with sweet chili sauce.", Price = 65000, PreparationTime = 15, Status = "Available", CategoryId = appetizers.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "French Fries", Description = "Crispy golden french fries.", Price = 35000, PreparationTime = 10, Status = "Available", CategoryId = appetizers.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Fried Dumplings", Description = "Savory pork dumplings.", Price = 50000, PreparationTime = 12, Status = "Available", CategoryId = appetizers.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Garlic Bread", Description = "Toasted bread with garlic butter sauce.", Price = 40000, PreparationTime = 8, Status = "Available", CategoryId = appetizers.Id, CreatedAt = DateTime.Now },
+                new Dish { Name = "Gỏi cuốn tôm", Description = "Gỏi cuốn tôm tươi kiểu Việt Nam.", Price = 45000, PreparationTime = 10, Status = "Available", CategoryId = appetizers.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cánh gà chiên", Description = "Cánh gà giòn dùng cùng sốt tương ớt ngọt.", Price = 65000, PreparationTime = 15, Status = "Available", CategoryId = appetizers.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Khoai tây chiên", Description = "Khoai tây chiên vàng giòn.", Price = 35000, PreparationTime = 10, Status = "Available", CategoryId = appetizers.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Há cảo chiên", Description = "Há cảo nhân thịt heo đậm vị.", Price = 50000, PreparationTime = 12, Status = "Available", CategoryId = appetizers.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Bánh mì bơ tỏi", Description = "Bánh mì nướng phủ bơ tỏi thơm lừng.", Price = 40000, PreparationTime = 8, Status = "Available", CategoryId = appetizers.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
 
                 // MAIN DISHES (5)
-                new Dish { Name = "Grilled Beef Steak", Description = "Tender beef steak with mushroom sauce.", Price = 189000, PreparationTime = 25, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Grilled Chicken", Description = "Grilled chicken with herbs.", Price = 99000, PreparationTime = 20, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Pork Chop", Description = "Juicy pork chop with rice.", Price = 119000, PreparationTime = 22, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Beef Burger", Description = "Classic beef burger with cheese.", Price = 89000, PreparationTime = 15, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Chicken Burger", Description = "Crispy chicken burger.", Price = 79000, PreparationTime = 15, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = DateTime.Now },
+                new Dish { Name = "Bò nướng sốt nấm", Description = "Thịt bò nướng mềm dùng cùng sốt nấm.", Price = 189000, PreparationTime = 25, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Gà nướng thảo mộc", Description = "Gà nướng thơm hương thảo mộc.", Price = 99000, PreparationTime = 20, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cơm sườn nướng", Description = "Sườn heo nướng mọng nước dùng cùng cơm.", Price = 119000, PreparationTime = 22, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Bánh mì kẹp bò", Description = "Bánh mì kẹp thịt bò và phô mai.", Price = 89000, PreparationTime = 15, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Bánh mì kẹp gà", Description = "Bánh mì kẹp gà chiên giòn.", Price = 79000, PreparationTime = 15, Status = "Available", CategoryId = mainDishes.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
 
                 // RICE & NOODLES (5)
-                new Dish { Name = "Fried Rice", Description = "Fried rice with eggs and vegetables.", Price = 65000, PreparationTime = 12, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Beef Fried Rice", Description = "Special fried rice with tender beef.", Price = 85000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Chicken Fried Rice", Description = "Savory chicken fried rice.", Price = 75000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Beef Noodles", Description = "Vietnamese beef pho noodles.", Price = 79000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Chicken Noodles", Description = "Rice noodles with poached chicken.", Price = 69000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = DateTime.Now },
+                new Dish { Name = "Cơm chiên trứng", Description = "Cơm chiên cùng trứng và rau củ.", Price = 65000, PreparationTime = 12, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cơm chiên bò", Description = "Cơm chiên đặc biệt cùng thịt bò mềm.", Price = 85000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cơm chiên gà", Description = "Cơm chiên thịt gà đậm đà.", Price = 75000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Phở bò", Description = "Phở bò truyền thống Việt Nam.", Price = 79000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Phở gà", Description = "Phở dùng cùng thịt gà luộc.", Price = 69000, PreparationTime = 15, Status = "Available", CategoryId = riceNoodles.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
 
                 // SEAFOOD (5)
-                new Dish { Name = "Grilled Shrimp", Description = "Fresh king prawns grilled with garlic.", Price = 149000, PreparationTime = 20, Status = "Available", CategoryId = seafood.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Fried Calamari", Description = "Crispy fried squid rings.", Price = 129000, PreparationTime = 18, Status = "Available", CategoryId = seafood.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Grilled Salmon", Description = "Atlantic salmon with lemon sauce.", Price = 199000, PreparationTime = 25, Status = "Available", CategoryId = seafood.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Seafood Hotpot", Description = "Seafood hotpot with vegetables.", Price = 249000, PreparationTime = 30, Status = "Available", CategoryId = seafood.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Butter Garlic Prawns", Description = "Prawns sautéed in garlic butter.", Price = 169000, PreparationTime = 20, Status = "Available", CategoryId = seafood.Id, CreatedAt = DateTime.Now },
+                new Dish { Name = "Tôm nướng tỏi", Description = "Tôm tươi nướng cùng tỏi.", Price = 149000, PreparationTime = 20, Status = "Available", CategoryId = seafood.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Mực chiên giòn", Description = "Khoanh mực chiên vàng giòn.", Price = 129000, PreparationTime = 18, Status = "Available", CategoryId = seafood.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cá hồi nướng", Description = "Cá hồi nướng dùng cùng sốt chanh.", Price = 199000, PreparationTime = 25, Status = "Available", CategoryId = seafood.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Lẩu hải sản", Description = "Lẩu hải sản dùng cùng rau tươi.", Price = 249000, PreparationTime = 30, Status = "Available", CategoryId = seafood.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Tôm sốt bơ tỏi", Description = "Tôm áp chảo với sốt bơ tỏi.", Price = 169000, PreparationTime = 20, Status = "Available", CategoryId = seafood.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
 
                 // DRINKS (5)
-                new Dish { Name = "Coca Cola", Description = "Chilled soda.", Price = 20000, PreparationTime = 2, Status = "Available", CategoryId = drinks.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Orange Juice", Description = "Freshly squeezed orange juice.", Price = 35000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Lemon Tea", Description = "Iced refreshing lemon tea.", Price = 30000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Milk Coffee", Description = "Vietnamese iced coffee with milk.", Price = 35000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Mineral Water", Description = "Bottled water.", Price = 15000, PreparationTime = 1, Status = "Available", CategoryId = drinks.Id, CreatedAt = DateTime.Now },
+                new Dish { Name = "Nước ngọt Coca-Cola", Description = "Nước ngọt dùng lạnh.", Price = 20000, PreparationTime = 2, Status = "Available", CategoryId = drinks.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Nước cam ép", Description = "Nước cam tươi ép nguyên chất.", Price = 35000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Trà chanh", Description = "Trà chanh đá thanh mát.", Price = 30000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Cà phê sữa đá", Description = "Cà phê sữa đá kiểu Việt Nam.", Price = 35000, PreparationTime = 5, Status = "Available", CategoryId = drinks.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Nước khoáng", Description = "Nước khoáng đóng chai.", Price = 15000, PreparationTime = 1, Status = "Available", CategoryId = drinks.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
 
                 // DESSERTS (5)
-                new Dish { Name = "Cheesecake", Description = "Berry cheesecake.", Price = 55000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Chocolate Cake", Description = "Fudge chocolate cake slice.", Price = 50000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Ice Cream", Description = "Vanilla ice cream scoop.", Price = 40000, PreparationTime = 3, Status = "Available", CategoryId = desserts.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Fruit Salad", Description = "Seasonal fresh fruit bowl.", Price = 45000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = DateTime.Now },
-                new Dish { Name = "Tiramisu", Description = "Classic Italian coffee cake.", Price = 65000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = DateTime.Now }
+                new Dish { Name = "Bánh phô mai", Description = "Bánh phô mai phủ quả mọng.", Price = 55000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Bánh sô-cô-la", Description = "Bánh sô-cô-la mềm mịn.", Price = 50000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Kem vani", Description = "Kem vani thơm ngọt.", Price = 40000, PreparationTime = 3, Status = "Available", CategoryId = desserts.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Trái cây theo mùa", Description = "Trái cây tươi tuyển chọn theo mùa.", Price = 45000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now },
+                new Dish { Name = "Bánh tiramisu", Description = "Bánh cà phê tiramisu kiểu Ý.", Price = 65000, PreparationTime = 5, Status = "Available", CategoryId = desserts.Id, CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now }
             };
 
             foreach (var dish in dishes)
@@ -226,20 +230,20 @@ namespace RestaurantWebsite.Migrations
             // =====================================================
             // 6. COMBOS (3 Combo Packages)
             // =====================================================
-            var springRolls = context.Dishes.First(d => d.Name == "Spring Rolls");
-            var grilledChicken = context.Dishes.First(d => d.Name == "Grilled Chicken");
-            var friedRice = context.Dishes.First(d => d.Name == "Fried Rice");
-            var cocaCola = context.Dishes.First(d => d.Name == "Coca Cola");
-            var frenchFries = context.Dishes.First(d => d.Name == "French Fries");
-            var cheesecake = context.Dishes.First(d => d.Name == "Cheesecake");
-            var chocolateCake = context.Dishes.First(d => d.Name == "Chocolate Cake");
-            var orangeJuice = context.Dishes.First(d => d.Name == "Orange Juice");
+            var springRolls = context.Dishes.First(d => d.Name == "Gỏi cuốn tôm");
+            var grilledChicken = context.Dishes.First(d => d.Name == "Gà nướng thảo mộc");
+            var friedRice = context.Dishes.First(d => d.Name == "Cơm chiên trứng");
+            var cocaCola = context.Dishes.First(d => d.Name == "Nước ngọt Coca-Cola");
+            var frenchFries = context.Dishes.First(d => d.Name == "Khoai tây chiên");
+            var cheesecake = context.Dishes.First(d => d.Name == "Bánh phô mai");
+            var chocolateCake = context.Dishes.First(d => d.Name == "Bánh sô-cô-la");
+            var orangeJuice = context.Dishes.First(d => d.Name == "Nước cam ép");
 
             var combos = new List<Combo>
             {
-                new Combo { Name = "Family Combo", Description = "Complete combo for family.", Price = 299000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now.AddMonths(6) },
-                new Combo { Name = "Chicken Meal Combo", Description = "Chicken meal with fries & drink.", Price = 139000, ImageUrl = "/Resources/User/images/combo03.jpg", IsActive = true, StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now.AddMonths(6) },
-                new Combo { Name = "Dessert Combo", Description = "Sweet dessert treat combo.", Price = 99000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now.AddMonths(6) }
+                new Combo { Name = "Suất ăn gia đình", Description = "Suất ăn đầy đủ dành cho cả gia đình.", Price = 299000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất gà và nước uống", Description = "Suất gà dùng cùng khoai tây chiên và nước uống.", Price = 139000, ImageUrl = "/Resources/User/images/combo03.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất tráng miệng", Description = "Kết hợp các món tráng miệng ngọt ngào.", Price = 99000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) }
             };
 
             foreach (var combo in combos)
@@ -248,9 +252,9 @@ namespace RestaurantWebsite.Migrations
             }
             context.SaveChanges();
 
-            var familyCombo = context.Combos.First(c => c.Name == "Family Combo");
-            var chickenCombo = context.Combos.First(c => c.Name == "Chicken Meal Combo");
-            var dessertCombo = context.Combos.First(c => c.Name == "Dessert Combo");
+            var familyCombo = context.Combos.First(c => c.Name == "Suất ăn gia đình");
+            var chickenCombo = context.Combos.First(c => c.Name == "Suất gà và nước uống");
+            var dessertCombo = context.Combos.First(c => c.Name == "Suất tráng miệng");
 
             AddComboItem(context, familyCombo.Id, springRolls.Id, 1);
             AddComboItem(context, familyCombo.Id, grilledChicken.Id, 2);
@@ -272,11 +276,11 @@ namespace RestaurantWebsite.Migrations
             // =====================================================
             var promotions = new List<Promotion>
             {
-                new Promotion { Code = "WELCOME10", Name = "Welcome 10%", Description = "10% discount for orders.", DiscountType = "Percentage", DiscountValue = 10, MinimumOrderAmount = 100000, MaximumDiscount = 50000, StartDate = DateTime.Now.AddMonths(-2), EndDate = DateTime.Now.AddMonths(4), UsageLimit = 100, UsedCount = 5, IsActive = true },
-                new Promotion { Code = "SAVE50K", Name = "Save 50K", Description = "50,000 VND discount.", DiscountType = "FixedAmount", DiscountValue = 50000, MinimumOrderAmount = 300000, MaximumDiscount = 50000, StartDate = DateTime.Now.AddMonths(-2), EndDate = DateTime.Now.AddMonths(4), UsageLimit = 50, UsedCount = 3, IsActive = true },
-                new Promotion { Code = "WEEKEND15", Name = "Weekend 15%", Description = "15% weekend discount.", DiscountType = "Percentage", DiscountValue = 15, MinimumOrderAmount = 200000, MaximumDiscount = 70000, StartDate = DateTime.Now.AddMonths(-2), EndDate = DateTime.Now.AddMonths(3), UsageLimit = 100, UsedCount = 2, IsActive = true },
-                new Promotion { Code = "VIP20", Name = "VIP Member 20%", Description = "20% discount for VIP customers.", DiscountType = "Percentage", DiscountValue = 20, MinimumOrderAmount = 500000, MaximumDiscount = 150000, StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now.AddMonths(5), UsageLimit = 200, UsedCount = 1, IsActive = true },
-                new Promotion { Code = "FREESHIP", Name = "Free Shipping 30K", Description = "30,000 VND delivery discount.", DiscountType = "FixedAmount", DiscountValue = 30000, MinimumOrderAmount = 150000, MaximumDiscount = 30000, StartDate = DateTime.Now.AddMonths(-1), EndDate = DateTime.Now.AddMonths(3), UsageLimit = 500, UsedCount = 10, IsActive = true }
+                new Promotion { Code = "WELCOME10", Name = "Chào khách mới - giảm 10%", Description = "Giảm 10% giá trị đơn hàng.", DiscountType = "Percentage", DiscountValue = 10, MinimumOrderAmount = 100000, MaximumDiscount = 50000, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-2), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(4), UsageLimit = 100, UsedCount = 5, IsActive = true },
+                new Promotion { Code = "SAVE50K", Name = "Tiết kiệm 50.000 đồng", Description = "Giảm 50.000 đồng cho đơn hàng.", DiscountType = "FixedAmount", DiscountValue = 50000, MinimumOrderAmount = 300000, MaximumDiscount = 50000, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-2), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(4), UsageLimit = 50, UsedCount = 3, IsActive = true },
+                new Promotion { Code = "WEEKEND15", Name = "Cuối tuần - giảm 15%", Description = "Giảm 15% cho đơn hàng cuối tuần.", DiscountType = "Percentage", DiscountValue = 15, MinimumOrderAmount = 200000, MaximumDiscount = 70000, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-2), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(3), UsageLimit = 100, UsedCount = 2, IsActive = true },
+                new Promotion { Code = "VIP20", Name = "Khách thân thiết - giảm 20%", Description = "Giảm 20% dành cho khách hàng thân thiết.", DiscountType = "Percentage", DiscountValue = 20, MinimumOrderAmount = 500000, MaximumDiscount = 150000, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(5), UsageLimit = 200, UsedCount = 1, IsActive = true },
+                new Promotion { Code = "FREESHIP", Name = "Ưu đãi 30.000 đồng", Description = "Giảm 30.000 đồng trên giá trị đơn hàng.", DiscountType = "FixedAmount", DiscountValue = 30000, MinimumOrderAmount = 150000, MaximumDiscount = 30000, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(3), UsageLimit = 500, UsedCount = 10, IsActive = true }
             };
 
             foreach (var promotion in promotions)
@@ -305,11 +309,11 @@ namespace RestaurantWebsite.Migrations
                     {
                         UserId = user.Id,
                         TableId = table.Id,
-                        ReservationDate = DateTime.Now.Date.AddDays(i - 8).AddHours(11 + (i % 8) * 2), // Non-overlapping 2h slots
+                        ReservationDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.Date.AddDays(i - 8).AddHours(11 + (i % 8) * 2), // Non-overlapping 2h slots
                         PartySize = Math.Min(table.Capacity, (i % 6) + 1),
-                        SpecialRequest = i % 3 == 0 ? "High chair needed, near window" : "Anniversary dinner",
+                        SpecialRequest = i % 3 == 0 ? "Cần ghế trẻ em, ưu tiên gần cửa sổ." : "Bữa tối kỷ niệm.",
                         Status = status,
-                        CreatedAt = DateTime.Now.AddDays(-15 + i)
+                        CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-15 + i)
                     });
                 }
                 context.SaveChanges();
@@ -361,8 +365,8 @@ namespace RestaurantWebsite.Migrations
                         DiscountAmount = discount,
                         DeliveryFee = type == "Delivery" ? 20000 : 0,
                         TotalAmount = total + (type == "Delivery" ? 20000 : 0),
-                        Note = i % 4 == 0 ? "Please make it extra spicy!" : null,
-                        CreatedAt = DateTime.Now.AddDays(-30 + i).AddHours(i % 12)
+                        Note = i % 4 == 0 ? "Vui lòng làm món cay hơn." : null,
+                        CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-30 + i).AddHours(i % 12)
                     };
 
                     context.Orders.Add(order);
@@ -397,7 +401,7 @@ namespace RestaurantWebsite.Migrations
                         PaymentMethod = i % 3 == 0 ? "Bank Transfer" : (i % 3 == 1 ? "Cash" : "Digital Wallet"),
                         Amount = order.TotalAmount,
                         Status = status == "Delivered" ? "Completed" : (status == "Cancelled" ? "Failed" : "Pending"),
-                        PaymentDate = DateTime.Now.AddDays(-30 + i),
+                        PaymentDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-30 + i),
                         TransactionCode = $"TXN{order.Id:D6}"
                     });
 
@@ -436,8 +440,8 @@ namespace RestaurantWebsite.Migrations
                         OrderId = order.Id,
                         DishId = dishId,
                         Rating = (i % 5) + 1,
-                        Comment = i % 2 == 0 ? "Delicious food and prompt delivery! Will order again." : "Great service and friendly atmosphere.",
-                        CreatedAt = DateTime.Now.AddDays(-10 + i),
+                        Comment = i % 2 == 0 ? "Món ngon, giao hàng nhanh! Tôi sẽ đặt lại." : "Phục vụ tận tâm, không gian thân thiện.",
+                        CreatedAt = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddDays(-10 + i),
                         IsApproved = true
                     });
                 }

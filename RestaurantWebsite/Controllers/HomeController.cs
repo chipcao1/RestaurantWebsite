@@ -15,7 +15,7 @@ namespace RestaurantWebsite.Controllers
         // =====================================================
         public ActionResult Index()
         {
-            var now = DateTime.Now;
+            var now = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
 
             // -------------------------------------------------
             // ACTIVE CATEGORIES
@@ -33,7 +33,7 @@ namespace RestaurantWebsite.Controllers
             var dishes = db.Dishes
                 .Include(d => d.Category)
                 .Include(d => d.DishImages)
-                .Where(d => d.Status == "Available")
+                .Where(d => d.Status == "Available" && d.Category.IsActive)
                 .OrderByDescending(d => d.CreatedAt)
                 .ThenBy(d => d.Name)
                 .Take(6)
@@ -95,9 +95,7 @@ namespace RestaurantWebsite.Controllers
         // =====================================================
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
+            return RedirectToAction("About");
         }
 
 

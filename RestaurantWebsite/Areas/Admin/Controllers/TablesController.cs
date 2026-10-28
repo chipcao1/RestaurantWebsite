@@ -53,8 +53,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .ThenBy(t => t.TableNumber)
                 .ToList();
 
-            ViewBag.Zones = new SelectList(AvailableZones, zone);
-            ViewBag.Statuses = new SelectList(AvailableStatuses, status);
+            ViewBag.Zones = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableZones, zone);
+            ViewBag.Statuses = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableStatuses, status);
             ViewBag.SelectedZone = zone ?? "All";
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SearchTerm = search;
@@ -68,8 +68,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            ViewBag.Zones = new SelectList(AvailableZones, "Indoor");
-            ViewBag.Statuses = new SelectList(AvailableStatuses, "Available");
+            ViewBag.Zones = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableZones, "Indoor");
+            ViewBag.Statuses = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableStatuses, "Available");
 
             var model = new RestaurantTable
             {
@@ -87,7 +87,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(RestaurantTable model)
+        public ActionResult Create([Bind(Include = "Id,TableNumber,Capacity,Zone,Status,IsActive")] RestaurantTable model)
         {
             model.TableNumber = string.IsNullOrWhiteSpace(model.TableNumber) ? null : model.TableNumber.Trim();
             model.Zone = string.IsNullOrWhiteSpace(model.Zone) ? null : model.Zone.Trim();
@@ -96,21 +96,21 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             // Validation
             if (string.IsNullOrWhiteSpace(model.TableNumber))
             {
-                ModelState.AddModelError("TableNumber", "Table number is required.");
+                ModelState.AddModelError("TableNumber", "Vui lòng nhập số bàn.");
             }
             else if (db.RestaurantTables.Any(t => t.TableNumber.ToLower() == model.TableNumber.ToLower()))
             {
-                ModelState.AddModelError("TableNumber", "A table with this number already exists.");
+                ModelState.AddModelError("TableNumber", "Số bàn đã tồn tại.");
             }
 
             if (model.Capacity < 1 || model.Capacity > 50)
             {
-                ModelState.AddModelError("Capacity", "Capacity must be between 1 and 50 seats.");
+                ModelState.AddModelError("Capacity", "Sức chứa phải từ 1 đến 50 khách.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Zone))
             {
-                ModelState.AddModelError("Zone", "Zone is required.");
+                ModelState.AddModelError("Zone", "Vui lòng nhập khu vực.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Status))
@@ -118,17 +118,19 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 model.Status = "Available";
             }
 
+            if (!AvailableStatuses.Contains(model.Status)) ModelState.AddModelError("Status", "Trạng thái bàn không hợp lệ.");
+            if (!AvailableZones.Contains(model.Zone)) ModelState.AddModelError("Zone", "Khu vực bàn không hợp lệ.");
             if (!ModelState.IsValid)
             {
-                ViewBag.Zones = new SelectList(AvailableZones, model.Zone);
-                ViewBag.Statuses = new SelectList(AvailableStatuses, model.Status);
+                ViewBag.Zones = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableZones, model.Zone);
+                ViewBag.Statuses = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableStatuses, model.Status);
                 return View(model);
             }
 
             db.RestaurantTables.Add(model);
             db.SaveChanges();
 
-            TempData["Success"] = $"Table \"{model.TableNumber}\" was created successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 
@@ -140,7 +142,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         {
             if (!id.HasValue)
             {
-                TempData["Error"] = "Table ID was not provided.";
+                TempData["Error"] = "Thiếu mã bàn.";
                 return RedirectToAction("Index");
             }
 
@@ -151,12 +153,12 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (table == null)
             {
-                TempData["Error"] = "Table was not found.";
+                TempData["Error"] = "Không tìm thấy bàn.";
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Zones = new SelectList(AvailableZones, table.Zone);
-            ViewBag.Statuses = new SelectList(AvailableStatuses, table.Status);
+            ViewBag.Zones = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableZones, table.Zone);
+            ViewBag.Statuses = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableStatuses, table.Status);
 
             return View(table);
         }
@@ -166,7 +168,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(RestaurantTable model)
+        public ActionResult Edit([Bind(Include = "Id,TableNumber,Capacity,Zone,Status,IsActive")] RestaurantTable model)
         {
             var table = db.RestaurantTables
                 .Include(t => t.Reservations)
@@ -175,7 +177,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (table == null)
             {
-                TempData["Error"] = "Table was not found.";
+                TempData["Error"] = "Không tìm thấy bàn.";
                 return RedirectToAction("Index");
             }
 
@@ -185,27 +187,29 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (string.IsNullOrWhiteSpace(model.TableNumber))
             {
-                ModelState.AddModelError("TableNumber", "Table number is required.");
+                ModelState.AddModelError("TableNumber", "Vui lòng nhập số bàn.");
             }
             else if (db.RestaurantTables.Any(t => t.Id != model.Id && t.TableNumber.ToLower() == model.TableNumber.ToLower()))
             {
-                ModelState.AddModelError("TableNumber", "Another table with this number already exists.");
+                ModelState.AddModelError("TableNumber", "Số bàn đã tồn tại.");
             }
 
             if (model.Capacity < 1 || model.Capacity > 50)
             {
-                ModelState.AddModelError("Capacity", "Capacity must be between 1 and 50 seats.");
+                ModelState.AddModelError("Capacity", "Sức chứa phải từ 1 đến 50 khách.");
             }
 
             if (string.IsNullOrWhiteSpace(model.Zone))
             {
-                ModelState.AddModelError("Zone", "Zone is required.");
+                ModelState.AddModelError("Zone", "Vui lòng nhập khu vực.");
             }
 
+            if (!AvailableStatuses.Contains(model.Status)) ModelState.AddModelError("Status", "Trạng thái bàn không hợp lệ.");
+            if (!AvailableZones.Contains(model.Zone)) ModelState.AddModelError("Zone", "Khu vực bàn không hợp lệ.");
             if (!ModelState.IsValid)
             {
-                ViewBag.Zones = new SelectList(AvailableZones, model.Zone);
-                ViewBag.Statuses = new SelectList(AvailableStatuses, model.Status);
+                ViewBag.Zones = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableZones, model.Zone);
+                ViewBag.Statuses = RestaurantWebsite.Infrastructure.ViewOptions.Choices(AvailableStatuses, model.Status);
                 model.Reservations = table.Reservations;
                 model.Orders = table.Orders;
                 return View(model);
@@ -219,7 +223,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             db.SaveChanges();
 
-            TempData["Success"] = $"Table \"{table.TableNumber}\" was updated successfully.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 
@@ -233,15 +237,15 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             var table = db.RestaurantTables.Find(id);
             if (table == null)
             {
-                TempData["Error"] = "Table was not found.";
+                TempData["Error"] = "Không tìm thấy bàn.";
                 return RedirectToAction("Index");
             }
 
             table.IsActive = !table.IsActive;
             db.SaveChanges();
 
-            string statusText = table.IsActive ? "activated" : "deactivated";
-            TempData["Success"] = $"Table \"{table.TableNumber}\" has been {statusText}.";
+            string statusText = table.IsActive ? "kích hoạt" : "ngừng hoạt động";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
 
             return RedirectToAction("Index");
         }
@@ -260,7 +264,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             if (table == null)
             {
-                TempData["Error"] = "Table was not found.";
+                TempData["Error"] = "Không tìm thấy bàn.";
                 return RedirectToAction("Index");
             }
 
@@ -273,7 +277,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 if (resCount > 0) reason += $"{resCount} reservation(s) ";
                 if (orderCount > 0) reason += $"{orderCount} order(s) ";
 
-                TempData["Error"] = $"Cannot delete table \"{table.TableNumber}\" because it is referenced by {reason.Trim()}. Please deactivate the table or set its status to Maintenance instead of deleting.";
+                TempData["Error"] = "Dữ liệu đang được sử dụng. Hãy ngừng hoạt động thay vì xóa để giữ lịch sử.";
                 return RedirectToAction("Index");
             }
 
@@ -281,7 +285,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             db.RestaurantTables.Remove(table);
             db.SaveChanges();
 
-            TempData["Success"] = $"Table \"{tableNum}\" has been permanently deleted.";
+            TempData["Success"] = "Đã lưu thay đổi thành công.";
             return RedirectToAction("Index");
         }
 

@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 
 namespace RestaurantWebsite.Controllers
 {
@@ -10,7 +10,7 @@ namespace RestaurantWebsite.Controllers
             Response.StatusCode = 404;
             Response.TrySkipIisCustomErrors = true;
 
-            return View("Error404");
+            return View("~/Views/Shared/Error404.cshtml");
         }
 
         [HttpGet]
@@ -19,7 +19,7 @@ namespace RestaurantWebsite.Controllers
             Response.StatusCode = 500;
             Response.TrySkipIisCustomErrors = true;
 
-            return View("ServerError");
+            return View("~/Views/Shared/ServerError.cshtml");
         }
     }
 }

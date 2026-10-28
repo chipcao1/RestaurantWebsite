@@ -1,0 +1,69 @@
+@using RestaurantWebsite.Models
+@using RestaurantWebsite.Infrastructure
+@{Layout="~/Views/Shared/_OperationsLayout.cshtml";ViewBag.Title="Tổng quan ca làm";var orders=ViewBag.RecentOrders as IEnumerable<Order>??new List<Order>();var reservations=ViewBag.TodayReservations as IEnumerable<Reservation>??new List<Reservation>();}
+<div class="page-heading">
+<div>
+<p class="eyebrow">KHÔNG GIAN LÀM VIỆC · FEANE</p>
+<h1>Sẵn sàng cho một ca làm tốt</h1>
+<p>Xin chào @Session["UserName"]. Theo dõi yêu cầu mới và phục vụ khách đúng hẹn.</p>
+</div>
+<a class="btn btn-warning" href="@Url.Action("Orders", "Staff",new{area="Staff",status="Pending"})">Xử lý đơn chờ</a>
+</div>
+<div class="metric-grid">
+<div class="metric">
+<span>Đơn chờ xác nhận</span>
+<strong>@ViewBag.PendingOrdersCount</strong>
+</div>
+<div class="metric">
+<span>Đơn đang chế biến / phục vụ</span>
+<strong>@ViewBag.ProcessingOrdersCount</strong>
+</div>
+<div class="metric">
+<span>Đặt bàn hôm nay</span>
+<strong>@ViewBag.TodayReservationsCount</strong>
+</div>
+</div>
+<section class="surface">
+<div class="page-heading">
+<div>
+<h2>Đơn hàng gần đây</h2>
+<p>Chuyển đến hàng đợi để xác nhận, thu tiền và cập nhật tiến trình.</p>
+</div>
+<a href="@Url.Action("Orders", "Staff",new{area="Staff"})">Xem tất cả →</a>
+</div>
+<div class="table-responsive">
+<table class="table">
+<thead>
+<tr>
+<th>Đơn</th>
+<th>Khách hàng</th>
+<th>Hình thức</th>
+<th>Thành tiền</th>
+<th>Trạng thái</th>
+<th>Chứng từ</th>
+</tr>
+</thead>
+<tbody>@foreach(var order in orders){<tr>
+<td>#@order.Id</td>
+<td>@order.User.FullName</td>
+<td>@Vietnamese.Label(order.OrderType)</td>
+<td>@Vietnamese.Money(order.TotalAmount)</td>
+<td>@Vietnamese.Label(order.Status)</td>
+<td>
+<a href="@Url.Action("Receipt", "Order",new{area="Customer",id=order.Id})">Xem hóa đơn</a>
+</td>
+</tr>}</tbody>
+</table>
+</div>@if(!orders.Any()){<p class="empty-state">Chưa có đơn hàng.</p>}</section>
+<section class="surface">
+<div class="page-heading">
+<div>
+<h2>Lịch đón khách hôm nay</h2>
+<p>Kiểm tra người phụ trách trước khi xác nhận hoặc thay đổi bàn.</p>
+</div>
+<a href="@Url.Action("Reservations", "Staff",new{area="Staff",date=RestaurantClock.Now.ToString("yyyy-MM-dd")})">Xem lịch và phân bàn →</a>
+</div>@foreach(var r in reservations){<div class="d-flex justify-content-between border-top py-3">
+<span>
+<strong>@r.ReservationDate.ToString("HH:mm")</strong> · @r.User.FullName · @r.PartySize khách</span>
+<span>Bàn @r.Table.TableNumber · @Vietnamese.Label(r.Status)</span>
+</div>}@if(!reservations.Any()){<p class="empty-state">Hôm nay chưa có lịch đặt bàn.</p>}</section>

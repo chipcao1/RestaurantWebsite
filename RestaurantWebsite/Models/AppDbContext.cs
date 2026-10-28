@@ -5,7 +5,7 @@ namespace RestaurantWebsite.Models
     public class AppDbContext : DbContext
     {
         public AppDbContext()
-            : base("name=RestaurantWebsite")
+            : base(System.Environment.GetEnvironmentVariable("RESTAURANT_CONNECTION_STRING") ?? "name=RestaurantWebsite")
         {
         }
 

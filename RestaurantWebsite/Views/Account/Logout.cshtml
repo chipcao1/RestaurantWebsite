@@ -1,0 +1,2 @@
+@{ViewBag.Title="Đăng xuất";ViewBag.BodyClass="sub_page";}
+<section class="layout_padding"><div class="container"><div class="surface"><h1>Đăng xuất tài khoản?</h1><p>Bạn có thể đăng nhập lại để tiếp tục quản lý đơn hàng và đặt bàn.</p>@using(Html.BeginForm("Logout", "Account",new{area=""},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-warning">Xác nhận đăng xuất</button> <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Home",new{area=""})">Quay lại</a>}</div></div></section>
