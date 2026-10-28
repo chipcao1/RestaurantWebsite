@@ -21,3 +21,5 @@ node tests/frontend-smoke.cjs
 Workflow Windows có kiểm tra LocalDB, quyền truy cập, giao dịch đồng thời và PDF Unicode. Biên dịch trên Linux không thay thế nghiệm thu ứng dụng trên Windows.
 
 Database dùng nguyên schema của `main`, chỉ có migration `InitialCreate`. Xem [tương thích database và xử lý lỗi Update-Database](docs/Database-compatibility.md).
+
+Để thêm dữ liệu minh họa trực tiếp bằng SQL Server Management Studio, dùng [file SQL và hướng dẫn dữ liệu mẫu](database/README.md).

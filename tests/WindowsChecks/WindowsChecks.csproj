@@ -2,4 +2,5 @@
 <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion></PropertyGroup>
 <ItemGroup><Reference Include="RestaurantWebsite"><HintPath>../../RestaurantWebsite/bin/RestaurantWebsite.dll</HintPath></Reference><Reference Include="System.Web" /><Reference Include="System.Configuration" />
 <PackageReference Include="EntityFramework" Version="6.5.2" /><PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" /><PackageReference Include="PDFsharp" Version="1.50.5147" /></ItemGroup>
+<ItemGroup><Content Include="../../database/seed-demo.sql" Link="seed-demo.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

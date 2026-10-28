@@ -55,6 +55,29 @@ class Program
         foreach(var spec in new[]{new[]{"admin","Admin","Dashboard","Index"},new[]{"staff/Orders","Staff","Staff","Orders"},new[]{"customer/orders","Customer","Account","MyOrders"},new[]{"Menu/Index","Customer","Menu","Index"},new[]{"Account/Login","","Account","Login"},new[]{"Account/Profile","Customer","Account","Profile"},new[]{"staff/catalog/Dishes/Edit/1","Staff","Dishes","Edit"}})
         {var route=routes.GetRouteData(new ContextStub(spec[0]));Check(route!=null&&Convert.ToString(route.DataTokens["area"])==spec[1]&&Convert.ToString(route.Values["controller"])==spec[2]&&Convert.ToString(route.Values["action"])==spec[3],"route "+spec[0]);}
     }
+    static void DemoSql()
+    {
+        string sql=File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"seed-demo.sql"));
+        string[] tables={"Users","Categories","Dishes","DishImages","RestaurantTables","Comboes","ComboItems","Promotions","Reservations","Orders","OrderItems","Payments","OrderPromotions","Reviews"};
+        using(var db=new AppDbContext())
+        {
+            db.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction,sql);
+            var demoUsers=db.Users.Where(u=>u.Email.EndsWith(".yamy@example.test")).ToList();
+            Check(demoUsers.Count==4&&demoUsers.All(u=>{bool rehash;return RestaurantWebsite.Security.PasswordHasher.VerifyPassword(u.PasswordHash,"YamyDemo@2026!",out rehash)&&!rehash;}),"SQL demo accounts authenticate with application hasher");
+            var orders=db.Orders.Include(o=>o.OrderItems).Include(o=>o.Payments).Where(o=>o.Note.StartsWith("[YAMY-DEMO-O")).ToList();
+            Check(orders.Count==8&&orders.All(o=>o.SubTotal==o.OrderItems.Sum(i=>i.SubTotal)&&o.TotalAmount==o.SubTotal-o.DiscountAmount+o.DeliveryFee&&o.Payments.Single().Amount==o.TotalAmount),"SQL sample totals match line items and payments");
+            Check(db.OrderPromotions.Any(p=>p.Order.Note.StartsWith("[YAMY-DEMO-O")),"SQL sample links an order to its promotion");
+            var counts=tables.ToDictionary(t=>t,t=>db.Database.SqlQuery<int>("SELECT COUNT(*) FROM dbo.["+t+"]").Single());
+            var admin=demoUsers.Single(u=>u.Role=="Admin");admin.PasswordHash=RestaurantWebsite.Security.PasswordHasher.HashPassword("ExistingDemo@2026!");
+            var dish=db.Dishes.First(d=>d.Name=="Cơm chiên bò");dish.Price=123456;
+            db.SaveChanges();string preservedHash=admin.PasswordHash;
+            db.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction,sql);
+            Check(tables.All(t=>db.Database.SqlQuery<int>("SELECT COUNT(*) FROM dbo.["+t+"]").Single()==counts[t]),"running SQL seed twice adds no duplicates in all fourteen tables");
+            db.Entry(admin).Reload();db.Entry(dish).Reload();
+            Check(admin.PasswordHash==preservedHash&&dish.Price==123456,"SQL seed preserves existing passwords and edited prices");
+            Check(db.Categories.Any(c=>c.Name=="Appetizers"&&c.Description=="Fresh appetizers & starters"),"SQL seed preserves original catalog data");
+        }
+    }
     static void Main()
     {
         if(Environment.OSVersion.Platform!=PlatformID.Win32NT)throw new PlatformNotSupportedException("Run these integration checks on Windows with LocalDB.");
@@ -114,6 +137,7 @@ class Program
             using(var db=new AppDbContext()){Check(db.Promotions.Find(promoId).UsedCount==1,"promotion count is atomic");Check(db.Orders.Count(o=>o.TableId==tableId&&o.Status!="Cancelled")==1,"one table claim persisted");}
             byte[] pdf=PdfService.Create("BÁO CÁO TIẾNG VIỆT",Enumerable.Range(1,180).Select(i=>"Dòng "+i+": Nguyễn Văn An — Thanh toán, hoàn tiền, đặt bàn."));
             Check(Encoding.ASCII.GetString(pdf,0,4)=="%PDF","PDF header");Check(Encoding.ASCII.GetString(pdf).Contains("/ToUnicode"),"PDF includes Unicode glyph map");using(var stream=new MemoryStream(pdf))using(var document=PdfReader.Open(stream,PdfDocumentOpenMode.Import))Check(document.PageCount>1,"PDF paginates long reports");
+            DemoSql();
             Console.WriteLine(passed+" Windows checks passed");
         }
         finally
