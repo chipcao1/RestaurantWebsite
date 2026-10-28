@@ -104,6 +104,30 @@ class Program
             Check(db.Promotions.AsNoTracking().Single(p=>p.Code=="LASTONE").UsedCount==0&&db.ChangeTracker.Entries<Promotion>().All(e=>e.State==EntityState.Unchanged),"promotion preview does not consume or persist a use");
         }
     }
+    static void CatalogAndDishPermissions()
+    {
+        Check(typeof(RestaurantWebsite.Areas.Staff.Controllers.DishesController).GetMethod("Delete")==null,"staff area exposes no dish deletion endpoint even to an admin");
+        Check(typeof(RestaurantWebsite.Areas.Admin.Controllers.DishesController).GetMethod("Delete")!=null,"admin area retains its protected dish deletion action");
+        using(var db=new AppDbContext())
+        {
+            var all=new MenuCatalogService(db).Load();
+            var expected=db.Dishes.Count(d=>d.Status=="Available"&&d.Category.IsActive);
+            Check(all.Dishes.Count==expected&&expected>6,"Home catalog includes every eligible dish instead of a six-dish preview");
+            var category=all.Categories.First();
+            var filtered=new MenuCatalogService(db).Load("Phở",category.Id);
+            Check(filtered.Dishes.Select(d=>d.Id).SequenceEqual(all.Dishes.Select(d=>d.Id)),"initial category and search never truncate catalog data");
+            using(var home=new RestaurantWebsite.Controllers.HomeController())
+            using(var customer=new RestaurantWebsite.Areas.Customer.Controllers.CustomerController())
+            using(var menu=new RestaurantWebsite.Areas.Customer.Controllers.MenuController())
+            {
+                var homeModel=(RestaurantWebsite.ViewModels.MenuCatalogViewModel)((ViewResult)home.Index(null,null)).Model;
+                var customerModel=(RestaurantWebsite.ViewModels.MenuCatalogViewModel)((ViewResult)customer.Index(null,null)).Model;
+                var menuModel=(RestaurantWebsite.ViewModels.MenuCatalogViewModel)((ViewResult)menu.Index(category.Id,null)).Model;
+                Check(homeModel.Dishes.Select(d=>d.Id).SequenceEqual(menuModel.Dishes.Select(d=>d.Id))&&customerModel.Dishes.Select(d=>d.Id).SequenceEqual(menuModel.Dishes.Select(d=>d.Id)),"public Home, customer Home and Menu share the full catalog");
+                Check(homeModel.Combos.Select(c=>c.Id).SequenceEqual(menuModel.Combos.Select(c=>c.Id)),"Home and Menu share eligible combo data");
+            }
+        }
+    }
     static void DemoSql()
     {
         string sql=File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"seed-demo.sql"));
@@ -191,6 +215,7 @@ class Program
             byte[] pdf=PdfService.Create("BÁO CÁO TIẾNG VIỆT",Enumerable.Range(1,180).Select(i=>"Dòng "+i+": Nguyễn Văn An — Thanh toán, hoàn tiền, đặt bàn."));
             Check(Encoding.ASCII.GetString(pdf,0,4)=="%PDF","PDF header");Check(Encoding.ASCII.GetString(pdf).Contains("/ToUnicode"),"PDF includes Unicode glyph map");using(var stream=new MemoryStream(pdf))using(var document=PdfReader.Open(stream,PdfDocumentOpenMode.Import))Check(document.PageCount>1,"PDF paginates long reports");
             DemoSql();
+            CatalogAndDishPermissions();
             Console.WriteLine(passed+" Windows checks passed");
         }
         finally

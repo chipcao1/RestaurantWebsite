@@ -1,7 +1,8 @@
 @using System.Linq
 @using RestaurantWebsite.Models
 @using RestaurantWebsite.Infrastructure
-@{ViewBag.Title="Bữa ngon cho những cuộc gặp gỡ";ViewBag.BodyClass="home_page";var dishes=ViewBag.HomeDishes as IEnumerable<Dish>??new List<Dish>();var categories=ViewBag.HomeCategories as IEnumerable<Category>??new List<Category>();var combo=ViewBag.HomeCombo as Combo;}
+@model RestaurantWebsite.ViewModels.MenuCatalogViewModel
+@{ViewBag.Title="Bữa ngon cho những cuộc gặp gỡ";ViewBag.BodyClass="home_page";var combo=Model.Combos.FirstOrDefault();}
 @section Hero {
 <section class="slider_section">
     <div class="container">
@@ -21,35 +22,7 @@
     </div>
 </section>
 }
-<section class="food_section layout_padding">
-<div class="container">
-<div class="page-heading">
-<div>
-<p class="eyebrow">TỪ CĂN BẾP FEANE</p>
-<h2>Món ngon cho hôm nay</h2>
-<p>Chọn món yêu thích, dùng tại bàn, mang về hoặc nhận giao tận nơi.</p>
-</div>
-<a href="@Url.Action("Index", "Menu",new{area="Customer"})" class="btn btn-outline-dark">Xem toàn bộ thực đơn</a>
-</div>
-<div class="account-nav">@foreach(var category in categories){<a href="@Url.Action("Index", "Menu",new{area="Customer",categoryId=category.Id})">@category.Name</a>}</div>
-<div class="row grid">
-@foreach(var dish in dishes){var image=dish.DishImages.FirstOrDefault(i=>i.IsPrimary)??dish.DishImages.FirstOrDefault();<div class="col-sm-6 col-lg-4 mb-4">
-<div class="box">
-<div class="img-box">
-<img src="@(image==null?Url.Content("~/Resources/User/images/f1.png"):Url.Content(image.ImageUrl))" alt="@dish.Name" loading="lazy"/>
-</div>
-<div class="detail-box">
-<h3>@dish.Name</h3>
-<p>@dish.Description</p>
-<div class="d-flex align-items-center justify-content-between">
-<strong>@Vietnamese.Money(dish.Price)</strong>
-<a href="@Url.Action("Index", "Menu",new{area="Customer",search=dish.Name})" class="btn btn-warning btn-sm">Chọn món</a>
-</div>
-</div>
-</div>
-</div>}
-</div>@if(!dishes.Any()){<p class="empty-state">Nhà hàng đang cập nhật thực đơn. Vui lòng quay lại sau.</p>}</div>
-</section>
+@Html.Partial("~/Views/Shared/_MenuCatalog.cshtml", Model)
 @if(combo!=null){<section class="layout_padding" style="background:#222831;color:white">
 <div class="container">
 <div class="row align-items-center">
@@ -77,3 +50,7 @@
 </div>
 </div>
 </section>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/menu-catalog.js")"></script>
+}

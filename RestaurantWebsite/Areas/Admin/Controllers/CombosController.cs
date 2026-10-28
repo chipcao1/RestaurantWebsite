@@ -11,14 +11,29 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
     public class CombosController : Controller
     {
         private readonly AppDbContext db = new AppDbContext();
-        public ActionResult Index() { return View(db.Combos.Include(c => c.ComboItems.Select(i => i.Dish)).OrderBy(c => c.Name).ToList()); }
+        public ActionResult Index(string search, string status)
+        {
+            var now = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
+            var combos = db.Combos.Include(c => c.ComboItems.Select(i => i.Dish.Category)).OrderBy(c => c.Name).ToList();
+            ViewBag.TotalCombos = combos.Count;
+            ViewBag.AvailableCombos = combos.Count(c => RestaurantWebsite.Services.CatalogRules.ComboStatus(c, now) == "Active");
+            ViewBag.InactiveCombos = combos.Count(c => !c.IsActive);
+            ViewBag.Search = (search ?? "").Trim();
+            ViewBag.Status = status;
+            ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(new[] { "Active", "Inactive", "Upcoming", "Expired", "Unavailable" }, status);
+            if (!string.IsNullOrWhiteSpace(search))
+                combos = combos.Where(c => (c.Name + " " + c.Description).IndexOf(search.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            if (!string.IsNullOrWhiteSpace(status))
+                combos = combos.Where(c => RestaurantWebsite.Services.CatalogRules.ComboStatus(c, now) == status).ToList();
+            return View(combos);
+        }
         public ActionResult Edit(int? id)
         {
             var model = id.HasValue ? db.Combos.Include(c => c.ComboItems).SingleOrDefault(c => c.Id == id) : new Combo();
             if (model == null) return HttpNotFound();
             LoadDishes(); return View(model);
         }
-        private void LoadDishes() { ViewBag.Dishes = db.Dishes.Where(d => d.Status != "Discontinued").OrderBy(d => d.Name).ToList(); }
+        private void LoadDishes() { ViewBag.Dishes = db.Dishes.Include(d => d.Category).Where(d => d.Status != "Discontinued").OrderBy(d => d.Name).ToList(); }
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,Name,Description,Price,ImageUrl,IsActive,StartDate,EndDate")] Combo model, int[] dishIds, int[] quantities)
         {

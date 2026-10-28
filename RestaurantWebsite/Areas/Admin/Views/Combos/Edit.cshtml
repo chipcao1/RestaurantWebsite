@@ -1,37 +1,49 @@
 @using System.Linq
+@using RestaurantWebsite.Infrastructure
 @model RestaurantWebsite.Models.Combo
-@{ ViewBag.Title = Model.Id == 0 ? "Thêm suất ăn kết hợp" : "Sửa suất ăn kết hợp"; var dishes = (IEnumerable<RestaurantWebsite.Models.Dish>)ViewBag.Dishes; var selected = Request.HttpMethod == "POST" ? Request.Form.GetValues("dishIds") ?? new string[0] : Model.ComboItems.Select(i=>i.DishId.ToString()).ToArray(); var postedQuantities = Request.Form.GetValues("quantities") ?? new string[0]; }
-<h1>@ViewBag.Title</h1>
-@using (Html.BeginForm()) { @Html.AntiForgeryToken() @Html.HiddenFor(m=>m.Id) @Html.ValidationSummary(false,"",new { @class="text-danger" })
-<div class="form-group">
-<label for="Name">Tên suất ăn</label>@Html.TextBoxFor(m=>m.Name,new { @class="form-control",maxlength=150,required="required" })</div>
-<div class="form-group">
-<label for="Description">Mô tả</label>@Html.TextAreaFor(m=>m.Description,new { @class="form-control",maxlength=500 })</div>
-<div class="form-group">
-<label for="Price">Giá bán (đồng)</label>@Html.TextBox("Price", Model.Price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture), new { @class="form-control",type="number",min=0,max=999999999,step=1,required="required" })</div>
-<div class="form-group">
-<label for="ImageUrl">Đường dẫn ảnh</label>@Html.TextBoxFor(m=>m.ImageUrl,new { @class="form-control",maxlength=500 })</div>
-<div class="row">
-<div class="col-md-6">
-<label for="StartDate">Bắt đầu</label>@Html.TextBoxFor(m=>m.StartDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })</div>
-<div class="col-md-6">
-<label for="EndDate">Kết thúc</label>@Html.TextBoxFor(m=>m.EndDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })</div>
-</div>
-<p class="mt-3">
-<label>@Html.CheckBoxFor(m=>m.IsActive) Đang bán</label>
-</p>
-<fieldset>
-<legend>Món thành phần</legend>
-<p>Chọn món và số lượng trong mỗi suất.</p>
-@foreach(var dish in dishes) { var index=Array.IndexOf(selected,dish.Id.ToString()); var quantity=index>=0 && postedQuantities.Length>index ? postedQuantities[index] : Model.ComboItems.Where(i=>i.DishId==dish.Id).Select(i=>i.Quantity.ToString()).FirstOrDefault() ?? "1";
-<div class="form-row align-items-center mb-2">
-<div class="col-8">
-<label>
-<input type="checkbox" name="dishIds" value="@dish.Id" @(index>=0 ? "checked" : "") onchange="this.closest('.form-row').querySelector('input[type=number]').disabled=!this.checked" /> @dish.Name</label>
-</div>
-<div class="col-4">
-<input aria-label="Số lượng @dish.Name" type="number" name="quantities" value="@quantity" min="1" max="100" class="form-control" @(index>=0 ? "" : "disabled") />
-</div>
-</div> }
-</fieldset>
-<button class="btn btn-warning mt-3">Lưu suất ăn</button> <a class="btn btn-outline-secondary mt-3" href="@Url.Action("Index")">Quay lại</a> }
+@{
+    ViewBag.Title = Model.Id == 0 ? "Thêm suất ăn kết hợp" : "Sửa suất ăn kết hợp";
+    var dishes = (IEnumerable<RestaurantWebsite.Models.Dish>)ViewBag.Dishes;
+    var selected = Request.HttpMethod == "POST" ? Request.Form.GetValues("dishIds") ?? new string[0] : Model.ComboItems.Select(i=>i.DishId.ToString()).ToArray();
+    var postedQuantities = Request.Form.GetValues("quantities") ?? new string[0];
+}
+<div class="content-header"><h1>@ViewBag.Title</h1><p class="text-muted mb-0">Thiết lập thông tin, giá bán và món trong mỗi suất.</p></div>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken() @Html.HiddenFor(m=>m.Id)
+    @Html.ValidationSummary(false,"Vui lòng kiểm tra thông tin:",new { @class="text-danger" })
+    <div class="row">
+        <div class="col-lg-7"><div class="card card-primary card-outline">
+            <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-info-circle mr-2"></i>Thông tin suất ăn</h2></div>
+            <div class="card-body">
+                <div class="form-group"><label for="Name">Tên suất ăn <span class="text-danger">*</span></label>@Html.TextBoxFor(m=>m.Name,new { @class="form-control",maxlength=150,required="required",placeholder="Ví dụ: Suất ăn gia đình" })@Html.ValidationMessageFor(m=>m.Name,"",new { @class="text-danger" })</div>
+                <div class="form-group"><label for="Description">Mô tả</label>@Html.TextAreaFor(m=>m.Description,new { @class="form-control",maxlength=500,rows=4,placeholder="Giới thiệu ngắn về suất ăn..." })</div>
+                <div class="form-group"><label for="ImageUrl">Đường dẫn ảnh</label>@Html.TextBoxFor(m=>m.ImageUrl,new { @class="form-control",maxlength=500,placeholder="https://... hoặc /Resources/..." })<small class="form-text text-muted">Dùng ảnh HTTPS hoặc ảnh nội bộ của website.</small>@Html.ValidationMessageFor(m=>m.ImageUrl,"",new { @class="text-danger" })</div>
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl) && RestaurantWebsite.Services.CatalogRules.ValidImageUrl(Model.ImageUrl))
+                { <img class="combo-preview img-fluid rounded" src="@Url.Content(Model.ImageUrl)" alt="Ảnh suất ăn" /> }
+            </div>
+        </div></div>
+        <div class="col-lg-5"><div class="card card-info card-outline">
+            <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-tag mr-2"></i>Giá bán và lịch áp dụng</h2></div>
+            <div class="card-body">
+                <div class="form-group"><label for="Price">Giá bán (đồng) <span class="text-danger">*</span></label><div class="input-group">@Html.TextBox("Price",Model.Price.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture),new { @class="form-control",type="number",min=0,max=999999999,step=1,required="required" })<div class="input-group-append"><span class="input-group-text">₫</span></div></div>@Html.ValidationMessageFor(m=>m.Price,"",new { @class="text-danger" })</div>
+                <div class="form-group"><label for="StartDate">Bắt đầu</label>@Html.TextBoxFor(m=>m.StartDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })</div>
+                <div class="form-group"><label for="EndDate">Kết thúc</label>@Html.TextBoxFor(m=>m.EndDate,"{0:yyyy-MM-ddTHH:mm}",new { type="datetime-local",@class="form-control" })@Html.ValidationMessageFor(m=>m.EndDate,"",new { @class="text-danger" })</div>
+                <p class="text-muted small">Để trống ngày nếu không giới hạn thời gian áp dụng.</p>
+                <div class="custom-control custom-checkbox">@Html.CheckBoxFor(m=>m.IsActive,new { @class="custom-control-input" })<label class="custom-control-label" for="IsActive">Mở bán suất ăn</label></div>
+            </div>
+        </div></div>
+    </div>
+    <div class="card card-warning card-outline">
+        <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-cutlery mr-2"></i>Món thành phần</h2></div>
+        <div class="card-body pb-2"><p class="text-muted mb-0">Chọn ít nhất một món và số lượng từ 1 đến 100 trong mỗi suất.</p></div>
+        <div class="table-responsive"><table class="table table-striped mb-0"><thead><tr><th>Chọn món</th><th>Danh mục</th><th class="text-right">Giá lẻ</th><th>Số lượng / suất</th></tr></thead><tbody>
+            @foreach (var dish in dishes)
+            {
+                var index=Array.IndexOf(selected,dish.Id.ToString()); var quantity=index>=0 && postedQuantities.Length>index ? postedQuantities[index] : Model.ComboItems.Where(i=>i.DishId==dish.Id).Select(i=>i.Quantity.ToString()).FirstOrDefault() ?? "1";
+                <tr><td><label class="mb-0"><input type="checkbox" name="dishIds" value="@dish.Id" @(index>=0 ? "checked" : "") onchange="this.closest('tr').querySelector('input[type=number]').disabled=!this.checked" /> @dish.Name</label>@if(dish.Status!="Available"){<small class="d-block text-warning">@Vietnamese.Label(dish.Status)</small>}</td><td>@dish.Category.Name</td><td class="text-right text-nowrap">@Vietnamese.Money(dish.Price)</td><td><input aria-label="Số lượng @dish.Name" type="number" name="quantities" value="@quantity" min="1" max="100" class="form-control combo-quantity" @(index>=0 ? "" : "disabled") /></td></tr>
+            }
+        </tbody></table></div>
+        <div class="card-footer text-right"><a class="btn btn-default mr-2" href="@Url.Action("Index")">Quay lại</a><button type="submit" class="btn btn-primary"><i class="fa fa-save mr-1"></i>Lưu suất ăn</button></div>
+    </div>
+}

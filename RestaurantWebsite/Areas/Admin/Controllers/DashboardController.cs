@@ -37,6 +37,14 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             ViewBag.MonthRevenue = new RestaurantWebsite.Services.ReportService(db).Sales(monthStart, nextMonthStart.AddDays(-1)).Net;
             ViewBag.MonthOrderCount = monthValidOrdersQuery.Count();
 
+            ViewBag.TotalCategories = db.Categories.Count();
+            ViewBag.TotalDishes = db.Dishes.Count();
+            ViewBag.TotalTables = db.RestaurantTables.Count();
+            ViewBag.TotalReservations = db.Reservations.Count();
+            ViewBag.TotalOrders = db.Orders.Count();
+            ViewBag.TotalPromotions = db.Promotions.Count();
+            ViewBag.TotalUsers = db.Users.Count();
+
             // 3. Operational Counts
             ViewBag.PendingOrdersCount = db.Orders.Count(o => o.Status == "Pending");
             ViewBag.TodayReservationsCount = db.Reservations
@@ -64,8 +72,8 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
 
             var peakHourObj = hourlyDistribution.OrderByDescending(x => x.OrderCount).FirstOrDefault();
             string peakBusinessHour = peakHourObj != null
-                ? string.Format("{0:D2}:00 - {1:D2}:00 ({2} orders)", peakHourObj.Hour, peakHourObj.Hour + 1, peakHourObj.OrderCount)
-                : "N/A";
+                ? string.Format("{0:D2}:00 - {1:D2}:00 ({2} đơn)", peakHourObj.Hour, peakHourObj.Hour + 1, peakHourObj.OrderCount)
+                : "Chưa có dữ liệu";
             ViewBag.PeakBusinessHour = peakBusinessHour;
             ViewBag.HourlyDistribution = hourlyDistribution;
 
@@ -78,7 +86,6 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             for (int day = 1; day <= daysInMonth; day++)
             {
                 dailyLabelsList.Add(string.Format("{0:D2}/{1:D2}", day, now.Month));
-                var dayOrders = monthValidOrders.Where(o => o.CreatedAt.Day == day);
                 dailyRevenueList.Add(RestaurantWebsite.Services.ReportMath.Calculate(monthPayments, monthStart.AddDays(day - 1), monthStart.AddDays(day)).Net);
             }
             ViewBag.DailyLabels = dailyLabelsList;

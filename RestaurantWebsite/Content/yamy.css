@@ -78,3 +78,35 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     .bg-box { display: none; }
     .table-responsive { overflow: visible; }
 }
+/* Shared Home / Menu catalog: full dataset, native filters, no Isotope/CDN dependency. */
+.catalog-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 24px 0 16px; }
+.catalog-filter { border: 0; padding: 8px 20px; background: transparent; color: #222831; border-radius: 25px; }
+.catalog-filter.active { color: white; background: #222831; }
+.menu-search-form .form-control, .menu-search-form .btn { min-height: 46px; }
+.menu-catalog .box { height: 100%; margin-top: 0; display: flex; flex-direction: column; }
+.menu-catalog .box .detail-box { flex: 1; display: flex; flex-direction: column; }
+.menu-catalog .box .detail-box p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.menu-catalog .box .options { margin-top: auto; }
+.catalog-detail { width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 50%; background: #ffbe33; color: white; display: inline-flex; align-items: center; justify-content: center; }
+.catalog-detail:hover { background: #e69c00; }
+.menu-catalog .modal-content { border-radius: 12px; overflow: hidden; }
+/* AdminLTE cards, counters and analytics follow the original main dashboard. */
+.dashboard-kpis .small-box { min-height: 168px; display: flex; flex-direction: column; }
+.dashboard-kpis .small-box .inner { flex: 1; position: relative; z-index: 1; }
+.dashboard-kpis .small-box h3 { font-size: clamp(1.3rem,2vw,2rem); overflow-wrap: anywhere; }
+.dashboard-kpis .small-box h4 { font-size: 1.2rem; line-height: 1.5; }
+.dashboard-kpis .small-box .icon { opacity: .65; }
+.dashboard-counts .info-box-icon { width: 50px; font-size: 1.5rem; }
+.dashboard-counts .info-box-content { min-width: 0; }
+.dashboard-chart-scroll { overflow-x: auto; }
+.dashboard-chart { width: 100%; min-width: 560px; height: auto; display: block; }
+.dashboard-chart text { fill: #6c757d; font: 12px "Segoe UI",Arial,sans-serif; }
+.combo-thumbnail { width: 72px; height: 64px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.combo-description { max-width: 260px; min-width: 140px; }
+.combos-table { min-width: 1000px; }
+.combo-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; min-width: 110px; }
+.combo-actions form { margin: 0; }
+.combo-actions .btn { white-space: nowrap; }
+.combo-preview { max-height: 220px; object-fit: contain; }
+.combo-quantity { width: 100px; }
+@media (max-width: 767px) { .catalog-filter { padding: 8px 14px; } .dashboard-kpis .small-box { min-height: 150px; } }

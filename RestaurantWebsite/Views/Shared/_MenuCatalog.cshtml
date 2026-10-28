@@ -1,0 +1,78 @@
+@using System.Linq
+@using RestaurantWebsite.Infrastructure
+@model RestaurantWebsite.ViewModels.MenuCatalogViewModel
+@{
+    int visibleCount = Model.Dishes.Count(d => Model.Matches(d.Name, d.Description, d.CategoryId, false)) + Model.Combos.Count(c => Model.Matches(c.Name, c.Description, null, true));
+}
+<section class="food_section layout_padding menu-catalog" data-menu-catalog data-selected-category="@(Model.SelectedCategoryId.HasValue ? Model.SelectedCategoryId.Value.ToString() : "all")">
+    <div class="container">
+        <div class="heading_container heading_center mb-4">
+            <h2>Thực đơn của nhà hàng</h2>
+            <p>Chọn món yêu thích, dùng tại bàn, mang về hoặc nhận giao tận nơi.</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                @using (Html.BeginForm(null, null, FormMethod.Get, new { data_menu_form = "", @class = "menu-search-form" }))
+                {
+                    <label class="sr-only" for="catalogSearch">Tìm món hoặc suất ăn</label>
+                    <div class="input-group">
+                        <input id="catalogSearch" data-menu-search type="search" name="search" class="form-control" value="@Model.Search" placeholder="Tìm món hoặc suất ăn kết hợp..." autocomplete="off" />
+                        <div class="input-group-append"><button type="submit" class="btn btn-warning"><i class="fa fa-search mr-1"></i>Tìm kiếm</button></div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="catalog-filters" role="group" aria-label="Lọc loại món">
+            <button type="button" class="catalog-filter @(!Model.SelectedCategoryId.HasValue ? "active" : "")" data-menu-filter="all" aria-pressed="@(!Model.SelectedCategoryId.HasValue ? "true" : "false")">Tất cả</button>
+            @foreach (var category in Model.Categories)
+            {
+                <button type="button" class="catalog-filter @(Model.SelectedCategoryId == category.Id ? "active" : "")" data-menu-filter="@category.Id" aria-pressed="@(Model.SelectedCategoryId == category.Id ? "true" : "false")">@category.Name</button>
+            }
+            <button type="button" class="catalog-filter" data-menu-filter="combo" aria-pressed="false">Suất ăn kết hợp</button>
+        </div>
+        <p class="text-muted small text-center mb-4" data-menu-count aria-live="polite">Hiển thị @visibleCount món / suất ăn</p>
+        <div class="row catalog-grid">
+            @foreach (var dish in Model.Dishes)
+            {
+                var image = dish.DishImages.FirstOrDefault(i => i.IsPrimary) ?? dish.DishImages.FirstOrDefault();
+                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="dish" data-category="@dish.CategoryId" data-search="@(dish.Name + " " + dish.Description)" hidden="@(!Model.Matches(dish.Name, dish.Description, dish.CategoryId, false) ? "hidden" : null)">
+                    <div class="box">
+                        <div class="img-box"><img src="@Url.Content(image == null ? "~/Resources/User/images/f1.png" : image.ImageUrl)" alt="@dish.Name" loading="lazy" /></div>
+                        <div class="detail-box">
+                            <h5>@dish.Name</h5><p>@dish.Description</p>
+                            <div class="options">
+                                <h6>@Vietnamese.Money(dish.Price)</h6>
+                                <button type="button" class="catalog-detail" data-menu-detail="@Url.Action("Details", "Menu", new { area = "Customer", id = dish.Id })" data-detail-title="Chi tiết món ăn" aria-label="Xem chi tiết @dish.Name"><i class="fa fa-shopping-cart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            @foreach (var combo in Model.Combos)
+            {
+                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="combo" data-category="" data-search="@(combo.Name + " " + combo.Description)" hidden="@(!Model.Matches(combo.Name, combo.Description, null, true) ? "hidden" : null)">
+                    <div class="box">
+                        <div class="img-box"><img src="@Url.Content(string.IsNullOrWhiteSpace(combo.ImageUrl) ? "~/Resources/User/images/o2.jpg" : combo.ImageUrl)" alt="@combo.Name" loading="lazy" /></div>
+                        <div class="detail-box">
+                            <h5>@combo.Name</h5><p>@(string.IsNullOrWhiteSpace(combo.Description) ? "Kết hợp những món ngon cho bữa ăn trọn vẹn." : combo.Description)</p>
+                            <div class="options">
+                                <h6>@Vietnamese.Money(combo.Price)</h6>
+                                <button type="button" class="catalog-detail" data-menu-detail="@Url.Action("Details", "Combo", new { area = "Customer", id = combo.Id })" data-detail-title="Chi tiết suất ăn" aria-label="Xem chi tiết @combo.Name"><i class="fa fa-shopping-cart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="empty-state" data-menu-empty hidden="@(visibleCount > 0 ? "hidden" : null)">Không tìm thấy món hoặc suất ăn phù hợp. Hãy chọn loại khác hoặc xóa từ khóa tìm kiếm.</div>
+        <noscript><p class="text-muted">Bật JavaScript để lọc món ngay tại trang và xem chi tiết trong cửa sổ.</p></noscript>
+    </div>
+    <div class="modal fade" data-menu-modal tabindex="-1" role="dialog" aria-label="Chi tiết thực đơn" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning"><h5 class="modal-title" data-menu-modal-title>Chi tiết món ăn</h5><button type="button" class="close" data-dismiss="modal" aria-label="Đóng"><span aria-hidden="true">&times;</span></button></div>
+                <div class="modal-body" data-menu-modal-body></div>
+            </div>
+        </div>
+    </div>
+</section>

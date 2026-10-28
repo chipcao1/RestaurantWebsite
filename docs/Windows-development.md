@@ -17,6 +17,7 @@ msbuild RestaurantWebsite/RestaurantWebsite.csproj /t:Build /p:Configuration=Rel
 dotnet run --project tests/RestaurantWebsite.Tests
 node tests/frontend-smoke.cjs
 node tests/checkout-preview.cjs
+node tests/menu-catalog.cjs
 sqllocaldb start MSSQLLocalDB
 dotnet build tests/WindowsChecks/WindowsChecks.csproj -c Release
 & tests/WindowsChecks/bin/Release/net48/WindowsChecks.exe
@@ -58,7 +59,7 @@ Chờ thông báo IIS Express đã khởi động. Trong cửa sổ PowerShell k
 | Nhóm | Kiểm tra |
 |---|---|
 | Tài khoản/phân quyền | Đăng ký khách; đăng nhập ba vai trò về đúng trang chủ; admin chuyển qua lại khu quản trị/nhân viên; tài khoản người khác chỉ xem/reset 123456789/khóa/mở, tạo nhân viên không nhận Role giả; đổi mật khẩu; khóa/đổi quyền có hiệu lực ở yêu cầu tiếp theo; POST trái quyền bị chặn; không khóa/hạ quyền quản trị viên cuối. |
-| Danh mục/món | Nhân viên và quản trị thêm/sửa món; sửa giá, thời gian chế biến; thêm/gỡ ảnh/chọn đại diện; ẩn dữ liệu đã được tham chiếu thay vì xóa lịch sử. |
+| Danh mục/món | Nhân viên và quản trị thêm/sửa món; khu nhân viên không có nút hoặc endpoint xóa món (kể cả admin đang xem khu nhân viên); sửa giá, thời gian chế biến; thêm/gỡ ảnh/chọn đại diện; ẩn dữ liệu đã được tham chiếu thay vì xóa lịch sử. |
 | Đặt món | Thêm món và suất ăn; số lượng; đổi gợi ý suất ăn; nhập mã đúng/sai/hết lượt xem ngay mức giảm và tổng tiền; xóa mã hoặc gõ nhanh mã mới không giữ kết quả cũ; giao hàng cần địa chỉ, mang về không có địa chỉ/phí giao hàng, tại bàn lưu đúng phiên bàn. |
 | Đặt bàn | Số khách không vượt sức chứa; xác nhận/hủy/đổi bàn không trùng giờ; nhân viên/quản trị xử lý theo vai trò; nhiều đơn trong một phiên vẫn giữ chỗ khi còn đơn đang mở. |
 | Thanh toán/hóa đơn | Ghi nhận thủ công tiền mặt/chuyển khoản/ví; mã giao dịch; chặn thu trùng; chưa trả đủ không hoàn tất; hoàn toàn phần trước chế biến đồng thời hủy đơn. Không tích hợp cổng thanh toán thật. |
@@ -75,3 +76,11 @@ YAMY_DOTNET=/path/to/dotnet bash scripts/validate-linux.sh
 Script khôi phục đúng phiên bản NuGet vào thư mục kiểm chứng, biên dịch Debug/Release với reference assemblies net48, chạy test C# độc lập, parse và compile Razor, so mô hình EF6 với snapshot InitialCreate nguyên bản của main. Nó chỉ bỏ các target quản lý tiến trình VBCSCompiler qua Windows WMI khi chạy MSBuild .NET trên Linux; không tắt bước biên dịch, assertion, TLS hay xác minh package. Warning NU1701 ở công cụ RazorCheck là do dùng parser Razor MVC5 net45 trong tiến trình kiểm chứng net8; mã sinh ra vẫn được biên dịch đích net48.
 
 Không dùng Linux để tuyên bố đã chạy IIS Express, LocalDB hoặc kiểm tra hiển thị PDF bằng font Windows. Workflow `.github/workflows/windows-validation.yml` chuẩn bị các kiểm tra Windows sau khi nhánh được đẩy lên; việc có file workflow không đồng nghĩa CI đã chạy.
+
+## Nghiệm thu Home/Menu và tổng quan
+
+- Home, /customer và /customer/Menu/Index phải có cùng danh sách món/ suất ăn đang phục vụ, không giới hạn sáu món. Chọn loại, gõ/xóa tìm kiếm, chọn lại Tất cả không đổi trang và lấy lại đủ kết quả.
+- Mở Menu với categoryId rồi chọn Tất cả: vẫn thấy món ở các danh mục khác. CategoryId không hợp lệ trở về toàn bộ dữ liệu hợp lệ.
+- Chi tiết món/suất ăn mở trong modal ngay tại Home hoặc Menu, đúng trạng thái đăng nhập; chuyển nhanh hai món không hiển thị nhầm phản hồi cũ.
+- Combos có ảnh, thành phần, giá, lịch bán, trạng thái và bộ lọc; thử thêm/sửa và gửi lại form lỗi giữ lựa chọn/số lượng.
+- Tổng quan Admin/Staff dùng khung small-box/card như main; kiểm tra số liệu với database thật, tooltip SVG và bảng ngày; hourly value không được nhầm thành tiền đã thu. Kiểm tra desktop nội dung không bị sidebar che và trên điện thoại bảng chỉ cuộn trong card.

@@ -337,9 +337,8 @@ namespace RestaurantWebsite.Controllers.Management
         // =====================================================
         // POST: admin/dishes/delete/5 (Safe Delete)
         // =====================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id)
+        [NonAction]
+        protected ActionResult DeleteDish(int id)
         {
             var dish = db.Dishes
                 .Include(d => d.DishImages)

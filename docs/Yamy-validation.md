@@ -50,3 +50,13 @@ Bản sửa tương thích main đã được rà soát độc lập: không có
 - Bỏ Users.Edit; trang tài khoản chỉ đọc. Reset cố định 123456789 qua PBKDF2; giữ khóa/mở (không tự khóa hoặc khóa admin cuối), tạo nhân viên cưỡng chế Role=Staff.
 
 Kiểm chứng: 56 kiểm tra logic, frontend/checkout Node, Debug/Release, 59 Razor view và so schema main đều đạt. WindowsChecks có kiểm tra controller thật cho điều hướng, reset, tạo nhân viên và quote; biên dịch net48 0 lỗi/cảnh báo nhưng chưa chạy Windows/LocalDB. Chromium dùng fixture HTML từ layout/assets tại 390, 768, 1440px, xác minh chữ Việt, không tràn ngang và sidebar mở/đóng. Fixture không thay thế rendering MVC thật. Một reviewer độc lập không xác nhận thêm lỗi. Không thay đổi model EF, migration hoặc database của người dùng.
+
+## Hoàn thiện Home/Menu và các trang vận hành (29/10/2026)
+
+- Home, CustomerHome và Menu dùng chung MenuCatalogService/ViewModel, partial và JavaScript. Lấy toàn bộ món Available thuộc danh mục đang hoạt động và suất ăn thực sự phục vụ được; category/search chỉ ẩn/hiện ban đầu, không cắt dữ liệu máy chủ. Không còn Take(6), chuyển trang khi lọc Home hoặc mở Menu theo tìm kiếm một món khi chọn chi tiết.
+- Staff không có public Delete; helper protected NonAction chỉ được gọi từ Admin.Delete có CSRF. Nút xóa chỉ xuất hiện ở Admin, kể cả khi tài khoản Admin chuyển sang Staff.
+- Combos Index/Edit theo AdminLTE card, small-box, filter, ảnh/thành phần/lịch/trạng thái và form hai cột. Trạng thái bán xét cả ngày và món thành phần.
+- Dashboard quản trị theo main: callout, 4 small-box, 6 info-box, chart theo ngày, phân bố theo giờ/hình thức phục vụ, top món; tiền đồng và tiếng Việt. Biểu đồ SVG cục bộ có bảng số liệu, không phụ thuộc Chart.js CDN. Thu ròng vẫn theo Payment; tổng giá trị đơn theo giờ được ghi rõ có thể chưa thu.
+- Tổng quan nhân viên dùng callout, small-box và card/table theo main. Thực đơn không còn phụ thuộc Isotope/CDN; gỡ các script CDN không còn được view dùng.
+
+Đã chạy: 65 kiểm tra logic; ba bộ Node (frontend, checkout, menu gồm cache/race của modal); build Debug/Release; 60 Razor parse/compile; EF model khớp main; git diff --check. WindowsChecks biên dịch net48 0 lỗi/cảnh báo, chưa chạy SQL/Windows. Chromium kiểm tra 5 trang × 3 kích thước 390/768/1440px bằng actual generated Razor với helpers/models thử nghiệm; filter đủ món, tìm kiếm/chi tiết tại chỗ, vị trí sidebar và không tràn ngang đều đạt. Endpoint modal trong trình duyệt được mô phỏng; không tuyên bố đã chạy MVC/IIS/SQL. Rà soát độc lập không có phát hiện lỗi được xác nhận. Schema/migration không đổi.

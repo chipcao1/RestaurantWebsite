@@ -5,6 +5,13 @@ namespace RestaurantWebsite.Services
 {
     public static class CatalogRules
     {
+        public static string ComboStatus(Combo combo, DateTime now)
+        {
+            if (!combo.IsActive) return "Inactive";
+            if (combo.StartDate.HasValue && combo.StartDate > now) return "Upcoming";
+            if (combo.EndDate.HasValue && combo.EndDate < now) return "Expired";
+            return Purchasable(combo, now) ? "Active" : "Unavailable";
+        }
         public static bool Purchasable(Combo combo, DateTime now)
         {
             return combo != null && combo.IsActive && combo.Price >= 0 &&

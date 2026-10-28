@@ -1,33 +1,51 @@
+@using System.Linq
+@using RestaurantWebsite.Infrastructure
+@using RestaurantWebsite.Services
 @model IEnumerable<RestaurantWebsite.Models.Combo>
-@{ ViewBag.Title = "Suất ăn kết hợp"; }
-<div class="page-heading">
-<div>
-<p class="eyebrow">THỰC ĐƠN</p>
-<h1>Suất ăn kết hợp</h1>
-<p>Gom các món thành một lựa chọn tiện lợi cho khách hàng.</p>
+@{ ViewBag.Title = "Suất ăn kết hợp"; var now = RestaurantClock.Now; }
+<div class="content-header"><div class="d-flex flex-wrap align-items-center justify-content-between"><div><h1>Suất ăn kết hợp</h1><p class="text-muted mb-0">Quản lý giá bán, món thành phần và thời gian áp dụng.</p></div><a class="btn btn-primary mt-2" href="@Url.Action("Edit")"><i class="fa fa-plus mr-1"></i>Thêm suất ăn</a></div></div>
+<div class="row">
+    <div class="col-md-4"><div class="small-box bg-info"><div class="inner"><h3>@ViewBag.TotalCombos</h3><p>Tổng suất ăn kết hợp</p></div><div class="icon"><i class="fa fa-cubes"></i></div></div></div>
+    <div class="col-md-4"><div class="small-box bg-success"><div class="inner"><h3>@ViewBag.AvailableCombos</h3><p>Đang sẵn sàng phục vụ</p></div><div class="icon"><i class="fa fa-check-circle"></i></div></div></div>
+    <div class="col-md-4"><div class="small-box bg-secondary"><div class="inner"><h3>@ViewBag.InactiveCombos</h3><p>Đã ngừng bán</p></div><div class="icon"><i class="fa fa-pause-circle"></i></div></div></div>
 </div>
-<a class="btn btn-warning" href="@Url.Action("Edit")">Thêm suất ăn</a>
+<div class="card card-primary card-outline">
+    <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-cubes mr-2"></i>Danh sách suất ăn</h2><span class="float-right badge badge-light">@Model.Count() kết quả</span></div>
+    <div class="card-body border-bottom">
+        @using (Html.BeginForm("Index", "Combos", new { area = "Admin" }, FormMethod.Get, new { @class = "form-row align-items-end" }))
+        {
+            <div class="col-md-6 mb-2"><label for="comboSearch">Tên hoặc mô tả</label><input id="comboSearch" name="search" class="form-control" value="@ViewBag.Search" placeholder="Tìm suất ăn..." /></div>
+            <div class="col-md-3 mb-2"><label for="status">Trạng thái</label>@Html.DropDownList("status", (SelectList)ViewBag.StatusList, "Tất cả trạng thái", new { @class="form-control" })</div>
+            <div class="col-md-3 mb-2"><button type="submit" class="btn btn-primary"><i class="fa fa-search mr-1"></i>Lọc</button><a class="btn btn-default ml-1" href="@Url.Action("Index")">Đặt lại</a></div>
+        }
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="card-body text-center py-5"><i class="fa fa-cubes fa-3x text-muted mb-3"></i><h3 class="h5">Chưa có suất ăn phù hợp</h3><p class="text-muted">Thử đổi bộ lọc hoặc thêm suất ăn đầu tiên.</p><a class="btn btn-primary" href="@Url.Action("Edit")">Thêm suất ăn</a></div>
+    }
+    else
+    {
+        <div class="table-responsive"><table class="table table-striped table-hover mb-0 combos-table">
+            <thead class="thead-light"><tr><th>Suất ăn</th><th>Món thành phần</th><th class="text-right">Giá bán</th><th>Thời gian áp dụng</th><th>Trạng thái</th><th class="text-center">Thao tác</th></tr></thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var state = CatalogRules.ComboStatus(item, now);
+                    var badge = state == "Active" ? "success" : state == "Inactive" ? "secondary" : state == "Upcoming" ? "info" : "warning";
+                    var label = state == "Active" ? "Đang bán" : state == "Inactive" ? "Ngừng bán" : state == "Unavailable" ? "Chưa thể phục vụ" : Vietnamese.Label(state);
+                    <tr>
+                        <td><div class="d-flex align-items-center"><img class="combo-thumbnail mr-3" src="@Url.Content(string.IsNullOrWhiteSpace(item.ImageUrl) ? "~/Resources/User/images/o2.jpg" : item.ImageUrl)" alt="@item.Name" /><div><strong>@item.Name</strong><small class="d-block text-muted combo-description">@item.Description</small></div></div></td>
+                        <td>@if (!item.ComboItems.Any()){<span class="text-muted">Chưa có món</span>}else{foreach (var line in item.ComboItems){<small class="d-block">@(line.Dish == null ? "Món không còn tồn tại" : line.Dish.Name) <strong>× @line.Quantity</strong></small>}}</td>
+                        <td class="text-right text-success font-weight-bold text-nowrap">@Vietnamese.Money(item.Price)</td>
+                        <td class="small"><span class="d-block">Từ: @(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")</span><span>Đến: @(item.EndDate.HasValue ? item.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")</span></td>
+                        <td><span class="badge badge-@badge">@label</span></td>
+                        <td class="text-center"><div class="combo-actions"><a class="btn btn-outline-primary btn-sm" href="@Url.Action("Edit", new { id=item.Id })"><i class="fa fa-pencil mr-1"></i>Chỉnh sửa</a>
+                            @using (Html.BeginForm("ToggleStatus", "Combos", new { area="Admin", id=item.Id }, FormMethod.Post, new { onsubmit="return confirm('Bạn xác nhận đổi trạng thái bán suất ăn này?');" }))
+                            { @Html.AntiForgeryToken()<button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fa @(item.IsActive ? "fa-pause" : "fa-play") mr-1"></i>@(item.IsActive ? "Ngừng bán" : "Mở bán")</button> }
+                        </div></td>
+                    </tr>
+                }
+            </tbody>
+        </table></div>
+    }
 </div>
-<div class="table-responsive">
-<table class="table">
-<thead>
-<tr>
-<th>Tên</th>
-<th>Giá</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-@foreach (var item in Model) { <tr>
-<td>@item.Name</td>
-<td>@RestaurantWebsite.Infrastructure.Vietnamese.Money(item.Price)</td>
-<td>@(item.IsActive ? "Đang bán" : "Ngừng bán")</td>
-<td>
-<a href="@Url.Action("Edit", new { id=item.Id })">Chỉnh sửa</a> @using(Html.BeginForm("ToggleStatus", "Combos",FormMethod.Post,new { @class="d-inline" })) { @Html.AntiForgeryToken()<input type="hidden" name="id" value="@item.Id"/>
-<button class="btn btn-sm btn-outline-secondary">@(item.IsActive ? "Ngừng bán" : "Mở bán")</button> }</td>
-</tr> }
-</tbody>
-</table>
-</div>
-@if (!Model.Any()) { <p class="empty-state">Chưa có suất ăn kết hợp. Hãy thêm suất ăn đầu tiên.</p> }

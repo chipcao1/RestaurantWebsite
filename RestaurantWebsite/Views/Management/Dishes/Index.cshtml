@@ -51,7 +51,7 @@
         {
             <div class="form-group mr-3 mb-2">
                 <label for="categoryId" class="mr-2 font-weight-bold small"><i class="fa fa-filter mr-1"></i> Danh mục:</label>
-                @Html.DropDownList("categoryId", categories, "-- All Danh mục --", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
+                @Html.DropDownList("categoryId", categories, "Tất cả danh mục", new { @class = "form-control form-control-sm", onchange = "this.form.submit()" })
             </div>
 
             <div class="form-group mr-3 mb-2">
@@ -229,14 +229,16 @@
                                             @Html.AntiForgeryToken()
                                             <button type="submit"
                                                     class="btn @(item.Status == "Available" ? "btn-outline-warning" : "btn-outline-success") btn-sm"
-                                                    title="@(item.Status == "Available" ? "Set status to Temporarily Unavailable (Hide from menu)" : "Set status to Available (Show on menu)")"
+                                                    title="@(item.Status == "Available" ? "Tạm ngừng phục vụ (ẩn khỏi thực đơn)" : "Mở bán (hiện trên thực đơn)")"
                                                     onclick="return confirm('Bạn xác nhận thực hiện thao tác này?');">
                                                 <i class="fa @(item.Status == "Available" ? "fa-pause" : "fa-play")"></i>
                                             </button>
                                         }
 
                                         <!-- Delete -->
-                                        @using (Html.BeginForm("Delete", "Dishes", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]), id = item.Id }, FormMethod.Post, new { @class = "d-inline" }))
+                                        @if (Convert.ToString(ViewContext.RouteData.DataTokens["area"]) == "Admin" && Convert.ToString(Session["Role"]) == "Admin")
+                                        {
+                                        using (Html.BeginForm("Delete", "Dishes", new { area = Convert.ToString(ViewContext.RouteData.DataTokens["area"]), id = item.Id }, FormMethod.Post, new { @class = "d-inline" }))
                                         {
                                             @Html.AntiForgeryToken()
                                             if (isUsed)
@@ -257,6 +259,7 @@
                                                     <i class="fa fa-trash-o"></i>
                                                 </button>
                                             }
+                                        }
                                         }
                                     </div>
                                 </td>

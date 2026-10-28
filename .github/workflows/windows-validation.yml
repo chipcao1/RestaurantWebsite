@@ -41,6 +41,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Shared frontend checks failed' }
           node tests/checkout-preview.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Checkout preview checks failed' }
+          node tests/menu-catalog.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Menu catalog checks failed' }
       - name: Start isolated LocalDB
         shell: pwsh
         run: |

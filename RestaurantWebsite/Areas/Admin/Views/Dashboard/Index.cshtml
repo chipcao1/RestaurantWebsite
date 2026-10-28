@@ -1,67 +1,95 @@
+@using System.Linq
+@using System.Globalization
 @using RestaurantWebsite.Infrastructure
 @using RestaurantWebsite.Areas.Admin.Controllers
-@{ViewBag.Title="Tổng quan nhà hàng";var top=ViewBag.TopDishes as IEnumerable<TopDishItem>??new List<TopDishItem>();var daily=ViewBag.DailyRevenues as List<decimal>??new List<decimal>();var labels=ViewBag.DailyLabels as List<string>??new List<string>();decimal peak=daily.Count>0?daily.Max():0m;}
-<div class="page-heading">
-<div>
-<p class="eyebrow">NHÀ HÀNG FEANE · HÔM NAY</p>
-<h1>Chào ngày mới, @Session["UserName"]</h1>
-<p>Nắm tình hình phục vụ và kết quả kinh doanh tại một nơi.</p>
+@{
+    ViewBag.Title = "Tổng quan và phân tích";
+    var top = ViewBag.TopDishes as IEnumerable<TopDishItem> ?? new List<TopDishItem>();
+    var daily = ViewBag.DailyRevenues as List<decimal> ?? new List<decimal>();
+    var labels = ViewBag.DailyLabels as List<string> ?? new List<string>();
+    var hourly = ViewBag.HourlyDistribution as IEnumerable<PeakHourItem> ?? new List<PeakHourItem>();
+    var types = ViewBag.OrderTypeDistribution as Dictionary<string,int> ?? new Dictionary<string,int>();
+    int busiest = hourly.Any() ? hourly.Max(h=>h.OrderCount) : 0;
+    decimal min = Math.Min(0m, daily.DefaultIfEmpty(0m).Min());
+    decimal max = Math.Max(0m, daily.DefaultIfEmpty(0m).Max());
+    if (max == min) { max = min + 100000m; }
+    Func<int,string> plotX = i => (110m + (daily.Count > 1 ? i*670m/(daily.Count-1) : 0m)).ToString("0.##",CultureInfo.InvariantCulture);
+    Func<decimal,string> plotY = value => (220m-(value-min)/(max-min)*190m).ToString("0.##",CultureInfo.InvariantCulture);
+    string points = string.Join(" ",daily.Select((value,i)=>plotX(i)+","+plotY(value)));
+}
+<div class="row"><div class="col-12"><div class="callout callout-info bg-white elevation-1">
+    <h5><i class="fa fa-tachometer text-info mr-2"></i>Chào mừng trở lại, <strong>@Session["UserName"]</strong>!</h5>
+    <p class="mb-0 text-muted">Theo dõi hoạt động nhà hàng, kết quả bán hàng và nhu cầu phục vụ từ dữ liệu thực tế.</p>
+</div></div></div>
+<div class="row dashboard-kpis">
+    <div class="col-lg-3 col-sm-6"><div class="small-box bg-success"><div class="inner"><h3>@Vietnamese.Money((decimal)ViewBag.TodayRevenue)</h3><p>Thu ròng hôm nay</p></div><div class="icon"><i class="fa fa-money"></i></div><a class="small-box-footer" href="@Url.Action("Index","Reports",new{area="Admin",from=RestaurantClock.Now.ToString("yyyy-MM-dd"),to=RestaurantClock.Now.ToString("yyyy-MM-dd")})">Xem báo cáo ngày <i class="fa fa-arrow-circle-right"></i></a></div></div>
+    <div class="col-lg-3 col-sm-6"><div class="small-box bg-info"><div class="inner"><h3>@Vietnamese.Money((decimal)ViewBag.MonthRevenue)</h3><p>Thu ròng tháng này</p></div><div class="icon"><i class="fa fa-calendar-check-o"></i></div><a class="small-box-footer" href="@Url.Action("Index","Reports",new{area="Admin"})">Báo cáo doanh thu <i class="fa fa-arrow-circle-right"></i></a></div></div>
+    <div class="col-lg-3 col-sm-6"><div class="small-box bg-warning"><div class="inner"><h3>@ViewBag.TodayOrderCount</h3><p>Đơn hợp lệ hôm nay</p></div><div class="icon"><i class="fa fa-shopping-cart"></i></div><a class="small-box-footer" href="@Url.Action("Index","Orders",new{area="Admin"})">Theo dõi đơn hàng <i class="fa fa-arrow-circle-right"></i></a></div></div>
+    <div class="col-lg-3 col-sm-6"><div class="small-box bg-primary"><div class="inner"><h4 class="font-weight-bold">@ViewBag.PeakBusinessHour</h4><p>Khung giờ nhiều đơn nhất tháng</p></div><div class="icon"><i class="fa fa-clock-o"></i></div><a class="small-box-footer" href="#hourly-orders">Xem phân bố theo giờ <i class="fa fa-arrow-circle-right"></i></a></div></div>
 </div>
-<a class="btn btn-warning" href="@Url.Action("Index", "Reports",new{area="Admin"})">Xem báo cáo doanh thu</a>
+<div class="row dashboard-counts">
+    @foreach (var item in new[] {
+        new { Text="Danh mục", Value=(int)ViewBag.TotalCategories, Icon="th-list", Color="info", Controller="Categories" },
+        new { Text="Món ăn", Value=(int)ViewBag.TotalDishes, Icon="cutlery", Color="success", Controller="Dishes" },
+        new { Text="Bàn", Value=(int)ViewBag.TotalTables, Icon="table", Color="primary", Controller="Tables" },
+        new { Text="Đặt bàn", Value=(int)ViewBag.TotalReservations, Icon="calendar", Color="warning", Controller="Reservations" },
+        new { Text="Khuyến mãi", Value=(int)ViewBag.TotalPromotions, Icon="tags", Color="purple", Controller="Promotions" },
+        new { Text="Tài khoản", Value=(int)ViewBag.TotalUsers, Icon="users", Color="dark", Controller="Users" }
+    })
+    {
+        <div class="col-lg-2 col-sm-4 col-6"><a class="info-box bg-light text-dark" href="@Url.Action("Index",item.Controller,new{area="Admin"})"><span class="info-box-icon bg-@item.Color"><i class="fa fa-@item.Icon"></i></span><div class="info-box-content"><span class="info-box-text">@item.Text</span><span class="info-box-number">@item.Value</span></div></a></div>
+    }
 </div>
-<div class="metric-grid">
-<div class="metric">
-<span>Thu ròng hôm nay</span>
-<strong>@Vietnamese.Money((decimal)ViewBag.TodayRevenue)</strong>
-</div>
-<div class="metric">
-<span>Thu ròng tháng này</span>
-<strong>@Vietnamese.Money((decimal)ViewBag.MonthRevenue)</strong>
-</div>
-<div class="metric">
-<span>Đơn đang chờ xác nhận</span>
-<strong>@ViewBag.PendingOrdersCount</strong>
-<a href="@Url.Action("Index", "Orders",new{area="Admin",status="Pending"})">Đến hàng đợi →</a>
-</div>
-</div>
-<div class="row mt-4">
-<div class="col-lg-8">
-<section class="surface">
-<div class="page-heading">
-<div>
-<h2>Dòng tiền trong tháng</h2>
-<p>Số tiền đã thu trừ khoản đã hoàn, tính theo ngày thanh toán gốc.</p>
-</div>
-</div>
-<div class="revenue-bars" role="img" aria-label="Doanh thu ròng từng ngày trong tháng">
-@for(int i=0;i<daily.Count;i++){<div class="revenue-bar">
-<span>@labels[i]</span>
-<div style="width:@(peak>0?Math.Max(0,daily[i])/peak*100:0)%">
-</div>
-<strong>@Vietnamese.Money(daily[i])</strong>
-</div>}
-</div>
-</section>
-</div>
-<div class="col-lg-4">
-<section class="surface">
-<p class="eyebrow">CẦN THEO DÕI</p>
-<h2>Vận hành hôm nay</h2>
-<p>
-<strong>@ViewBag.TodayOrderCount</strong> đơn đã đặt</p>
-<p>
-<strong>@ViewBag.TodayReservationsCount</strong> lượt đặt bàn</p>
-<p>
-<strong>@ViewBag.TotalCustomersCount</strong> khách hàng</p>
-<p>
-<strong>@ViewBag.ActivePromotionsCount</strong> khuyến mãi đang áp dụng</p>
-<a href="@Url.Action("Index", "Reservations",new{area="Admin"})">Xem lịch đặt bàn →</a>
-</section>
-<section class="surface">
-<h2>Món được yêu thích</h2>
-<p class="text-muted">Từ các đơn đã thanh toán.</p>@foreach(var dish in top){<div class="d-flex justify-content-between border-top py-3">
-<span>@dish.DishName</span>
-<strong>@dish.TotalQuantity phần</strong>
-</div>}@if(!top.Any()){<p>Chưa có dữ liệu món đã bán.</p>}</section>
-</div>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card card-primary card-outline">
+            <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-line-chart text-primary mr-2"></i>Thu ròng từng ngày trong tháng</h2><span class="badge badge-info float-right">@RestaurantClock.Now.ToString("MM/yyyy")</span></div>
+            <div class="card-body">
+                <p class="small text-muted">Theo ngày thanh toán gốc; khoản đã hoàn được loại khỏi kỳ thanh toán gốc.</p>
+                @if (!daily.Any(v=>v!=0)){<p class="text-muted small">Tháng này chưa phát sinh thu ròng.</p>}
+                <div class="dashboard-chart-scroll">
+                    <svg class="dashboard-chart" viewBox="0 0 800 260" role="img" aria-label="Biểu đồ thu ròng từng ngày, đơn vị đồng">
+                        @for(int i=0;i<=4;i++)
+                        {
+                            decimal tick=min+(max-min)*i/4m;
+                            <g><line x1="110" y1="@plotY(tick)" x2="780" y2="@plotY(tick)" stroke="#e9ecef" /><text x="100" y="@plotY(tick)" text-anchor="end" dominant-baseline="middle">@tick.ToString("N0")</text></g>
+                        }
+                        @if(daily.Any())
+                        {
+                            <polygon points="110,@plotY(0) @points 780,@plotY(0)" fill="rgba(40,167,69,.12)" />
+                            <polyline points="@points" fill="none" stroke="#28a745" stroke-width="3" />
+                            for(int i=0;i<daily.Count;i++)
+                            {
+                                <circle cx="@plotX(i)" cy="@plotY(daily[i])" r="4" fill="#28a745"><title>@labels[i]: @Vietnamese.Money(daily[i])</title></circle>
+                                if(i%5==0||i==daily.Count-1){<g><text x="@plotX(i)" y="245" text-anchor="middle">@labels[i]</text></g>}
+                            }
+                        }
+                    </svg>
+                </div>
+                <details class="mt-3"><summary class="text-primary">Xem số liệu từng ngày</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Ngày</th><th class="text-right">Thu ròng</th></tr></thead><tbody>@for(int i=0;i<daily.Count;i++){<tr><td>@labels[i]</td><td class="text-right">@Vietnamese.Money(daily[i])</td></tr>}</tbody></table></div></details>
+            </div>
+        </div>
+        <div id="hourly-orders" class="card card-info card-outline">
+            <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-clock-o text-info mr-2"></i>Phân bố đơn theo giờ trong tháng</h2></div>
+            <div class="card-body p-0">
+                @if(!hourly.Any()){<p class="p-3 mb-0 text-muted">Chưa có dữ liệu đơn hàng trong tháng này.</p>}else{
+                    <div class="table-responsive"><table class="table table-striped table-hover mb-0"><thead class="thead-light"><tr><th>Khung giờ</th><th class="text-center">Số đơn</th><th class="text-right">Giá trị đơn</th><th>Phân bố</th></tr></thead><tbody>
+                    @foreach(var hour in hourly){int percent=busiest>0?hour.OrderCount*100/busiest:0;<tr><td class="text-nowrap">@hour.Hour.ToString("D2"):00 – @((hour.Hour+1).ToString("D2")):00</td><td class="text-center"><span class="badge badge-primary">@hour.OrderCount đơn</span></td><td class="text-right text-nowrap">@Vietnamese.Money(hour.Revenue)</td><td><div class="progress progress-xs"><div class="progress-bar bg-info" style="width:@percent%"></div></div></td></tr>}
+                    </tbody></table></div><p class="text-muted small p-3 mb-0">Giá trị đơn gồm các đơn chưa hủy, có thể chưa thanh toán; không phải doanh thu đã thu.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card card-success card-outline"><div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-pie-chart text-success mr-2"></i>Hình thức phục vụ trong tháng</h2></div><div class="card-body">
+            @if(!types.Any()){<p class="text-muted mb-0">Chưa có đơn trong tháng.</p>}else{<ul class="list-group list-group-flush">@foreach(var type in types){<li class="list-group-item d-flex justify-content-between align-items-center px-0"><span>@(type.Key=="Unknown"?"Chưa phân loại":Vietnamese.Label(type.Key))</span><span class="badge badge-success badge-pill">@type.Value đơn</span></li>}</ul>}
+        </div></div>
+        <div class="card card-warning card-outline"><div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-trophy text-warning mr-2"></i>5 món bán chạy</h2></div><div class="card-body p-0">
+            @if(!top.Any()){<p class="p-3 mb-0 text-muted">Chưa có dữ liệu món đã thanh toán.</p>}else{<ul class="list-group list-group-flush">@foreach(var dish in top){<li class="list-group-item d-flex justify-content-between align-items-center"><div><strong class="d-block">@dish.DishName</strong><small class="text-muted">Giá trị món: @Vietnamese.Money(dish.TotalRevenue)</small></div><span class="badge badge-warning ml-2 text-nowrap">@dish.TotalQuantity phần</span></li>}</ul>}
+        </div></div>
+        <div class="card card-secondary card-outline"><div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-bell-o mr-2"></i>Cần xử lý hôm nay</h2></div><div class="card-body">
+            <p><strong>@ViewBag.PendingOrdersCount</strong> đơn đang chờ xác nhận</p><p><strong>@ViewBag.TodayReservationsCount</strong> lượt đặt bàn hôm nay</p>
+            <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Index","Orders",new{area="Admin",status="Pending"})">Đến hàng đợi <i class="fa fa-arrow-right ml-1"></i></a>
+        </div></div>
+    </div>
 </div>

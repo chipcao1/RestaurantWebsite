@@ -32,6 +32,7 @@ done
 "$YAMY_DOTNET" run --project tests/RestaurantWebsite.Tests
 node tests/frontend-smoke.cjs
 node tests/checkout-preview.cjs
+node tests/menu-catalog.cjs
 "$YAMY_DOTNET" run --project scripts/RazorCheck -- "$YAMY_REPO_ROOT/RestaurantWebsite" "$YAMY_VALIDATION_ROOT/razor-generated"
 python3 scripts/razor-project.py "$YAMY_VALIDATION_ROOT"
 "$YAMY_DOTNET" msbuild "$YAMY_VALIDATION_ROOT/razor-validation.csproj" "/p:FrameworkPathOverride=$YAMY_VALIDATION_ROOT/nuget/microsoft.netframework.referenceassemblies.net48/1.0.3/build/.NETFramework/v4.8" /p:AutomaticallyUseReferenceAssemblyPackages=false

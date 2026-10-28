@@ -82,6 +82,17 @@ class Program
         promotion.DiscountType="FixedAmount";promotion.DiscountValue=30000;
         Check(PromotionRules.Calculate(promotion,200000m,now)==30000m,"preview supports main seed FixedAmount spelling");
         Check(PromotionRules.Describe(promotion).Contains("30.000"),"fixed promotion description shows currency amount");
+        var catalog = new RestaurantWebsite.ViewModels.MenuCatalogViewModel { SelectedCategoryId=2, Search="  PHỞ  " };
+        Check(catalog.Matches("Phở gà","Món ngon",2,false),"server catalog initial search and category match");
+        Check(!catalog.Matches("Phở bò","Món ngon",1,false),"server catalog hides other categories without dropping their data");
+        Check(!catalog.Matches("Phở kết hợp","Món ngon",null,true),"category filter excludes combo cards");
+        catalog.SelectedCategoryId=null;catalog.Search="";
+        Check(catalog.Matches("Món bất kỳ",null,3,false)&&catalog.Matches("Suất ăn",null,null,true),"All restores dishes and combos across every category");
+        combo.IsActive=false;Check(CatalogRules.ComboStatus(combo,now)=="Inactive","combo status reports paused before schedule");
+        combo.IsActive=true;Check(CatalogRules.ComboStatus(combo,now)=="Upcoming","combo status reports future availability");
+        combo.StartDate=now.AddDays(-2);combo.EndDate=now.AddDays(-1);Check(CatalogRules.ComboStatus(combo,now)=="Expired","combo status reports ended schedule");
+        combo.EndDate=now.AddDays(1);Check(CatalogRules.ComboStatus(combo,now)=="Active","combo status reports actually purchasable combo");
+        dish.Status="Discontinued";Check(CatalogRules.ComboStatus(combo,now)=="Unavailable","combo with unavailable ingredients is not labelled on sale");
         Console.WriteLine(passed + " tests passed");
     }
 }
