@@ -10,7 +10,6 @@ namespace RestaurantWebsite.Models
 
         public int UserId { get; set; }
 
-        public int? AssignedStaffId { get; set; }
 
         public int TableId { get; set; }
 

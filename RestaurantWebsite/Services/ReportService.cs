@@ -25,9 +25,9 @@ namespace RestaurantWebsite.Services
             if (to < from || (to - from).TotalDays > 366) throw new InvalidOperationException("Khoảng báo cáo phải hợp lệ và không quá 366 ngày.");
             var end = to.AddDays(1);
             var collected = db.Payments.Where(p => (p.Status == "Completed" || p.Status == "Refunded") && p.PaymentDate >= from && p.PaymentDate < end).ToList();
-            var refunded = db.Payments.Where(p => p.Status == "Refunded" && p.RefundedAt >= from && p.RefundedAt < end).ToList();
+            var refunded = db.Payments.Where(p => p.Status == "Refunded" && p.PaymentDate >= from && p.PaymentDate < end).ToList();
             var totals = ReportMath.Calculate(collected.Concat(refunded).GroupBy(p => p.Id).Select(g => g.First()), from, end);
-            return new SalesReport { From = from, To = to, Collected = totals.Collected, Refunded = totals.Refunded, Lines = collected.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Thu đơn #" + p.OrderId + " | " + Vietnamese.Money(p.Amount) }).Concat(refunded.Select(p => new { At = p.RefundedAt.Value, Text = p.RefundedAt.Value.ToString("dd/MM/yyyy HH:mm") + " | Hoàn đơn #" + p.OrderId + " | -" + Vietnamese.Money(p.Amount) })).OrderBy(x => x.At).Select(x => x.Text).ToList() };
+            return new SalesReport { From = from, To = to, Collected = totals.Collected, Refunded = totals.Refunded, Lines = collected.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Thu đơn #" + p.OrderId + " | " + Vietnamese.Money(p.Amount) }).Concat(refunded.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Đã hoàn (ngày thanh toán gốc) đơn #" + p.OrderId + " | -" + Vietnamese.Money(p.Amount) })).OrderBy(x => x.At).Select(x => x.Text).ToList() };
         }
         public IList<string> Menu()
         {

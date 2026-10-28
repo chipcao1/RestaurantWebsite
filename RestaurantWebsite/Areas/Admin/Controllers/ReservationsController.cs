@@ -58,7 +58,6 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 .OrderByDescending(r => r.ReservationDate)
                 .ToList();
 
-            ViewBag.StaffMembers = db.Users.Where(u => u.Role == "Staff" && u.IsActive).ToList();
             ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidStatuses, status);
             ViewBag.SelectedStatus = status ?? "All";
             ViewBag.SelectedDate = date;
@@ -127,14 +126,6 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             return RedirectToAction("Details", new { id });
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Assign(int id, int staffId)
-        {
-            try { new RestaurantWebsite.Services.ReservationService(db).Assign(id, staffId); TempData["Success"] = "Đã phân công nhân viên."; }
-            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
-            catch (System.Data.DataException) { TempData["Error"] = "Phân công vừa thay đổi. Vui lòng thử lại."; }
-            return RedirectToAction("Index");
-        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)

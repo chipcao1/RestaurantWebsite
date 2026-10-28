@@ -1,3 +1,5 @@
+> Cập nhật 29/10/2026: yêu cầu mới của người dùng giữ database giống main thay thế các phần dưới đây về migration mới, sáu cột bổ sung, phân công nhân viên và ngày hoàn riêng. Xem [quyết định và cách xử lý](../../Database-compatibility.md).
+
 # Hoàn thiện RestaurantWebsite trên nhánh Yamy
 
 ## Mục tiêu và quyết định đã xác nhận

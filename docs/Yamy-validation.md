@@ -12,10 +12,10 @@ YAMY_DOTNET=/workspace/toolchains/dotnet/dotnet YAMY_VALIDATION_ROOT=/workspace/
 
 - Restore các phiên bản NuGet từ packages.config, thêm PDFsharp 1.50.5147 (MIT).
 - Build ứng dụng đích net48 ở Debug và Release bằng reference assemblies chính thức.
-- 44 kiểm thử C# chạy thành công: quyền chuyển trạng thái, chặn hoàn tất chưa trả tiền, trạng thái cuối, điều kiện hủy đặt bàn, nhãn tiếng Việt, giảm giá/cap/số tiền lẻ, giao khoảng thời gian, URL ảnh, điều kiện suất ăn, thu/hoàn theo ngày, số thập phân từ HTML.
+- 44 kiểm thử C# chạy thành công: quyền chuyển trạng thái, chặn hoàn tất chưa trả tiền, trạng thái cuối, điều kiện hủy đặt bàn, nhãn tiếng Việt, giảm giá/cap/số tiền lẻ, giao khoảng thời gian, URL ảnh, điều kiện suất ăn, thu/hoàn theo ngày thanh toán gốc, số thập phân từ HTML.
 - Kiểm thử JavaScript hồi quy chạy thành công khi thiếu phần tử năm trong footer và plugin tùy chọn.
 - Parse và biên dịch C# sinh từ 59 Razor view, không có lỗi.
-- Snapshot migration mới khớp mô hình EF6 thật; InitialCreate được giữ nguyên.
+- Mô hình EF6 khớp snapshot InitialCreate của main; ba file InitialCreate được giữ nguyên. Không còn migration YamyWorkflow hoặc sáu cột bổ sung.
 - Bộ WindowsChecks đích net48 được biên dịch ở Release, 0 lỗi, 0 cảnh báo.
 - `git diff --check`, kiểm tra cú pháp JavaScript, shell và Python đã chạy.
 
@@ -32,4 +32,10 @@ Một tác nhân độc lập đã xem thay đổi theo thiết kế. Không có
 - Khởi động IIS Express, gửi yêu cầu HTTP đại diện và kiểm thử giao diện tương tác trên máy tính/điện thoại.
 - Mở và kiểm tra hiển thị dấu tiếng Việt trong PDF bằng font Windows.
 
-Workflow Windows đã được thêm, nhưng chưa được chạy qua GitHub Actions vì nhánh chưa được push. Migration mới chưa được áp dụng vào database của người dùng. Xem [hướng dẫn thực thi và nghiệm thu Windows](Windows-development.md).
+Nhánh đã được push. Chưa xác nhận kết quả GitHub Actions từ môi trường hiện tại. Không kết nối hoặc thay đổi database của người dùng. Lần kiểm chứng này không thực thi SQL Server; các kiểm tra tương thích database và giữ dữ liệu trong WindowsChecks cần được chạy trên Windows. Xem [hướng dẫn thực thi và nghiệm thu Windows](Windows-development.md).
+
+## Điều chỉnh theo yêu cầu giữ database main (29/10/2026)
+
+Bỏ migration YamyWorkflow; dùng nguyên schema main và thêm kiểm tra so sánh toàn bộ CSDL/SSDL/mapping EF6 với InitialCreate. Công cụ tạo mô hình lấy tên entity set từ DbSet để phản ánh đúng Combos/Comboes; chỉ bỏ qua danh tính assembly của công cụ khi so sánh, vẫn kiểm tra bảng, cột, khóa và mapping. Bộ WindowsChecks có kiểm tra chỉ tồn tại InitialCreate, model tương thích database gốc, bảng Comboes và chạy lại Update-Database không dịch dữ liệu danh mục. Chưa thực thi bộ WindowsChecks trong Linux.
+
+Bản sửa tương thích main đã được rà soát độc lập: không có phát hiện lỗi được xác nhận. Build Debug/Release, 59 Razor view, 44 kiểm tra logic, kiểm tra frontend và so mô hình với InitialCreate đều đạt. WindowsChecks đã biên dịch Release với 0 lỗi/cảnh báo; chưa thực thi LocalDB/Windows.

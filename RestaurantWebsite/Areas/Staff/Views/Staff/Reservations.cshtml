@@ -2,12 +2,12 @@
 @using RestaurantWebsite.Services
 @using RestaurantWebsite.Infrastructure
 @model IEnumerable<Reservation>
-@{Layout="~/Views/Shared/_OperationsLayout.cshtml";ViewBag.Title="Lịch đặt bàn";var tables=(IEnumerable<RestaurantTable>)ViewBag.Tables;var staff=(IEnumerable<User>)ViewBag.StaffMembers;int uid=(int)Session["UserId"];string role=Convert.ToString(Session["Role"]);}
+@{Layout="~/Views/Shared/_OperationsLayout.cshtml";ViewBag.Title="Lịch đặt bàn";var tables=(IEnumerable<RestaurantTable>)ViewBag.Tables;string role=Convert.ToString(Session["Role"]);}
 <div class="page-heading">
 <div>
 <p class="eyebrow">PHỤC VỤ TẠI NHÀ HÀNG</p>
 <h1>Lịch đặt bàn</h1>
-<p>Xác nhận lịch, kiểm tra chỗ ngồi và theo dõi người phụ trách.</p>
+<p>Xác nhận lịch, kiểm tra chỗ ngồi và đổi bàn.</p>
 </div>
 </div>
 <form class="filter-bar" method="get">
@@ -21,13 +21,12 @@
 <th>Khách hàng</th>
 <th>Lịch phục vụ</th>
 <th>Bàn / số khách</th>
-<th>Phụ trách</th>
 <th>Trạng thái</th>
 <th>Thao tác</th>
 </tr>
 </thead>
 <tbody>
-@foreach(var item in Model){var assignee=staff.FirstOrDefault(u=>u.Id==item.AssignedStaffId);bool mine=!item.AssignedStaffId.HasValue||item.AssignedStaffId==uid||role=="Admin";<tr>
+@foreach(var item in Model){<tr>
 <td>
 <strong>@item.User.FullName</strong>
 <br/>@item.User.Phone<br/>
@@ -37,13 +36,11 @@
 <small>Đến @item.ReservationDate.AddHours(2).ToString("HH:mm")</small>
 </td>
 <td>Bàn @item.Table.TableNumber<br/>@item.PartySize khách</td>
-<td>@(assignee==null?"Chưa phân công":assignee.FullName)</td>
 <td>@Vietnamese.Label(item.Status)</td>
 <td>
-@if(mine){foreach(var next in new[]{"Confirmed","Completed","Cancelled"}){if(WorkflowRules.ReservationTransition(item.Status,next,role,item.ReservationDate,RestaurantClock.Now,item.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered"))){using(Html.BeginForm("UpdateReservationStatus", "Staff",new{area="Staff",id=item.Id,newStatus=next},FormMethod.Post,new{@class="d-inline"})){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">@Vietnamese.Label(next)</button>}}}
-if(item.Status=="Pending"||item.Status=="Confirmed"){using(Html.BeginForm("ChangeTable", "Staff",new{area="Staff",id=item.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<select name="newTableId" class="form-control form-control-sm" aria-label="Bàn thay thế">@foreach(var table in tables.Where(t=>t.Capacity>=item.PartySize)){<option value="@table.Id" @(table.Id==item.TableId?"selected":"")>Bàn @table.TableNumber (@table.Capacity chỗ)</option>}</select>
-<button class="btn btn-sm btn-outline-secondary mt-1">Đổi bàn</button>}}}
-else{<small>Nhân viên khác đang phụ trách</small>}
+@foreach(var next in new[]{"Confirmed","Completed","Cancelled"}){if(WorkflowRules.ReservationTransition(item.Status,next,role,item.ReservationDate,RestaurantClock.Now,item.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered"))){using(Html.BeginForm("UpdateReservationStatus", "Staff",new{area="Staff",id=item.Id,newStatus=next},FormMethod.Post,new{@class="d-inline"})){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">@Vietnamese.Label(next)</button>}}}
+@if(item.Status=="Pending"||item.Status=="Confirmed"){using(Html.BeginForm("ChangeTable", "Staff",new{area="Staff",id=item.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<select name="newTableId" class="form-control form-control-sm" aria-label="Bàn thay thế">@foreach(var table in tables.Where(t=>t.Capacity>=item.PartySize)){<option value="@table.Id" @(table.Id==item.TableId?"selected":"")>Bàn @table.TableNumber (@table.Capacity chỗ)</option>}</select>
+<button class="btn btn-sm btn-outline-secondary mt-1">Đổi bàn</button>}}
 </td>
 </tr>}
 </tbody>

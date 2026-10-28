@@ -14,9 +14,14 @@ class Program
     static void Main(string[] args)
     {
         var builder = new DbModelBuilder();
-        foreach (var type in typeof(User).Assembly.GetTypes())
-            if (type.Namespace == "RestaurantWebsite.Models" && type.IsClass && type.IsPublic && !type.IsNested && type != typeof(AppDbContext))
-                typeof(DbModelBuilder).GetMethod("Entity").MakeGenericMethod(type).Invoke(builder, null);
+        // Match DbContext's DbSet entity-set naming, including Combos/Comboes.
+        foreach (var property in typeof(AppDbContext).GetProperties())
+            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+            {
+                var type = property.PropertyType.GetGenericArguments()[0];
+                var configuration = typeof(DbModelBuilder).GetMethod("Entity").MakeGenericMethod(type).Invoke(builder, null);
+                configuration.GetType().GetMethod("HasEntitySetName").Invoke(configuration, new object[] { property.Name });
+            }
         using (var context = new SnapshotContext()) context.Configure(builder);
         var model = builder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
         using (var memory = new MemoryStream())

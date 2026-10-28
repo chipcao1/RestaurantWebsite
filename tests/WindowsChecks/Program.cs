@@ -65,14 +65,32 @@ class Program
         Environment.SetEnvironmentVariable("RESTAURANT_SEED_DEMO","false");
         try
         {
-            var config=new DbMigrationsConfiguration<AppDbContext>{AutomaticMigrationsEnabled=false,MigrationsAssembly=typeof(AppDbContext).Assembly,MigrationsNamespace="RestaurantWebsite.Migrations",ContextKey="RestaurantWebsite.Models.AppDbContext",TargetDatabase=new DbConnectionInfo(connection,"System.Data.SqlClient")};
-            new DbMigrator(config).Update();
+            var config=(DbMigrationsConfiguration<AppDbContext>)Activator.CreateInstance(typeof(AppDbContext).Assembly.GetType("RestaurantWebsite.Migrations.Configuration",true),true);
+            config.TargetDatabase=new DbConnectionInfo(connection,"System.Data.SqlClient");
+            var migrator=new DbMigrator(config);
+            Check(migrator.GetLocalMigrations().SequenceEqual(new[]{"202609281435011_InitialCreate"}),"only main's InitialCreate migration exists");
+            migrator.Update();
             Database.SetInitializer<AppDbContext>(null);
             int customer,staff,admin,dishId,tableId,promoId;
             using(var db=new AppDbContext())
             {
+                Check(db.Database.CompatibleWithModel(true),"current EF model is compatible with main's database");
+                Check(db.Database.SqlQuery<string>("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='dbo' AND TABLE_NAME IN ('Comboes','Combos')").Single()=="Comboes","combo table retains main's original name");
                 var users=new[]{new User{FullName="Khách thử",Email="customer@example.test",Role="Customer",PasswordHash="test-only",IsActive=true},new User{FullName="Nhân viên thử",Email="staff@example.test",Role="Staff",PasswordHash="test-only",IsActive=true},new User{FullName="Quản trị thử",Email="admin@example.test",Role="Admin",PasswordHash="test-only",IsActive=true}};
                 db.Users.AddRange(users);var category=new Category{Name="Món thử",IsActive=true};db.Categories.Add(category);var dish=new Dish{Name="Món kiểm thử",Category=category,Price=100000,Status="Available",PreparationTime=15};db.Dishes.Add(dish);var table=new RestaurantTable{TableNumber="T1",Capacity=4,Zone="Indoor",Status="Available",IsActive=true};db.RestaurantTables.Add(table);var promo=new Promotion{Code="LASTONE",Name="Một lượt",DiscountType="Percentage",DiscountValue=10,MinimumOrderAmount=0,UsageLimit=1,StartDate=RestaurantClock.Now.AddDays(-1),EndDate=RestaurantClock.Now.AddDays(1)};db.Promotions.Add(promo);db.SaveChanges();customer=users[0].Id;staff=users[1].Id;admin=users[2].Id;dishId=dish.Id;tableId=table.Id;promoId=promo.Id;
+            }
+            // Re-running Update-Database on the main schema must preserve user data.
+            using(var db=new AppDbContext())
+            {
+                db.Categories.Add(new Category{Name="Appetizers",Description="Fresh appetizers & starters",IsActive=true});
+                db.Combos.Add(new Combo{Name="Family Combo",Description="Complete combo for family.",Price=100000,IsActive=true});
+                db.SaveChanges();
+            }
+            migrator.Update();
+            using(var db=new AppDbContext())
+            {
+                Check(!migrator.GetPendingMigrations().Any(),"no additional migrations pending for main database");
+                Check(db.Categories.Any(c=>c.Name=="Appetizers"&&c.Description=="Fresh appetizers & starters")&&db.Combos.Any(c=>c.Name=="Family Combo"&&c.Description=="Complete combo for family."),"Update-Database preserves existing catalog data");
             }
             var fake=new ContextStub("admin");fake.Session["UserId"]=customer;fake.Session["Role"]="Admin";Check(!new AuthorizeProbe("Admin").Allows(fake),"session cannot spoof Admin role");
             using(var db=new AppDbContext()){var u=db.Users.Find(customer);u.IsActive=false;db.SaveChanges();}Check(!new AuthorizeProbe("Customer").Allows(fake),"locked user loses access immediately");

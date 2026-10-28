@@ -309,9 +309,7 @@
   <ItemGroup />
   <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202610280900000_YamyWorkflow.resx">
-      <DependentUpon>202610280900000_YamyWorkflow.cs</DependentUpon>
-    </EmbeddedResource>
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PdfSharp">
@@ -337,6 +335,8 @@
   <ItemGroup>
     <Content Include="Scripts\yamy.js" />
   </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
   <ItemGroup>
     </ItemGroup>
   <ItemGroup>
@@ -428,8 +428,6 @@
     <Compile Include="Infrastructure\ViewOptions.cs" />
     <Compile Include="Migrations\202609281435011_InitialCreate.Designer.cs" />
     <Compile Include="Migrations\202609281435011_InitialCreate.cs" />
-    <Compile Include="Migrations\202610280900000_YamyWorkflow.Designer.cs" />
-    <Compile Include="Migrations\202610280900000_YamyWorkflow.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\Category.cs" />

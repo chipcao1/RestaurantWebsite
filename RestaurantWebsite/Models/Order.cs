@@ -46,8 +46,6 @@ namespace RestaurantWebsite.Models
         [StringLength(500, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string Note { get; set; }
 
-        public DateTime? ServiceStart { get; set; }
-        public DateTime? ServiceEnd { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

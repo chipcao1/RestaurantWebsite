@@ -45,14 +45,14 @@ class Program
         Check(!WorkflowRules.ReservationTransition("Unknown","Cancelled","Customer",now.AddHours(1),now,false), "unknown reservation state rejected");
         var payments = new[] {
             new RestaurantWebsite.Models.Payment { Status="Completed",Amount=100m,PaymentDate=now },
-            new RestaurantWebsite.Models.Payment { Status="Refunded",Amount=200m,PaymentDate=now.AddDays(-1),RefundedAt=now },
-            new RestaurantWebsite.Models.Payment { Status="Refunded",Amount=50m,PaymentDate=now,RefundedAt=now.AddDays(1) },
+            new RestaurantWebsite.Models.Payment { Status="Refunded",Amount=200m,PaymentDate=now.AddDays(-1) },
+            new RestaurantWebsite.Models.Payment { Status="Refunded",Amount=50m,PaymentDate=now },
             new RestaurantWebsite.Models.Payment { Status="Pending",Amount=999m,PaymentDate=now }
         };
         var total = ReportMath.Calculate(payments,now.Date,now.Date.AddDays(1));
-        Check(total.Collected==150m, "cash collected on original paid date including later refunds");
-        Check(total.Refunded==200m, "refund belongs to refund date");
-        Check(total.Net==-50m, "net may be negative when refunding older collections");
+        Check(total.Collected==150m, "payments remain allocated to original paid date");
+        Check(total.Refunded==50m, "refund adjusts the original payment period");
+        Check(total.Net==100m, "net excludes refunded and pending payments");
         var dish = new RestaurantWebsite.Models.Dish { Status="Available",Category=new RestaurantWebsite.Models.Category { IsActive=true },Price=100m };
         var combo = new RestaurantWebsite.Models.Combo { IsActive=true,Price=80m };
         combo.ComboItems.Add(new RestaurantWebsite.Models.ComboItem { Dish=dish,Quantity=1 });

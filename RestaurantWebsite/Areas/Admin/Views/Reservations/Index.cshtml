@@ -221,8 +221,3 @@
         }
     </div>
 </div>
-
-<section class="surface"><h2>Phân công xử lý</h2><p>Chọn đặt bàn đang chờ hoặc đã xác nhận và nhân viên phụ trách.</p>
-@using(Html.BeginForm("Assign", "Reservations",new{area="Admin"},FormMethod.Post,new{@class="filter-bar"})){
-@Html.AntiForgeryToken()<select name="id" class="form-control" aria-label="Đặt bàn" required><option value="">Chọn đặt bàn</option>@foreach(var r in Model.Where(x=>x.Status=="Pending"||x.Status=="Confirmed")){<option value="@r.Id">#@r.Id · @r.User.FullName · @r.ReservationDate.ToString("dd/MM HH:mm")</option>}</select><select name="staffId" class="form-control" aria-label="Nhân viên phụ trách" required><option value="">Chọn nhân viên</option>@foreach(var u in (IEnumerable<RestaurantWebsite.Models.User>)ViewBag.StaffMembers){<option value="@u.Id">@u.FullName</option>}</select><button class="btn btn-warning">Giao nhân viên</button>}
-</section>

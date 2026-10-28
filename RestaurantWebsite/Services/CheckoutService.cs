@@ -54,7 +54,7 @@ namespace RestaurantWebsite.Services
                     else tableId = input.TableId ?? 0;
                     var table = db.RestaurantTables.SingleOrDefault(t => t.Id == tableId && t.IsActive && t.Status == "Available");
                     if (table == null || new ReservationService(db).HasConflict(tableId, start, end, order.ReservationId)) throw new InvalidOperationException("Bàn đang có lịch phục vụ. Vui lòng chọn bàn khác hoặc đặt bàn hợp lệ.");
-                    order.TableId = tableId; order.ServiceStart = start; order.ServiceEnd = end;
+                    order.TableId = tableId;
                 }
                 db.Orders.Add(order);
                 foreach (var d in dishes) order.OrderItems.Add(new OrderItem { DishId = d.Id, Quantity = cart[d.Id], UnitPrice = d.Price, SubTotal = d.Price * cart[d.Id] });

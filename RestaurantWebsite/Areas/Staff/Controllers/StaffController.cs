@@ -209,7 +209,6 @@ namespace RestaurantWebsite.Areas.Staff.Controllers
             }
 
             ViewBag.Tables = db.RestaurantTables.Where(t => t.IsActive).OrderBy(t => t.TableNumber).ToList();
-            ViewBag.StaffMembers = db.Users.Where(u => u.Role == "Staff").ToList();
             var reservations = query.OrderByDescending(r => r.ReservationDate).ToList();
 
             ViewBag.StatusList = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidReservationStatuses, status);

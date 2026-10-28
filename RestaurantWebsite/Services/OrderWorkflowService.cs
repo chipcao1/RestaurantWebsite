@@ -34,7 +34,7 @@ namespace RestaurantWebsite.Services
                 {
                     if (payment.Order.Status == "Cancelled" || payment.Order.Status == "Delivered") throw new InvalidOperationException("Đơn hàng đã kết thúc.");
                     if (payment.Amount != payment.Order.TotalAmount || db.Payments.Any(p => p.OrderId == payment.OrderId && p.Id != payment.Id && p.Status == "Completed")) throw new InvalidOperationException("Số tiền không hợp lệ hoặc đơn đã được thanh toán.");
-                    payment.PaymentDate = RestaurantClock.Now; payment.ConfirmedById = actorId;
+                    payment.PaymentDate = RestaurantClock.Now;
                     if (!string.IsNullOrWhiteSpace(transactionCode))
                     {
                         transactionCode = transactionCode.Trim();
@@ -45,7 +45,6 @@ namespace RestaurantWebsite.Services
                 if (next == "Refunded")
                 {
                     if (payment.Order.Status != "Pending" && payment.Order.Status != "Confirmed") throw new InvalidOperationException("Chỉ hoàn và hủy đơn trước khi chế biến.");
-                    payment.RefundedAt = RestaurantClock.Now; payment.RefundedById = actorId;
                     payment.Order.Status = "Cancelled";
                     foreach (var other in db.Payments.Where(p => p.OrderId == payment.OrderId && p.Status == "Pending")) other.Status = "Failed";
                 }

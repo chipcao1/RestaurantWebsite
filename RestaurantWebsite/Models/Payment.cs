@@ -25,9 +25,6 @@ namespace RestaurantWebsite.Models
 
         public DateTime PaymentDate { get; set; }
 
-        public DateTime? RefundedAt { get; set; }
-        public int? ConfirmedById { get; set; }
-        public int? RefundedById { get; set; }
 
         [StringLength(100, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string TransactionCode { get; set; }

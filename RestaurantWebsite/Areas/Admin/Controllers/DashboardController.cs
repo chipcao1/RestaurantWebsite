@@ -74,7 +74,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             var dailyRevenueList = new List<decimal>();
             var dailyLabelsList = new List<string>();
 
-            var monthPayments = db.Payments.Where(p => ((p.Status == "Completed" || p.Status == "Refunded") && p.PaymentDate >= monthStart && p.PaymentDate < nextMonthStart) || (p.Status == "Refunded" && p.RefundedAt >= monthStart && p.RefundedAt < nextMonthStart)).ToList();
+            var monthPayments = db.Payments.Where(p => (p.Status == "Completed" || p.Status == "Refunded") && p.PaymentDate >= monthStart && p.PaymentDate < nextMonthStart).ToList();
             for (int day = 1; day <= daysInMonth; day++)
             {
                 dailyLabelsList.Add(string.Format("{0:D2}/{1:D2}", day, now.Month));

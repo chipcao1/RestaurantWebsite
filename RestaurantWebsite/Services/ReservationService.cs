@@ -11,16 +11,21 @@ namespace RestaurantWebsite.Services
         public ReservationService(AppDbContext context) { db = context; }
         public bool HasConflict(int tableId, DateTime start, DateTime end, int? excludeReservationId = null)
         {
+            var now = RestaurantClock.Now;
+            // Use the original schema: linked bookings define the service window;
+            // walk-in orders use CreatedAt. Overdue open orders keep their table occupied.
             return db.Reservations.Any(r => r.TableId == tableId && r.Id != (excludeReservationId ?? 0) && r.Status != "Cancelled" && r.Status != "Completed" && r.ReservationDate < end && System.Data.Entity.DbFunctions.AddHours(r.ReservationDate, 2) > start) ||
-                db.Orders.Any(o => o.TableId == tableId && o.Status != "Cancelled" && o.Status != "Delivered" &&
-                    (!excludeReservationId.HasValue || o.ReservationId != excludeReservationId) &&
-                    (o.ServiceStart ?? o.CreatedAt) < end &&
-                    ((!o.ServiceEnd.HasValue && System.Data.Entity.DbFunctions.AddHours(o.CreatedAt, 2) > start) || o.ServiceEnd > start || o.ServiceEnd <= RestaurantClock.Now));
+                db.Orders.Where(o => o.TableId == tableId && o.Status != "Cancelled" && o.Status != "Delivered" &&
+                    (!excludeReservationId.HasValue || o.ReservationId != excludeReservationId))
+                .Select(o => o.ReservationId.HasValue ? o.Reservation.ReservationDate : o.CreatedAt)
+                .Any(serviceStart => serviceStart < end &&
+                    (System.Data.Entity.DbFunctions.AddHours(serviceStart, 2) > start ||
+                     System.Data.Entity.DbFunctions.AddHours(serviceStart, 2) <= now));
         }
         private Reservation Get(int id, int actorId, string role)
         {
             var r = db.Reservations.SingleOrDefault(x => x.Id == id);
-            if (r == null || (role == "Customer" && r.UserId != actorId) || (role == "Staff" && r.AssignedStaffId.HasValue && r.AssignedStaffId != actorId)) throw new InvalidOperationException("Không tìm thấy đặt bàn hoặc bạn không được phân công xử lý.");
+            if (r == null || (role == "Customer" && r.UserId != actorId)) throw new InvalidOperationException("Không tìm thấy đặt bàn hoặc bạn không có quyền truy cập.");
             return r;
         }
         public void ChangeStatus(int id, string next, int actorId, string role)
@@ -32,18 +37,7 @@ namespace RestaurantWebsite.Services
                 if (!WorkflowRules.ReservationTransition(r.Status, next, role, r.ReservationDate, RestaurantClock.Now, open)) throw new InvalidOperationException("Không thể chuyển trạng thái đặt bàn vào lúc này.");
                 var table = db.RestaurantTables.Find(r.TableId);
                 if (next == "Confirmed" && (table == null || !table.IsActive || table.Status != "Available" || table.Capacity < r.PartySize || HasConflict(r.TableId, r.ReservationDate, r.ReservationDate.AddHours(2), r.Id))) throw new InvalidOperationException("Bàn không phù hợp hoặc khung giờ đã có người đặt.");
-                if (role == "Staff" && !r.AssignedStaffId.HasValue) r.AssignedStaffId = actorId;
                 r.Status = next; db.SaveChanges(); tx.Commit();
-            }
-        }
-        public void Assign(int id, int staffId)
-        {
-            using (var tx = db.Database.BeginTransaction(IsolationLevel.Serializable))
-            {
-                var r = db.Reservations.SingleOrDefault(x => x.Id == id);
-                if (r == null || (r.Status != "Pending" && r.Status != "Confirmed")) throw new InvalidOperationException("Đặt bàn đã kết thúc hoặc không tồn tại.");
-                if (!db.Users.Any(u => u.Id == staffId && u.Role == "Staff" && u.IsActive)) throw new InvalidOperationException("Nhân viên không hợp lệ.");
-                r.AssignedStaffId = staffId; db.SaveChanges(); tx.Commit();
             }
         }
         public void ChangeTable(int id, int tableId, int actorId, string role)
