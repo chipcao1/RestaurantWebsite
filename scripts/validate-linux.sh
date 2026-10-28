@@ -6,6 +6,7 @@ YAMY_DOTNET="${YAMY_DOTNET:-dotnet}"
 YAMY_VALIDATION_ROOT="${YAMY_VALIDATION_ROOT:-/tmp/restaurant-yamy-validation}"
 mkdir -p "$YAMY_VALIDATION_ROOT"
 cd "$YAMY_REPO_ROOT"
+python3 scripts/check-resx.py
 python3 - "$YAMY_VALIDATION_ROOT" <<'PY'
 from pathlib import Path
 import sys,xml.etree.ElementTree as E

@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Validate Windows ResX headers
+        run: python scripts/check-resx.py
       - uses: microsoft/setup-msbuild@v2
       - uses: NuGet/setup-nuget@v2
       - uses: actions/setup-dotnet@v4
