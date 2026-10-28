@@ -36,7 +36,11 @@ jobs:
           python scripts/check-model-snapshot.py model.txt
           if ($LASTEXITCODE -ne 0) { throw 'Database schema differs from main' }
       - name: Check shared frontend regression
-        run: node tests/frontend-smoke.cjs
+        run: |
+          node tests/frontend-smoke.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Shared frontend checks failed' }
+          node tests/checkout-preview.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Checkout preview checks failed' }
       - name: Start isolated LocalDB
         shell: pwsh
         run: |

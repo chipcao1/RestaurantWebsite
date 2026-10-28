@@ -1,20 +1,26 @@
 @using System.Linq
 @using RestaurantWebsite.Models
 @using RestaurantWebsite.Infrastructure
-@{ViewBag.Title="Bữa ngon cho những cuộc gặp gỡ";var dishes=ViewBag.HomeDishes as IEnumerable<Dish>??new List<Dish>();var categories=ViewBag.HomeCategories as IEnumerable<Category>??new List<Category>();var combo=ViewBag.HomeCombo as Combo;}
-@section Hero {<section class="container">
-<div class="customer-hero">
-<span class="section-kicker">BẾP ẤM · MÓN NGON · KHOẢNH KHẮC ĐẸP</span>
-<h1>Một bữa ngon.<br/>Nhiều điều đáng nhớ.</h1>
-<p>Từ bữa trưa nhẹ nhàng đến buổi tối sum vầy, Feane chuẩn bị từng món ăn để bạn tận hưởng khoảng thời gian bên những người thân yêu.</p>
-<div class="hero-actions">
-<a class="btn btn-warning" href="@Url.Action("Index", "Menu",new{area="Customer"})">Khám phá thực đơn <i class="fa fa-arrow-right">
-</i>
-</a>
-<a class="btn btn-outline-light" href="@Url.Action("Index", "Reservation",new{area="Customer"})">Đặt bàn trước</a>
-</div>
-</div>
-</section>}
+@{ViewBag.Title="Bữa ngon cho những cuộc gặp gỡ";ViewBag.BodyClass="home_page";var dishes=ViewBag.HomeDishes as IEnumerable<Dish>??new List<Dish>();var categories=ViewBag.HomeCategories as IEnumerable<Category>??new List<Category>();var combo=ViewBag.HomeCombo as Combo;}
+@section Hero {
+<section class="slider_section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-lg-6">
+                <div class="detail-box">
+                    <span class="section-kicker">CHÀO MỪNG ĐẾN FEANE</span>
+                    <h1>Bữa ăn ngon bắt đầu từ sự tận tâm</h1>
+                    <p>Khám phá món ngon được chuẩn bị từ nguyên liệu tươi mới. Dùng bữa tại nhà hàng, mang về hoặc nhận giao tận nơi.</p>
+                    <div class="btn-box">
+                        <a href="@Url.Action("Index", "Menu", new { area = "Customer" })">Khám phá thực đơn</a>
+                        <a class="hero-secondary" href="@Url.Action("Index", "Reservation", new { area = "Customer" })">Đặt bàn trước</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+}
 <section class="food_section layout_padding">
 <div class="container">
 <div class="page-heading">
@@ -44,7 +50,7 @@
 </div>}
 </div>@if(!dishes.Any()){<p class="empty-state">Nhà hàng đang cập nhật thực đơn. Vui lòng quay lại sau.</p>}</div>
 </section>
-@if(combo!=null){<section class="layout_padding" style="background:#253229;color:white">
+@if(combo!=null){<section class="layout_padding" style="background:#222831;color:white">
 <div class="container">
 <div class="row align-items-center">
 <div class="col-md-7">

@@ -18,7 +18,7 @@ namespace RestaurantWebsite.Infrastructure
             {"Occupied", "Đang sử dụng"}, {"Reserved", "Đã đặt"}, {"Maintenance", "Bảo trì"},
             {"Active", "Đang hoạt động"}, {"Inactive", "Ngừng hoạt động"}, {"Expired", "Hết hạn"},
             {"Upcoming", "Sắp áp dụng"}, {"All", "Tất cả"}, {"Percentage", "Phần trăm"}, {"Percent", "Phần trăm"},
-            {"Fixed", "Số tiền"}, {"Fixed Amount", "Số tiền"}, {"Amount", "Số tiền"}, {"Discontinued", "Ngừng kinh doanh"},
+            {"FixedAmount", "Số tiền"}, {"Fixed", "Số tiền"}, {"Fixed Amount", "Số tiền"}, {"Amount", "Số tiền"}, {"Discontinued", "Ngừng kinh doanh"},
             {"Window", "Gần cửa sổ"}, {"Indoor", "Trong nhà"}, {"Outdoor", "Ngoài trời"}, {"VIP", "Phòng riêng"}
         };
         public static string Label(string value) { string label; return value != null && Labels.TryGetValue(value, out label) ? label : value ?? ""; }

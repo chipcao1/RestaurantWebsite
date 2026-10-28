@@ -71,14 +71,14 @@
                     @using (Html.BeginForm(
                         "PlaceOrder", "Order", new { area = "Customer" },
                         FormMethod.Post,
-                        new { id = "checkoutForm" }))
+                        new { id = "checkoutForm", data_preview_url = Url.Action("PreviewPromotion", "Order", new { area = "Customer" }), data_subtotal = subTotal.ToString(System.Globalization.CultureInfo.InvariantCulture) }))
                     {
                         @Html.AntiForgeryToken()
 
                         <!-- ORDER TYPE -->
                         <div class="form-group">
                             <label for="OrderType" class="font-weight-bold">Hình thức phục vụ</label>
-                            <select name="OrderType" id="OrderType" class="form-control" onchange="toggleDeliveryAddress()">
+                            <select name="OrderType" id="OrderType" class="form-control">
                                 <option value="Delivery" @(Model.OrderType == "Delivery" ? "selected" : "")>Giao hàng</option>
                                 <option value="Dine-in" @(Model.OrderType == "Dine-in" ? "selected" : "")>Tại bàn</option>
                                 <option value="Takeaway" @(Model.OrderType == "Takeaway" ? "selected" : "")>Mang về</option>
@@ -146,21 +146,21 @@
                                     <input type="radio"
                                            name="paymentMethod"
                                            value="Cash"
-                                           checked="checked" />
+                                           @(ViewBag.PaymentMethod == null || ViewBag.PaymentMethod == "Cash" ? "checked" : "") />
                                     <span class="ml-2">Tiền mặt</span>
                                 </label>
 
                                 <label class="d-block mb-2">
                                     <input type="radio"
                                            name="paymentMethod"
-                                           value="Bank Transfer" />
+                                           value="Bank Transfer" @(ViewBag.PaymentMethod == "Bank Transfer" ? "checked" : "") />
                                     <span class="ml-2">Chuyển khoản</span>
                                 </label>
 
                                 <label class="d-block mb-0">
                                     <input type="radio"
                                            name="paymentMethod"
-                                           value="Digital Wallet" />
+                                           value="Digital Wallet" @(ViewBag.PaymentMethod == "Digital Wallet" ? "checked" : "") />
                                     <span class="ml-2">Ví điện tử</span>
                                 </label>
                             </div>
@@ -177,12 +177,14 @@
                                    id="promotionCode"
                                    class="form-control"
                                    maxlength="50"
-                                   placeholder="Nhập mã khuyến mãi" />
+                                   placeholder="Nhập mã khuyến mãi"
+                                   value="@ViewBag.PromotionCode" aria-describedby="promotionMessage" autocomplete="off" />
+                            <small id="promotionMessage" class="form-text" role="status" aria-live="polite"></small>
 
                             @if (promotions.Any())
                             {
                                 <small class="form-text text-muted">
-                                    Available codes:
+                                    Mã đang áp dụng:
                                     @string.Join(", ", promotions.Select(p => p.Code))
                                 </small>
                             }
@@ -215,7 +217,7 @@
                                 Về giỏ hàng
                             </a>
 
-                            <button type="submit"
+                            <button type="submit" id="placeOrderButton"
                                     class="btn btn-warning text-white">
                                 Xác nhận đặt món
                             </button>
@@ -327,13 +329,13 @@
                             {
                                 <div class="mt-2 pl-2">
                                     <small class="text-muted">
-                                        Includes:
+                                        Gồm:
                                         @string.Join(
                                             ", ",
                                             combo.ComboItems.Select(ci =>
                                                 (ci.Dish != null
                                                     ? ci.Dish.Name
-                                                    : "Dish #" + ci.DishId)
+                                                    : "Món #" + ci.DishId)
                                                 + " x "
                                                 + (ci.Quantity * quantity)))
                                     </small>
@@ -344,12 +346,13 @@
 
                     <div class="d-flex justify-content-between">
                         <span>Tạm tính</span>
-                        <strong>@subTotal.ToString("N0") VNĐ</strong>
+                        <strong id="summarySubtotal">@subTotal.ToString("N0") VNĐ</strong>
                     </div>
 
+                    <div id="promotionSummary" class="checkout-promotion" hidden aria-live="polite"><span id="promotionDescription"></span></div>
                     <div class="d-flex justify-content-between mt-2">
                         <span>Giảm giá</span>
-                        <strong id="discountPreview">Tính lại sau khi áp dụng mã</strong>
+                        <strong id="discountPreview">0 VNĐ</strong>
                     </div>
 
                     <div class="d-flex justify-content-between mt-2">
@@ -387,39 +390,5 @@
 </section>
 
 @section scripts {
-    <script>
-        function toggleDeliveryAddress() {
-            document.getElementById('dineInGroup').style.display = document.getElementById('OrderType').value === 'Dine-in' ? '' : 'none';
-            var orderTypeSelect = document.getElementById("OrderType");
-            if (!orderTypeSelect) return;
-            var orderType = orderTypeSelect.value;
-            var addressGroup = document.getElementById("deliveryAddressGroup");
-            if (addressGroup) {
-                if (orderType === "Delivery") {
-                    addressGroup.style.display = "block";
-                } else {
-                    addressGroup.style.display = "none";
-                }
-            }
-        }
-
-        $(document).ready(function () {
-            // Guarantee #OrderType uses native HTML select behavior
-            if ($.fn.niceSelect && $('#OrderType').next('.nice-select').length) {
-                $('#OrderType').niceSelect('destroy');
-            }
-
-            // Sync address visibility with initial OrderType on page load
-            toggleDeliveryAddress();
-
-            // Listen for user changes
-            $('#OrderType').on('change', function () {
-                toggleDeliveryAddress();
-            });
-        });
-    </script>
+    <script src="@Url.Content("~/Scripts/checkout.js")"></script>
 }
-
-
-
-<script>(function(){var type=document.getElementById('OrderType');function update(){document.getElementById('dineInGroup').style.display=type.value==='Dine-in'?'':'none';document.getElementById('deliveryAddressGroup').style.display=type.value==='Delivery'?'':'none';}type.addEventListener('change',update);update();})();</script>

@@ -55,6 +55,55 @@ class Program
         foreach(var spec in new[]{new[]{"admin","Admin","Dashboard","Index"},new[]{"staff/Orders","Staff","Staff","Orders"},new[]{"customer/orders","Customer","Account","MyOrders"},new[]{"Menu/Index","Customer","Menu","Index"},new[]{"Account/Login","","Account","Login"},new[]{"Account/Profile","Customer","Account","Profile"},new[]{"staff/catalog/Dishes/Edit/1","Staff","Dishes","Edit"}})
         {var route=routes.GetRouteData(new ContextStub(spec[0]));Check(route!=null&&Convert.ToString(route.DataTokens["area"])==spec[1]&&Convert.ToString(route.Values["controller"])==spec[2]&&Convert.ToString(route.Values["action"])==spec[3],"route "+spec[0]);}
     }
+    static void RoleAndAccountForms(int customerId,int staffId,int adminId,int dishId)
+    {
+        const string password="LoginCheck@2026!";
+        using(var db=new AppDbContext())
+        {
+            foreach(int id in new[]{customerId,staffId,adminId})db.Users.Find(id).PasswordHash=RestaurantWebsite.Security.PasswordHasher.HashPassword(password);
+            db.SaveChanges();
+        }
+        foreach(var spec in new[]{new[]{"customer@example.test","CustomerHome","Customer"},new[]{"staff@example.test","StaffHome","Staff"},new[]{"admin@example.test","AdminHome","Admin"}})
+        using(var controller=new RestaurantWebsite.Controllers.AccountController())
+        {
+            var context=new ContextStub("Account/Login");
+            controller.ControllerContext=new ControllerContext(context,new RouteData(),controller);
+            foreach(string returnUrl in new[]{"/customer/Order/Checkout","/admin","https://example.test/outside"})
+            {
+                var result=(RedirectToRouteResult)controller.Login(spec[0],password,returnUrl);
+                Check(result.RouteName==spec[1]&&Convert.ToString(context.Session["Role"])==spec[2],"login prioritizes "+spec[2]+" workspace over "+returnUrl);
+            }
+            Check(((RedirectToRouteResult)controller.Login("/Menu")).RouteName==spec[1],"already signed-in account enters its own workspace");
+        }
+        using(var controller=new RestaurantWebsite.Areas.Admin.Controllers.UsersController())
+        {
+            var context=new ContextStub("admin/Users");context.Session["UserId"]=adminId;context.Session["Role"]="Admin";
+            controller.ControllerContext=new ControllerContext(context,new RouteData(),controller);
+            Check(controller.GetType().GetMethod("Edit")==null,"admin has no endpoint to edit another user's personal information or role");
+            Check(controller.GetType().GetMethod("ResetPassword").GetParameters().Length==1,"reset cannot accept a custom password from the browser");
+            controller.ResetPassword(customerId);
+            using(var db=new AppDbContext())
+            {
+                bool rehash;var user=db.Users.Find(customerId);
+                Check(RestaurantWebsite.Security.PasswordHasher.VerifyPassword(user.PasswordHash,"123456789",out rehash)&&!rehash,"admin reset stores the fixed password using PBKDF2");
+                Check(user.FullName=="Khách thử"&&user.Role=="Customer","password reset preserves profile and role");
+            }
+            controller.ToggleStatus(adminId);
+            using(var db=new AppDbContext())Check(db.Users.Find(adminId).IsActive,"admin cannot lock their current account");
+            controller.ToggleStatus(customerId);
+            using(var db=new AppDbContext())Check(!db.Users.Find(customerId).IsActive,"admin can lock another account");
+            controller.ToggleStatus(customerId);
+            using(var db=new AppDbContext())Check(db.Users.Find(customerId).IsActive,"admin can unlock another account");
+            controller.CreateStaff(new User{FullName="Nhân viên mới",Email="newstaff@example.test",Role="Admin",IsActive=true},password);
+            using(var db=new AppDbContext())Check(db.Users.Single(u=>u.Email=="newstaff@example.test").Role=="Staff","staff creation ignores a forged Admin role");
+        }
+        using(var db=new AppDbContext())
+        {
+            var quote=new CheckoutService(db).Quote(new Dictionary<int,int>{{dishId,2}},new Dictionary<int,int>()," lastone ");
+            Check(quote.Subtotal==200000&&quote.Discount==20000&&quote.Total==180000,"promotion quote recalculates the real session cart using database prices");
+            Check(db.Promotions.AsNoTracking().Single(p=>p.Code=="LASTONE").UsedCount==0&&db.ChangeTracker.Entries<Promotion>().All(e=>e.State==EntityState.Unchanged),"promotion preview does not consume or persist a use");
+        }
+    }
     static void DemoSql()
     {
         string sql=File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"seed-demo.sql"));
@@ -115,7 +164,11 @@ class Program
                 Check(!migrator.GetPendingMigrations().Any(),"no additional migrations pending for main database");
                 Check(db.Categories.Any(c=>c.Name=="Appetizers"&&c.Description=="Fresh appetizers & starters")&&db.Combos.Any(c=>c.Name=="Family Combo"&&c.Description=="Complete combo for family."),"Update-Database preserves existing catalog data");
             }
+            RoleAndAccountForms(customer,staff,admin,dishId);
             var fake=new ContextStub("admin");fake.Session["UserId"]=customer;fake.Session["Role"]="Admin";Check(!new AuthorizeProbe("Admin").Allows(fake),"session cannot spoof Admin role");
+            var operatorContext=new ContextStub("staff");operatorContext.Session["UserId"]=admin;
+            Check(new AuthorizeProbe("Staff","Admin").Allows(operatorContext)&&Convert.ToString(operatorContext.Session["Role"])=="Admin","admin can use the staff area without changing their role");
+            operatorContext.Session["UserId"]=staff;Check(!new AuthorizeProbe("Admin").Allows(operatorContext),"staff cannot enter the admin area");
             using(var db=new AppDbContext()){var u=db.Users.Find(customer);u.IsActive=false;db.SaveChanges();}Check(!new AuthorizeProbe("Customer").Allows(fake),"locked user loses access immediately");
             using(var db=new AppDbContext()){db.Users.Find(customer).IsActive=true;db.SaveChanges();}
             int orderId;

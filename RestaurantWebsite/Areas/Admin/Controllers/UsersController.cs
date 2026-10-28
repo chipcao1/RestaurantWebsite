@@ -130,7 +130,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
             db.Users.Add(model);
             db.SaveChanges();
 
-            TempData["Success"] = "Đã lưu thay đổi thành công.";
+            TempData["Success"] = "Đã tạo tài khoản nhân viên.";
             return RedirectToAction("Index");
         }
 
@@ -158,103 +158,9 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ValidRoles = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidRoles, user.Role);
             ViewBag.CurrentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
 
             return View(user);
-        }
-
-        // =====================================================
-        // POST: admin/users/edit/5
-        // =====================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,FullName,Email,Phone,Address,Role,IsActive")] User model)
-        {
-            using (var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
-            {
-
-                ModelState.Remove("PasswordHash");
-                var user = db.Users.FirstOrDefault(u => u.Id == model.Id);
-                if (user == null)
-                {
-                    TempData["Error"] = "Không tìm thấy tài khoản.";
-                    return RedirectToAction("Index");
-                }
-
-                int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
-
-                model.FullName = string.IsNullOrWhiteSpace(model.FullName) ? null : model.FullName.Trim();
-                model.Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim().ToLower();
-                model.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
-                model.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
-                model.Role = string.IsNullOrWhiteSpace(model.Role) ? user.Role : model.Role.Trim();
-
-                if (string.IsNullOrWhiteSpace(model.FullName))
-                {
-                    ModelState.AddModelError("FullName", "Vui lòng nhập họ tên.");
-                }
-
-                if (string.IsNullOrWhiteSpace(model.Email))
-                {
-                    ModelState.AddModelError("Email", "Vui lòng nhập email.");
-                }
-                else if (db.Users.Any(u => u.Id != model.Id && u.Email.ToLower() == model.Email))
-                {
-                    ModelState.AddModelError("Email", "Email đã được tài khoản khác sử dụng.");
-                }
-
-                if (!ValidRoles.Contains(model.Role))
-                {
-                    ModelState.AddModelError("Role", "Vai trò không hợp lệ.");
-                }
-
-                if (user.Role == "Admin" && user.IsActive && (!model.IsActive || model.Role != "Admin") && db.Users.Count(u => u.Role == "Admin" && u.IsActive) <= 1)
-                    ModelState.AddModelError("Role", "Không thể khóa hoặc gỡ quyền quản trị viên cuối cùng.");
-                // Security check: cannot change own role or deactivate self
-                if (user.Id == currentAdminId)
-                {
-                    if (!model.IsActive)
-                    {
-                        ModelState.AddModelError("IsActive", "Bạn không thể tự khóa tài khoản đang sử dụng.");
-                    }
-                    if (model.Role != "Admin")
-                    {
-                        ModelState.AddModelError("Role", "Bạn không thể tự gỡ quyền quản trị.");
-                    }
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    ViewBag.ValidRoles = RestaurantWebsite.Infrastructure.ViewOptions.Choices(ValidRoles, model.Role);
-                    ViewBag.CurrentAdminId = currentAdminId;
-                    model.Orders = user.Orders;
-                    model.Reservations = user.Reservations;
-                    model.Reviews = user.Reviews;
-                    return View("Details", model);
-                }
-
-                user.FullName = model.FullName;
-                user.Email = model.Email;
-                user.Phone = model.Phone;
-                user.Address = model.Address;
-                user.Role = model.Role;
-                user.IsActive = model.IsActive;
-
-                db.SaveChanges(); tx.Commit();
-
-                // If updating currently logged in admin's own info, update Session
-                if (user.Id == currentAdminId)
-                {
-                    Session["UserName"] = user.FullName;
-                    Session["UserEmail"] = user.Email;
-                    Session["Role"] = user.Role;
-                }
-
-                TempData["Success"] = "Đã lưu thay đổi thành công.";
-                return RedirectToAction("Details", new { id = user.Id });
-
-            }
         }
 
         // =====================================================
@@ -298,7 +204,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ResetPassword(int id, string newPassword)
+        public ActionResult ResetPassword(int id)
         {
             var user = db.Users.Find(id);
             if (user == null)
@@ -307,16 +213,10 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
-            {
-                TempData["Error"] = "Mật khẩu mới phải có ít nhất 6 ký tự.";
-                return RedirectToAction("Details", new { id = id });
-            }
-
-            user.PasswordHash = PasswordHasher.HashPassword(newPassword);
+            user.PasswordHash = PasswordHasher.HashPassword("123456789");
             db.SaveChanges();
 
-            TempData["Success"] = "Đã lưu thay đổi thành công.";
+            TempData["Success"] = "Đã đặt lại mật khẩu tài khoản về 123456789.";
             return RedirectToAction("Details", new { id = id });
         }
 

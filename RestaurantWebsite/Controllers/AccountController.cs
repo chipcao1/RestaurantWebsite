@@ -20,6 +20,21 @@ namespace RestaurantWebsite.Controllers
         [HttpGet]
         public ActionResult Login(string returnUrl)
         {
+            if (Session["UserId"] != null)
+            {
+                int id;
+                if (int.TryParse(Convert.ToString(Session["UserId"]), out id))
+                {
+                    var current = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == id && u.IsActive);
+                    if (current != null)
+                    {
+                        if (current.Role == "Admin") return RedirectToRoute("AdminHome");
+                        if (current.Role == "Staff") return RedirectToRoute("StaffHome");
+                        if (current.Role == "Customer") return RedirectToRoute("CustomerHome");
+                    }
+                }
+                Session.Clear();
+            }
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -81,11 +96,8 @@ namespace RestaurantWebsite.Controllers
             Session["UserEmail"] = user.Email;
             Session["Role"] = user.Role;
 
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
+            // Always enter the workspace for the authenticated role.
+            // A link from the public website must not override this destination.
             if (string.Equals(user.Role, "Customer", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToRoute("CustomerHome");

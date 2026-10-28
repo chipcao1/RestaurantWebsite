@@ -187,14 +187,14 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <a href="@Url.Action("Details", "Users", new { area = "Admin", id = item.Id })" class="btn btn-info" title="Chi tiết / Chỉnh sửa">
+                                        <a href="@Url.Action("Details", "Users", new { area = "Admin", id = item.Id })" class="btn btn-info" title="Xem chi tiết tài khoản">
                                             <i class="fa fa-eye"></i> Chi tiết
                                         </a>
 
                                         @using (Html.BeginForm("ToggleStatus", "Users", new { area = "Admin", id = item.Id }, FormMethod.Post, new { style = "display:inline;" }))
                                         {
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success") @(isSelf ? "disabled" : "")"
+                                            <button type="submit" class="btn @(item.IsActive ? "btn-secondary" : "btn-success")" disabled="@(isSelf ? "disabled" : null)"
                                                     title="@(isSelf ? "Bạn không thể tự khóa tài khoản đang dùng" : (item.IsActive ? "Khóa tài khoản" : "Kích hoạt tài khoản"))">
                                                 <i class="fa @(item.IsActive ? "fa-lock" : "fa-unlock")"></i>
                                             </button>

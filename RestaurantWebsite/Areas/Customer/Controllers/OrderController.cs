@@ -70,6 +70,28 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
         }
 
 
+        [HttpPost]
+        [RoleAuthorize("Customer")]
+        [ValidateAntiForgeryToken]
+        public ActionResult PreviewPromotion(string promotionCode)
+        {
+            try
+            {
+                var quote = new RestaurantWebsite.Services.CheckoutService(db).Quote(GetCart(), GetComboCart(), promotionCode);
+                return Json(new
+                {
+                    success = true,
+                    code = quote.Promotion == null ? "" : quote.Promotion.Code,
+                    description = quote.Promotion == null ? "" : RestaurantWebsite.Services.PromotionRules.Describe(quote.Promotion),
+                    subtotal = quote.Subtotal,
+                    discount = quote.Discount,
+                    total = quote.Total
+                });
+            }
+            catch (InvalidOperationException ex) { return Json(new { success = false, message = ex.Message }); }
+            catch (System.Data.DataException) { return Json(new { success = false, message = "Không thể kiểm tra mã lúc này. Vui lòng thử lại." }); }
+        }
+
         // =====================================================
         // POST: Order/PlaceOrder
         // =====================================================
@@ -90,6 +112,8 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
             }
             catch (InvalidOperationException ex) { ModelState.AddModelError("", ex.Message); }
             catch (System.Data.DataException) { ModelState.AddModelError("", "Dữ liệu vừa thay đổi. Vui lòng kiểm tra giỏ hàng và thử lại."); }
+            ViewBag.PromotionCode = promotionCode;
+            ViewBag.PaymentMethod = paymentMethod;
             PrepareCheckoutData(GetCart(), GetComboCart());
             return View("~/Areas/Customer/Views/Order/Checkout.cshtml", model);
         }

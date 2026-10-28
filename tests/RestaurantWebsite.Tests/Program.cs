@@ -6,6 +6,7 @@ class Program
 {
     static int passed;
     static void Check(bool condition, string name) { if (!condition) throw new Exception("FAIL: " + name); passed++; Console.WriteLine("PASS: " + name); }
+    static void Denied(Action action,string name) { bool denied=false;try { action(); } catch(InvalidOperationException) { denied=true; } Check(denied,name); }
     static void Main()
     {
         Check(WorkflowRules.OrderTransition("Pending", "Confirmed", "Staff", false), "staff confirms pending order");
@@ -67,6 +68,20 @@ class Program
         Check(!NumericRules.TryDecimal("1e9",out number),"exponential input rejected");
         Check(PricingRules.Discount(100.50m,"Percentage",100m,null)<=100.50m,"rounding cannot exceed fractional subtotal");
         Check(PricingRules.Discount(1000m,"Percentage",50m,100.50m)<=100.50m,"rounding cannot exceed fractional discount cap");
+        var promotion = new RestaurantWebsite.Models.Promotion { Code="YM10", IsActive=true, DiscountType="Percentage", DiscountValue=10, MinimumOrderAmount=100000, MaximumDiscount=50000, StartDate=now.AddDays(-1), EndDate=now.AddDays(1), UsageLimit=2, UsedCount=1 };
+        Check(PromotionRules.Calculate(promotion,200000m,now)==20000m,"preview percentage promotion uses eligible subtotal");
+        Check(promotion.UsedCount==1,"preview never consumes a promotion use");
+        Check(PromotionRules.Describe(promotion).Contains("10%")&&PromotionRules.Describe(promotion).Contains("50.000"),"percentage description includes value and cap");
+        Check(PromotionRules.Calculate(promotion,1000000m,now)==50000m,"preview applies maximum discount");
+        Denied(()=>PromotionRules.Calculate(promotion,99999m,now),"preview rejects subtotal below minimum");
+        promotion.UsedCount=2;Denied(()=>PromotionRules.Calculate(promotion,200000m,now),"preview rejects exhausted code");
+        promotion.UsedCount=0;promotion.IsActive=false;Denied(()=>PromotionRules.Calculate(promotion,200000m,now),"preview rejects disabled code");
+        promotion.IsActive=true;Denied(()=>PromotionRules.Calculate(promotion,200000m,now.AddDays(2)),"preview rejects expired code");
+        Denied(()=>PromotionRules.Calculate(promotion,200000m,now.AddDays(-2)),"preview rejects future code");
+        Denied(()=>PromotionRules.Calculate(null,200000m,now),"preview rejects unknown code");
+        promotion.DiscountType="FixedAmount";promotion.DiscountValue=30000;
+        Check(PromotionRules.Calculate(promotion,200000m,now)==30000m,"preview supports main seed FixedAmount spelling");
+        Check(PromotionRules.Describe(promotion).Contains("30.000"),"fixed promotion description shows currency amount");
         Console.WriteLine(passed + " tests passed");
     }
 }

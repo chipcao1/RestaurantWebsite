@@ -16,6 +16,7 @@ msbuild RestaurantWebsite/RestaurantWebsite.csproj /t:Build /p:Configuration=Deb
 msbuild RestaurantWebsite/RestaurantWebsite.csproj /t:Build /p:Configuration=Release /p:MvcBuildViews=true /m:2
 dotnet run --project tests/RestaurantWebsite.Tests
 node tests/frontend-smoke.cjs
+node tests/checkout-preview.cjs
 sqllocaldb start MSSQLLocalDB
 dotnet build tests/WindowsChecks/WindowsChecks.csproj -c Release
 & tests/WindowsChecks/bin/Release/net48/WindowsChecks.exe
@@ -56,9 +57,9 @@ Chờ thông báo IIS Express đã khởi động. Trong cửa sổ PowerShell k
 
 | Nhóm | Kiểm tra |
 |---|---|
-| Tài khoản/phân quyền | Đăng ký khách; đăng nhập ba vai trò; đổi mật khẩu; khóa/đổi quyền có hiệu lực ở yêu cầu tiếp theo; POST trái quyền bị chặn; không khóa/hạ quyền quản trị viên cuối. |
+| Tài khoản/phân quyền | Đăng ký khách; đăng nhập ba vai trò về đúng trang chủ; admin chuyển qua lại khu quản trị/nhân viên; tài khoản người khác chỉ xem/reset 123456789/khóa/mở, tạo nhân viên không nhận Role giả; đổi mật khẩu; khóa/đổi quyền có hiệu lực ở yêu cầu tiếp theo; POST trái quyền bị chặn; không khóa/hạ quyền quản trị viên cuối. |
 | Danh mục/món | Nhân viên và quản trị thêm/sửa món; sửa giá, thời gian chế biến; thêm/gỡ ảnh/chọn đại diện; ẩn dữ liệu đã được tham chiếu thay vì xóa lịch sử. |
-| Đặt món | Thêm món và suất ăn; số lượng; đổi gợi ý suất ăn; áp mã đúng/sai/hết lượt; giao hàng cần địa chỉ, mang về không có địa chỉ/phí giao hàng, tại bàn lưu đúng phiên bàn. |
+| Đặt món | Thêm món và suất ăn; số lượng; đổi gợi ý suất ăn; nhập mã đúng/sai/hết lượt xem ngay mức giảm và tổng tiền; xóa mã hoặc gõ nhanh mã mới không giữ kết quả cũ; giao hàng cần địa chỉ, mang về không có địa chỉ/phí giao hàng, tại bàn lưu đúng phiên bàn. |
 | Đặt bàn | Số khách không vượt sức chứa; xác nhận/hủy/đổi bàn không trùng giờ; nhân viên/quản trị xử lý theo vai trò; nhiều đơn trong một phiên vẫn giữ chỗ khi còn đơn đang mở. |
 | Thanh toán/hóa đơn | Ghi nhận thủ công tiền mặt/chuyển khoản/ví; mã giao dịch; chặn thu trùng; chưa trả đủ không hoàn tất; hoàn toàn phần trước chế biến đồng thời hủy đơn. Không tích hợp cổng thanh toán thật. |
 | Đánh giá | Đánh giá món trong đơn hoàn tất; chặn đơn người khác, đơn chưa hoàn tất và gửi trùng; quản trị duyệt/ẩn, nhân viên chỉ xem. |

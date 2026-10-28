@@ -15,7 +15,7 @@
             ?? Model.DishImages.FirstOrDefault();
     }
 
-    bool isLoggedIn = Session["UserId"] != null;
+    bool isLoggedIn = Session["UserId"] != null && Convert.ToString(Session["Role"]) == "Customer";
 }
 
 
@@ -145,7 +145,7 @@ else
                         Thời gian chuẩn bị:
 
                         <strong>
-                            @Model.PreparationTime mins
+                            @Model.PreparationTime phút
                         </strong>
 
                     </p>
@@ -265,69 +265,13 @@ else
                             </button>
                         }
                     }
+                    else if (Session["UserId"] != null)
+                    {
+                        <p class="text-muted">Chỉ tài khoản khách hàng có thể đặt món.</p>
+                        <a class="btn btn-outline-secondary btn-block" href="@Url.RouteUrl(Convert.ToString(Session["Role"]) == "Admin" ? "AdminHome" : "StaffHome")">Về khu vực làm việc</a>
+                    }
                     else
                     {
-                        <!-- QUANTITY -->
-                        <div class="form-group mb-3">
-
-                            <label class="text-secondary d-block mb-2">
-                                Số lượng:
-                            </label>
-
-                            <div class="d-flex align-items-center"
-                                 style="max-width:220px;">
-
-                                <!-- MINUS -->
-                                <button type="button"
-                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                                        style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
-                                        onclick="
-                                        var input=document.getElementById('txtQuantity');
-                                        var value=parseInt(input.value, 10) || 1;
-                                        if (value>
-                                    1) {
-                                    input.value = value - 1;
-                                    }
-                                    "
-                                    aria-label="Giảm số lượng">
-
-                                    −
-
-                                </button>
-
-
-                                <!-- QUANTITY DISPLAY -->
-                                <input type="text"
-                                       id="txtQuantity"
-                                       value="1"
-                                       readonly
-                                       class="form-control text-center mx-2"
-                                       style="width:80px;height:48px;font-size:18px;font-weight:bold;background:#fff;"
-                                       aria-label="Số lượng" />
-
-
-                                <!-- PLUS -->
-                                <button type="button"
-                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                                        style="width:48px;height:48px;font-size:24px;font-weight:bold;padding:0;"
-                                        onclick="
-                                        var input=document.getElementById('txtQuantity');
-                                        var value=parseInt(input.value, 10) || 1;
-                                        if (value < 99) {
-                                                input.value = value + 1;
-                                            }
-                                        "
-                                        aria-label="Tăng số lượng">
-
-                                    +
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
                         <!-- LOGIN -->
                         <a href="@Url.Action(
                                     "Login", "Account",

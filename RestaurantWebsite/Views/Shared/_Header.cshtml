@@ -25,6 +25,7 @@
 </li>
 @if(role=="Admin"){<li class="nav-item">
 <a class="nav-link" href="@Url.RouteUrl("AdminHome")">Quản trị</a>
+</li><li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("StaffHome")">Nhân viên</a>
 </li>}else if(role=="Staff"){<li class="nav-item">
 <a class="nav-link" href="@Url.RouteUrl("StaffHome")">Nhân viên</a>
 </li>}

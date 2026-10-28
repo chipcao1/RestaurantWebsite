@@ -348,6 +348,8 @@
   <ItemGroup>
     </ItemGroup>
   <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -448,11 +450,13 @@
     <Compile Include="Security\PasswordHasher.cs" />
     <Compile Include="Security\ReservationConflictValidator.cs" />
     <Compile Include="Services\CatalogRules.cs" />
+    <Compile Include="Services\CheckoutQuote.cs" />
     <Compile Include="Services\CheckoutService.cs" />
     <Compile Include="Services\NumericRules.cs" />
     <Compile Include="Services\OrderWorkflowService.cs" />
     <Compile Include="Services\PdfService.cs" />
     <Compile Include="Services\PricingRules.cs" />
+    <Compile Include="Services\PromotionRules.cs" />
     <Compile Include="Services\ReportMath.cs" />
     <Compile Include="Services\ReportService.cs" />
     <Compile Include="Services\ReservationService.cs" />
@@ -479,5 +483,8 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_OperationsLayout.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\checkout.js" />
   </ItemGroup>
 </Project>

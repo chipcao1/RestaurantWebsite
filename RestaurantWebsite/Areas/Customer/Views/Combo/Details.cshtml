@@ -108,7 +108,7 @@ else
                                         else
                                         {
                                             <strong>
-                                                Dish #@item.DishId
+                                                Món #@item.DishId
                                             </strong>
                                         }
 
@@ -179,6 +179,11 @@ else
                             Đăng nhập để đặt món
 
                         </a>
+                    }
+                    else if (Convert.ToString(Session["Role"]) != "Customer")
+                    {
+                        <p class="text-muted">Chỉ tài khoản khách hàng có thể đặt món.</p>
+                        <a class="btn btn-outline-secondary btn-block" href="@Url.RouteUrl(Convert.ToString(Session["Role"]) == "Admin" ? "AdminHome" : "StaffHome")">Về khu vực làm việc</a>
                     }
                     else
                     {

@@ -39,3 +39,14 @@ Nhánh đã được push. Chưa xác nhận kết quả GitHub Actions từ mô
 Bỏ migration YamyWorkflow; dùng nguyên schema main và thêm kiểm tra so sánh toàn bộ CSDL/SSDL/mapping EF6 với InitialCreate. Công cụ tạo mô hình lấy tên entity set từ DbSet để phản ánh đúng Combos/Comboes; chỉ bỏ qua danh tính assembly của công cụ khi so sánh, vẫn kiểm tra bảng, cột, khóa và mapping. Bộ WindowsChecks có kiểm tra chỉ tồn tại InitialCreate, model tương thích database gốc, bảng Comboes và chạy lại Update-Database không dịch dữ liệu danh mục. Chưa thực thi bộ WindowsChecks trong Linux.
 
 Bản sửa tương thích main đã được rà soát độc lập: không có phát hiện lỗi được xác nhận. Build Debug/Release, 59 Razor view, 44 kiểm tra logic, kiểm tra frontend và so mô hình với InitialCreate đều đạt. WindowsChecks đã biên dịch Release với 0 lỗi/cảnh báo; chưa thực thi LocalDB/Windows.
+
+## Sửa form và giao diện theo yêu cầu ngày 29/10/2026
+
+- Đăng nhập luôn về trang chủ theo vai trò, gồm trường hợp có returnUrl; tài khoản đang đăng nhập mở Login cũng về đúng khu vực.
+- Admin dùng menu theo area đang xem, có nút chuyển Admin/Staff và vẫn giữ quyền Admin. Nhân viên không được vào Admin.
+- Khôi phục khung Feane/AdminLTE và bảng màu của main, loại phần CSS đổi giao diện toàn cục, dùng font hỗ trợ tiếng Việt và lớp phủ nền giúp đọc chữ trên ảnh.
+- Chi tiết món không có bộ chọn số lượng cho khách chưa đăng nhập; nhân viên/quản trị có lối về khu làm việc.
+- Checkout gọi POST PreviewPromotion có CSRF/role, tính giá từ giỏ hàng trong session và database; chia sẻ PromotionRules/Quote với Place. Preview không tiêu thụ lượt. Phản hồi cũ không ghi đè mã mới; xóa mã trả về giá không giảm. Hiển thị mã, mức giảm phần trăm/cố định, trần giảm và số tiền thực giảm. Hỗ trợ cả FixedAmount trong seed main và Fixed Amount.
+- Bỏ Users.Edit; trang tài khoản chỉ đọc. Reset cố định 123456789 qua PBKDF2; giữ khóa/mở (không tự khóa hoặc khóa admin cuối), tạo nhân viên cưỡng chế Role=Staff.
+
+Kiểm chứng: 56 kiểm tra logic, frontend/checkout Node, Debug/Release, 59 Razor view và so schema main đều đạt. WindowsChecks có kiểm tra controller thật cho điều hướng, reset, tạo nhân viên và quote; biên dịch net48 0 lỗi/cảnh báo nhưng chưa chạy Windows/LocalDB. Chromium dùng fixture HTML từ layout/assets tại 390, 768, 1440px, xác minh chữ Việt, không tràn ngang và sidebar mở/đóng. Fixture không thay thế rendering MVC thật. Một reviewer độc lập không xác nhận thêm lỗi. Không thay đổi model EF, migration hoặc database của người dùng.

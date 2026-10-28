@@ -1,178 +1,67 @@
 @model RestaurantWebsite.Models.User
-
 @{
     ViewBag.Title = "Chi tiết tài khoản #" + Model.Id;
     Layout = "~/Views/Shared/_OperationsLayout.cshtml";
-    int currentAdminId = ViewBag.CurrentAdminId != null ? (int)ViewBag.CurrentAdminId : 0;
-    bool isSelf = Model.Id == currentAdminId;
+    bool isSelf = Model.Id == (ViewBag.CurrentAdminId != null ? (int)ViewBag.CurrentAdminId : 0);
 }
-
+<div class="page-heading">
+    <div><h1>Chi tiết tài khoản</h1><p>Xem thông tin và quản lý quyền truy cập của tài khoản.</p></div>
+    <a href="@Url.Action("Index", "Users", new { area = "Admin" })" class="btn btn-outline-secondary"><i class="fa fa-arrow-left mr-1"></i>Danh sách tài khoản</a>
+</div>
 <div class="row">
-    <!-- Left Column: User Profile Form -->
     <div class="col-lg-7">
-
-        @if (isSelf)
-        {
-            <div class="alert alert-info">
-                <i class="fa fa-info-circle mr-2"></i>
-                <strong>Lưu ý:</strong> Bạn đang sửa tài khoản quản trị đang đăng nhập (#@Model.Id). Bạn không thể tự khóa hoặc gỡ quyền quản trị.
+        <div class="card card-primary card-outline">
+            <div class="card-header"><h2 class="card-title"><i class="fa fa-user mr-2"></i>@Model.FullName</h2></div>
+            <div class="card-body">
+                <dl class="row account-details mb-0">
+                    <dt class="col-sm-4">Họ và tên</dt><dd class="col-sm-8">@Model.FullName</dd>
+                    <dt class="col-sm-4">Email</dt><dd class="col-sm-8">@Model.Email</dd>
+                    <dt class="col-sm-4">Điện thoại</dt><dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Phone) ? "Chưa cập nhật" : Model.Phone)</dd>
+                    <dt class="col-sm-4">Địa chỉ</dt><dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật" : Model.Address)</dd>
+                    <dt class="col-sm-4">Vai trò</dt><dd class="col-sm-8">@Vietnamese.Label(Model.Role)</dd>
+                    <dt class="col-sm-4">Trạng thái</dt><dd class="col-sm-8"><span class="badge @(Model.IsActive ? "badge-success" : "badge-secondary")">@(Model.IsActive ? "Đang hoạt động" : "Đã khóa")</span></dd>
+                    <dt class="col-sm-4">Ngày đăng ký</dt><dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
             </div>
-        }
-
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fa fa-user mr-2"></i>User Profile: @Model.FullName</h3>
-                <div class="card-tools">
-                    <span class="badge badge-light px-2 py-1 font-weight-bold">Role: @(Vietnamese.Label(Model.Role))</span>
-                </div>
-            </div>
-
-            @using (Html.BeginForm("Edit", "Users", new { area = "Admin" }, FormMethod.Post, new { @class = "form-horizontal" }))
-            {
-                @Html.AntiForgeryToken()
-                @Html.HiddenFor(m => m.Id)
-
-                <div class="card-body">
-                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
-
-                    <div class="form-group row">
-                        <label for="FullName" class="col-sm-3 col-form-label font-weight-bold">Họ và tên <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", required = "required" })
-                            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="Email" class="col-sm-3 col-form-label font-weight-bold">Email <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", required = "required" })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="Phone" class="col-sm-3 col-form-label font-weight-bold">Điện thoại</label>
-                        <div class="col-sm-9">
-                            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control" })
-                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="Address" class="col-sm-3 col-form-label font-weight-bold">Địa chỉ</label>
-                        <div class="col-sm-9">
-                            @Html.TextAreaFor(m => m.Address, new { @class = "form-control", rows = 2 })
-                            @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-
-                    <hr />
-
-                    <div class="form-group row">
-                        <label for="Role" class="col-sm-3 col-form-label font-weight-bold">Vai trò tài khoản <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            @if (isSelf)
-                            {
-                                @Html.HiddenFor(m => m.Role)
-                                <input type="text" class="form-control-plaintext font-weight-bold text-danger" value="Admin (Self - Protected)" readonly />
-                            }
-                            else
-                            {
-                                @Html.DropDownListFor(m => m.Role, (SelectList)ViewBag.ValidRoles, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.Role, "", new { @class = "text-danger" })
-                            }
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label class="col-sm-3 col-form-label font-weight-bold">Ngày đăng ký</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control-plaintext text-muted" value="@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <div class="col-sm-9 offset-sm-3">
-                            <div class="custom-control custom-checkbox">
-                                @if (isSelf)
-                                {
-                                    @Html.HiddenFor(m => m.IsActive)
-                                    <input type="checkbox" class="custom-control-input" id="IsActiveSelf" checked disabled />
-                                    <label class="custom-control-label font-weight-bold text-success" for="IsActiveSelf">Đang hoạt động (tài khoản của bạn)</label>
-                                }
-                                else
-                                {
-                                    @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "IsActive" })
-                                    <label class="custom-control-label font-weight-bold" for="IsActive">Tài khoản đang hoạt động</label>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer text-right">
-                    <a href="@Url.Action("Index", "Users", new { area = "Admin" })" class="btn btn-default mr-2">
-                        <i class="fa fa-arrow-left mr-1"></i> Hủy
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa fa-save mr-1"></i> Lưu thông tin cá nhân
-                    </button>
-                </div>
-            }
+        </div>
+        <div class="card card-outline card-secondary">
+            <div class="card-header"><h2 class="card-title">Thống kê hoạt động</h2></div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between"><span>Đơn đã đặt</span><strong>@Model.Orders.Count</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Lượt đặt bàn</span><strong>@Model.Reservations.Count</strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Đánh giá món</span><strong>@Model.Reviews.Count</strong></li>
+            </ul>
         </div>
     </div>
-
-    <!-- Right Column: Đặt lại mật khẩu & Tóm tắt hoạt động -->
     <div class="col-lg-5">
-
-        <!-- Đặt lại mật khẩu Card -->
-        <div class="card card-outline card-danger">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-key text-danger mr-2"></i>Đặt lại mật khẩu người dùng</h3>
-            </div>
+        <div class="card card-outline card-warning">
+            <div class="card-header"><h2 class="card-title"><i class="fa fa-lock mr-2"></i>Truy cập tài khoản</h2></div>
             <div class="card-body">
-                <p class="text-muted mb-3">Đặt mật khẩu mới cho tài khoản này. Mật khẩu được lưu bằng hàm băm bảo mật.</p>
-
-                @using (Html.BeginForm("ResetPassword", "Users", new { area = "Admin" }, FormMethod.Post))
+                @if (isSelf)
                 {
-                    @Html.AntiForgeryToken()
-                    @Html.Hidden("id", Model.Id)
-
-                    <div class="form-group">
-                        <label class="font-weight-bold">Mật khẩu mới (ít nhất 6 ký tự):</label>
-                        <input type="password" name="newPassword" class="form-control" placeholder="Nhập mật khẩu mới..." minlength="6" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Bạn xác nhận thực hiện thao tác này?');">
-                        <i class="fa fa-refresh mr-1"></i> Đặt lại mật khẩu
-                    </button>
+                    <p class="text-muted">Đây là tài khoản bạn đang sử dụng. Bạn không thể tự khóa tài khoản này.</p>
+                }
+                else
+                {
+                    <p>@(Model.IsActive ? "Khóa tài khoản sẽ ngăn người dùng truy cập các chức năng yêu cầu đăng nhập." : "Mở khóa để người dùng tiếp tục đăng nhập và sử dụng tài khoản.")</p>
+                    using (Html.BeginForm("ToggleStatus", "Users", new { area = "Admin", id = Model.Id }, FormMethod.Post, new { onsubmit = "return confirm('Bạn xác nhận thay đổi trạng thái truy cập tài khoản này?');" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn @(Model.IsActive ? "btn-warning" : "btn-success") btn-block">@(Model.IsActive ? "Khóa tài khoản" : "Mở khóa tài khoản")</button>
+                    }
                 }
             </div>
         </div>
-
-        <!-- Activity History Summary -->
-        <div class="card card-outline card-secondary">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fa fa-history text-secondary mr-2"></i>Thống kê hoạt động</h3>
-            </div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa fa-shopping-cart text-primary mr-2"></i> Tổng đơn đã đặt</span>
-                        <span class="badge badge-primary badge-pill">@(Model.Orders?.Count ?? 0)</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa fa-calendar text-info mr-2"></i> Tổng lượt đặt bàn</span>
-                        <span class="badge badge-info badge-pill">@(Model.Reservations?.Count ?? 0)</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="fa fa-star text-warning mr-2"></i> Lượt đánh giá món</span>
-                        <span class="badge badge-warning badge-pill">@(Model.Reviews?.Count ?? 0)</span>
-                    </li>
-                </ul>
+        <div class="card card-outline card-danger">
+            <div class="card-header"><h2 class="card-title"><i class="fa fa-key mr-2"></i>Đặt lại mật khẩu</h2></div>
+            <div class="card-body">
+                <p>Đặt lại mật khẩu của tài khoản về <strong>123456789</strong>. Người dùng có thể đăng nhập bằng mật khẩu này sau khi đặt lại.</p>
+                @using (Html.BeginForm("ResetPassword", "Users", new { area = "Admin", id = Model.Id }, FormMethod.Post, new { onsubmit = "return confirm('Đặt lại mật khẩu tài khoản này về 123456789?');" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-block">Đặt lại về 123456789</button>
+                }
             </div>
         </div>
-
     </div>
 </div>

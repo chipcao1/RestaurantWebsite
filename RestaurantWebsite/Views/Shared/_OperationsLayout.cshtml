@@ -1,90 +1,103 @@
 @using RestaurantWebsite.Infrastructure
-@{ var role=Convert.ToString(Session["Role"]); bool admin=role=="Admin"; string area=admin?"Admin":"Staff"; }
+@{
+    string role = Convert.ToString(Session["Role"]);
+    bool isAdmin = role == "Admin";
+    bool adminArea = string.Equals(Convert.ToString(ViewContext.RouteData.DataTokens["area"]), "Admin", StringComparison.OrdinalIgnoreCase);
+    string area = adminArea ? "Admin" : "Staff";
+    string controller = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+    string action = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    var links = new[] {
+        new { Controller = adminArea ? "Dashboard" : "Staff", Action = "Index", Text = "Tổng quan", Icon = "tachometer" },
+        new { Controller = adminArea ? "Orders" : "Staff", Action = adminArea ? "Index" : "Orders", Text = "Xử lý đơn hàng", Icon = "shopping-bag" },
+        new { Controller = adminArea ? "Reservations" : "Staff", Action = adminArea ? "Index" : "Reservations", Text = "Đặt bàn", Icon = "calendar" },
+        new { Controller = "Categories", Action = "Index", Text = "Danh mục món", Icon = "list" },
+        new { Controller = "Dishes", Action = "Index", Text = "Món ăn", Icon = "cutlery" },
+        new { Controller = "Reviews", Action = "Index", Text = "Đánh giá", Icon = "star-o" }
+    };
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>@ViewBag.Title · Feane</title>
-<link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")"/>
-<link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")"/>
-<link rel="stylesheet" href="@Url.Content("~/Content/yamy.css")"/>@RenderSection("Styles",false)</head>
-<body class="operations">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>@ViewBag.Title · Feane</title>
+    <link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css?v=20261029")" />
+    @RenderSection("Styles", false)
+</head>
+<body class="hold-transition sidebar-mini layout-fixed operations">
 <a class="skip-link" href="#main-content">Đến nội dung chính</a>
-<div class="workspace">
-<aside class="workspace-sidebar"><button type="button" class="sidebar-close btn btn-outline-light" aria-label="Đóng menu">×</button>
-<a class="workspace-brand" href="@Url.RouteUrl(admin?"AdminHome":"StaffHome")">Feane<span>VẬN HÀNH NHÀ HÀNG</span>
-</a>
-<div class="workspace-identity">
-<span class="avatar-circle">
-<i class="fa fa-user">
-</i>
-</span>
-<strong>@Session["UserName"]</strong>
-<small>@Vietnamese.Label(role)</small>
+<div class="wrapper">
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light" aria-label="Điều hướng khu vực">
+        <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#" role="button" aria-label="Mở hoặc thu gọn menu"><i class="fa fa-bars"></i></a></li>
+            <li class="nav-item"><span class="nav-link text-dark">@(adminArea ? "Khu vực quản trị" : "Khu vực nhân viên")</span></li>
+        </ul>
+        <div class="navbar-nav ml-auto align-items-center operations-actions">
+            @if (isAdmin)
+            {
+                <a class="btn btn-outline-primary btn-sm" href="@Url.RouteUrl(adminArea ? "StaffHome" : "AdminHome")"><i class="fa fa-exchange mr-1"></i>@(adminArea ? "Sang khu vực nhân viên" : "Về khu vực quản trị")</a>
+            }
+            <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("Index", "Home", new { area = "" })"><i class="fa fa-globe mr-1"></i><span class="d-none d-md-inline">Xem website</span></a>
+            @using (Html.BeginForm("Logout", "Account", new { area = "" }, FormMethod.Post, null))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa fa-sign-out mr-1"></i>Đăng xuất</button>
+            }
+        </div>
+    </nav>
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="@Url.RouteUrl(adminArea ? "AdminHome" : "StaffHome")" class="brand-link">
+            <img src="@Url.Content("~/Resources/Admin/img/AdminLTELogo.png")" alt="" class="brand-image img-circle elevation-3" />
+            <span class="brand-text font-weight-light"><strong>Feane</strong> · @(adminArea ? "Quản trị" : "Nhân viên")</span>
+        </a>
+        <div class="sidebar">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+                <div class="image"><img src="@Url.Content("~/Resources/Admin/img/avatar5.png")" class="img-circle elevation-2" alt="" /></div>
+                <div class="info"><span class="d-block text-white">@Session["UserName"]</span><small class="text-success"><i class="fa fa-circle mr-1"></i>@Vietnamese.Label(role)</small></div>
+            </div>
+            <nav class="mt-2" aria-label="Chức năng của khu vực">
+                <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+                    @foreach (var item in links)
+                    {
+                        bool active = controller == item.Controller && (controller != "Staff" || action == item.Action);
+                        <li class="nav-item"><a class="nav-link @(active ? "active" : "")" href="@Url.Action(item.Action, item.Controller, new { area })" aria-current="@(active ? "page" : null)"><i class="nav-icon fa fa-@item.Icon"></i><p>@item.Text</p></a></li>
+                    }
+                    @if (adminArea && isAdmin)
+                    {
+                        <li class="nav-header">QUẢN TRỊ NHÀ HÀNG</li>
+                        foreach (var item in new[] {
+                            new { Controller="Combos", Text="Suất ăn kết hợp", Icon="cubes" },
+                            new { Controller="Promotions", Text="Khuyến mãi", Icon="tag" },
+                            new { Controller="Tables", Text="Bàn và khu vực", Icon="th-large" },
+                            new { Controller="Users", Text="Quản lý tài khoản", Icon="users" },
+                            new { Controller="Reports", Text="Báo cáo doanh thu", Icon="bar-chart" }
+                        })
+                        {
+                            <li class="nav-item"><a class="nav-link @(controller == item.Controller ? "active" : "")" href="@Url.Action("Index", item.Controller, new { area = "Admin" })"><i class="nav-icon fa fa-@item.Icon"></i><p>@item.Text</p></a></li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("Menu", "Reports", new { area = "Staff" })"><i class="nav-icon fa fa-file-pdf-o"></i><p>Tải thực đơn PDF</p></a></li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </aside>
+    <div class="content-wrapper">
+        <main id="main-content" class="content pt-4 pb-4"><div class="container-fluid operations-content">
+            @Html.Partial("~/Views/Shared/_Alerts.cshtml")
+            @RenderBody()
+        </div></main>
+    </div>
+    <footer class="main-footer"><strong>Feane</strong> · Phục vụ tận tâm.<span class="float-right d-none d-sm-inline">@RestaurantClock.Now.ToString("dd/MM/yyyy") · Giờ Việt Nam</span></footer>
 </div>
-<nav aria-label="Chức năng theo vai trò">
-<a href="@Url.RouteUrl(admin?"AdminHome":"StaffHome")">
-<i class="fa fa-dashboard">
-</i> Tổng quan</a>
-<a href="@(admin?Url.Action("Index", "Orders",new{area="Admin"}):Url.Action("Orders", "Staff",new{area="Staff"}))">
-<i class="fa fa-cutlery">
-</i> Xử lý đơn hàng</a>
-<a href="@(admin?Url.Action("Index", "Reservations",new{area="Admin"}):Url.Action("Reservations", "Staff",new{area="Staff"}))">
-<i class="fa fa-calendar">
-</i> Đặt bàn</a>
-<p class="nav-group">THỰC ĐƠN & CHẤT LƯỢNG</p>
-<a href="@Url.Action("Index", "Categories",new{area})">
-<i class="fa fa-list">
-</i> Danh mục món</a>
-<a href="@Url.Action("Index", "Dishes",new{area})">
-<i class="fa fa-book">
-</i> Món ăn</a>
-<a href="@Url.Action("Index", "Reviews",new{area})">
-<i class="fa fa-star-o">
-</i> Đánh giá</a>
-@if(admin){<a href="@Url.Action("Index", "Combos",new{area="Admin"})">
-<i class="fa fa-cubes">
-</i> Suất ăn kết hợp</a>
-<a href="@Url.Action("Index", "Promotions",new{area="Admin"})">
-<i class="fa fa-tag">
-</i> Khuyến mãi</a>
-<p class="nav-group">QUẢN TRỊ</p>
-<a href="@Url.Action("Index", "Tables",new{area="Admin"})">
-<i class="fa fa-th-large">
-</i> Bàn & khu vực</a>
-<a href="@Url.Action("Index", "Users",new{area="Admin"})">
-<i class="fa fa-users">
-</i> Tài khoản & phân quyền</a>
-<a href="@Url.Action("Index", "Reports",new{area="Admin"})">
-<i class="fa fa-bar-chart">
-</i> Báo cáo doanh thu</a>}
-else {<a href="@Url.Action("Menu", "Reports",new{area="Staff"})">
-<i class="fa fa-file-pdf-o">
-</i> Tải thực đơn PDF</a>}
-</nav>
-<div class="sidebar-bottom">
-<a href="@Url.Action("Index", "Home",new{area=""})">Xem website nhà hàng <i class="fa fa-external-link">
-</i>
-</a>@using(Html.BeginForm("Logout", "Account",new{area=""},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-outline-light btn-block mt-3">Đăng xuất</button>}</div>
-</aside>
-<div class="workspace-body">
-<header class="workspace-topbar">
-<button class="btn btn-outline-secondary sidebar-toggle" type="button" aria-label="Mở hoặc đóng menu" aria-expanded="false">☰</button>
-<span>@(admin?"Khu vực quản trị":"Khu vực nhân viên")</span>
-<span class="workspace-date">@RestaurantClock.Now.ToString("dd/MM/yyyy") · Giờ Việt Nam</span>
-</header>
-<main id="main-content" class="workspace-main">@Html.Partial("~/Views/Shared/_Alerts.cshtml")@RenderBody()</main>
-<footer class="workspace-footer">Feane · Phục vụ tận tâm, vận hành rõ ràng.</footer>
-</div>
-</div>
-<script src="@Url.Content("~/Resources/User/js/jquery-3.4.1.min.js")">
-</script>
-<script src="@Url.Content("~/Resources/User/js/bootstrap.js")">
-</script>
-<script>document.querySelector('.sidebar-toggle').addEventListener('click',function(){var open=document.body.classList.toggle('sidebar-open');this.setAttribute('aria-expanded',open?'true':'false');});</script>
-<script>function closeSidebar(){document.body.classList.remove('sidebar-open');document.querySelector('.sidebar-toggle').setAttribute('aria-expanded','false');}document.querySelector('.sidebar-close').addEventListener('click',closeSidebar);document.addEventListener('keydown',function(event){if(event.key==='Escape')closeSidebar();});</script>
-@RenderSection("scripts",false)<script src="@Url.Content("~/Scripts/yamy.js")">
-</script>
+<script src="@Url.Content("~/Resources/User/js/jquery-3.4.1.min.js")"></script>
+<script src="@Url.Content("~/Resources/User/js/bootstrap.js")"></script>
+<script src="@Url.Content("~/Resources/Admin/js/adminlte.min.js")"></script>
+@RenderSection("scripts", false)
+<script src="@Url.Content("~/Scripts/yamy.js")"></script>
 </body>
 </html>
