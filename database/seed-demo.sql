@@ -60,12 +60,12 @@ BEGIN TRY
     -- 2. Danh mục và 30 món: giữ nguyên các bản ghi cùng tên đã có.
     DECLARE @CategorySeed TABLE (Name nvarchar(100), Description nvarchar(500), ImageUrl nvarchar(250));
     INSERT INTO @CategorySeed VALUES
-    (N'Khai vị', N'Các món khai vị tươi ngon.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish01.jpg'),
-    (N'Món chính', N'Món chính từ thịt bò, heo và gà.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish06.jpg'),
-    (N'Cơm và phở', N'Các món cơm và phở truyền thống.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish11.jpg'),
-    (N'Hải sản', N'Hải sản tươi ngon từ biển.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish16.jpg'),
-    (N'Đồ uống', N'Nước giải khát và nước ép trái cây.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish21.jpg'),
-    (N'Tráng miệng', N'Bánh ngọt và các món tráng miệng mát lạnh.', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish26.jpg');
+    (N'Khai vị', N'Các món khai vị tươi ngon.', N'https://raw.githubusercontent.com/jeamarie/odin-recipes/eef6c2e98df6b54b2fe71ccecc0ef0559e556876/recipes/images/spring-roll.png'),
+    (N'Món chính', N'Món chính từ thịt bò, heo và gà.', N'https://raw.githubusercontent.com/bragiarya/mtm_pos/61700be8ece5fd89c8ba80be995a13ed7dc31d2d/assets/img/MENTAHAN/steaks-with-tarragon-mushrooms-sq-024.jpg'),
+    (N'Cơm và phở', N'Các món cơm và phở truyền thống.', N'https://raw.githubusercontent.com/jszecz/odin-recipes/439fe2da83cfc56b75d89e79a135627e6b00f5bb/images/fried-rice.jpg'),
+    (N'Hải sản', N'Hải sản tươi ngon từ biển.', N'https://raw.githubusercontent.com/lemon7h3chick/odin-recipes/16b4ee306afc28f1af4be9dfdb9de4a674c8d782/images/spicy-grilled-shrimp.jpg'),
+    (N'Đồ uống', N'Nước giải khát và nước ép trái cây.', N'https://raw.githubusercontent.com/Vinayak-E/Responsive-coca-cola-website/691f86ab839c04fc3ce80921c2026e4dc6383ed6/width1960%20%281%29.webp'),
+    (N'Tráng miệng', N'Bánh ngọt và các món tráng miệng mát lạnh.', N'https://raw.githubusercontent.com/EufranioDiogo/cheesecake-recipe/43a27ed0b1c8a0d48f40307cde9296f3dfaa57f9/IMG/photo1.png');
     INSERT INTO dbo.Categories (Name, Description, ImageUrl, IsActive)
     SELECT s.Name, s.Description, s.ImageUrl, 1 FROM @CategorySeed s
     WHERE NOT EXISTS (SELECT 1 FROM dbo.Categories c WHERE c.Name=s.Name);
@@ -73,36 +73,36 @@ BEGIN TRY
     DECLARE @DishSeed TABLE (Name nvarchar(150), Description nvarchar(1000),
         Price decimal(18,2), PreparationTime int, CategoryName nvarchar(100), ImageUrl nvarchar(500));
     INSERT INTO @DishSeed VALUES
-    (N'Gỏi cuốn tôm', N'Gỏi cuốn tôm tươi kiểu Việt Nam.', 45000, 10, N'Khai vị', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish01.jpg'),
-    (N'Cánh gà chiên', N'Cánh gà giòn dùng cùng sốt tương ớt ngọt.', 65000, 15, N'Khai vị', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish02.jpg'),
-    (N'Khoai tây chiên', N'Khoai tây chiên vàng giòn.', 35000, 10, N'Khai vị', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish03.jpg'),
-    (N'Há cảo chiên', N'Há cảo nhân thịt heo đậm vị.', 50000, 12, N'Khai vị', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish04.jpg'),
-    (N'Bánh mì bơ tỏi', N'Bánh mì nướng phủ bơ tỏi thơm lừng.', 40000, 8, N'Khai vị', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish05.jpg'),
-    (N'Bò nướng sốt nấm', N'Thịt bò nướng mềm dùng cùng sốt nấm.', 189000, 25, N'Món chính', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish06.jpg'),
-    (N'Gà nướng thảo mộc', N'Gà nướng thơm hương thảo mộc.', 99000, 20, N'Món chính', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish07.jpg'),
-    (N'Cơm sườn nướng', N'Sườn heo nướng mọng nước dùng cùng cơm.', 119000, 22, N'Món chính', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish08.jpg'),
-    (N'Bánh mì kẹp bò', N'Bánh mì kẹp thịt bò và phô mai.', 89000, 15, N'Món chính', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish09.jpg'),
-    (N'Bánh mì kẹp gà', N'Bánh mì kẹp gà chiên giòn.', 79000, 15, N'Món chính', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish10.jpg'),
-    (N'Cơm chiên trứng', N'Cơm chiên cùng trứng và rau củ.', 65000, 12, N'Cơm và phở', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish11.jpg'),
-    (N'Cơm chiên bò', N'Cơm chiên đặc biệt cùng thịt bò mềm.', 85000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish12.jpg'),
-    (N'Cơm chiên gà', N'Cơm chiên thịt gà đậm đà.', 75000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish13.jpg'),
-    (N'Phở bò', N'Phở bò truyền thống Việt Nam.', 79000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish14.jpg'),
-    (N'Phở gà', N'Phở dùng cùng thịt gà luộc.', 69000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish15.jpg'),
-    (N'Tôm nướng tỏi', N'Tôm tươi nướng cùng tỏi.', 149000, 20, N'Hải sản', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish16.jpg'),
-    (N'Mực chiên giòn', N'Khoanh mực chiên vàng giòn.', 129000, 18, N'Hải sản', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish17.jpg'),
-    (N'Cá hồi nướng', N'Cá hồi nướng dùng cùng sốt chanh.', 199000, 25, N'Hải sản', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish18.jpg'),
-    (N'Lẩu hải sản', N'Lẩu hải sản dùng cùng rau tươi.', 249000, 30, N'Hải sản', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish19.jpg'),
-    (N'Tôm sốt bơ tỏi', N'Tôm áp chảo với sốt bơ tỏi.', 169000, 20, N'Hải sản', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish20.jpg'),
-    (N'Nước ngọt Coca-Cola', N'Nước ngọt dùng lạnh.', 20000, 2, N'Đồ uống', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish21.jpg'),
-    (N'Nước cam ép', N'Nước cam tươi ép nguyên chất.', 35000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish22.jpg'),
-    (N'Trà chanh', N'Trà chanh đá thanh mát.', 30000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish23.jpg'),
-    (N'Cà phê sữa đá', N'Cà phê sữa đá kiểu Việt Nam.', 35000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish24.jpg'),
-    (N'Nước khoáng', N'Nước khoáng đóng chai.', 15000, 1, N'Đồ uống', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish25.jpg'),
-    (N'Bánh phô mai', N'Bánh phô mai phủ quả mọng.', 55000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish26.jpg'),
-    (N'Bánh sô-cô-la', N'Bánh sô-cô-la mềm mịn.', 50000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish27.jpg'),
-    (N'Kem vani', N'Kem vani thơm ngọt.', 40000, 3, N'Tráng miệng', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish28.jpg'),
-    (N'Trái cây theo mùa', N'Trái cây tươi tuyển chọn theo mùa.', 45000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish29.jpg'),
-    (N'Bánh tiramisu', N'Bánh cà phê tiramisu kiểu Ý.', 65000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/dish30.jpg');
+    (N'Gỏi cuốn tôm', N'Gỏi cuốn tôm tươi kiểu Việt Nam.', 45000, 10, N'Khai vị', N'https://raw.githubusercontent.com/jeamarie/odin-recipes/eef6c2e98df6b54b2fe71ccecc0ef0559e556876/recipes/images/spring-roll.png'),
+    (N'Cánh gà chiên', N'Cánh gà giòn dùng cùng sốt tương ớt ngọt.', 65000, 15, N'Khai vị', N'https://raw.githubusercontent.com/achohan1/odin-recipes/4e17a42a03203e35a5c0f767b338cdf9c5b51eec/images/chickenwings.jpg'),
+    (N'Khoai tây chiên', N'Khoai tây chiên vàng giòn.', 35000, 10, N'Khai vị', N'https://raw.githubusercontent.com/DarieldonMedeiros/odin-recipes/74a5597fc45c3ab1491457800251d1f82447af02/images/fries.jpg'),
+    (N'Há cảo chiên', N'Há cảo nhân thịt heo đậm vị.', 50000, 12, N'Khai vị', N'https://raw.githubusercontent.com/YunxiangDeng/odin-recipes/a341bd2adc2b648eedcf0ea47d8b39ce2caa7aad/recipes/imgs/pork-gyoza.webp'),
+    (N'Bánh mì bơ tỏi', N'Bánh mì nướng phủ bơ tỏi thơm lừng.', 40000, 8, N'Khai vị', N'https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/garlic_bread-1275456.jpg'),
+    (N'Bò nướng sốt nấm', N'Thịt bò nướng mềm dùng cùng sốt nấm.', 189000, 25, N'Món chính', N'https://raw.githubusercontent.com/bragiarya/mtm_pos/61700be8ece5fd89c8ba80be995a13ed7dc31d2d/assets/img/MENTAHAN/steaks-with-tarragon-mushrooms-sq-024.jpg'),
+    (N'Gà nướng thảo mộc', N'Gà nướng thơm hương thảo mộc.', 99000, 20, N'Món chính', N'https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/nandos-butterfly-chicken-hero1.jpg'),
+    (N'Cơm sườn nướng', N'Sườn heo nướng mọng nước dùng cùng cơm.', 119000, 22, N'Món chính', N'https://raw.githubusercontent.com/Harly-1506/4VNfoods-Deep-learning/0c58b48ff644d1854703eae16b50f7fba7a567c6/datasets/dataset/Test/Com%20tam/108.jpg'),
+    (N'Bánh mì kẹp bò', N'Bánh mì kẹp thịt bò và phô mai.', 89000, 15, N'Món chính', N'https://raw.githubusercontent.com/its-krishnendu-dev/food-recipe-website/11c200e5885779c0a660e6915f5a8046e4b5bbbf/ClassicCheeseBurger_9.jpg'),
+    (N'Bánh mì kẹp gà', N'Bánh mì kẹp gà chiên giòn.', 79000, 15, N'Món chính', N'https://raw.githubusercontent.com/stefanthoss/chickenonabun.com/a343420da1f3b55b544fa317815f2a4ab5bae942/assets/images/original/gotts-roadside.jpg'),
+    (N'Cơm chiên trứng', N'Cơm chiên cùng trứng và rau củ.', 65000, 12, N'Cơm và phở', N'https://raw.githubusercontent.com/jszecz/odin-recipes/439fe2da83cfc56b75d89e79a135627e6b00f5bb/images/fried-rice.jpg'),
+    (N'Cơm chiên bò', N'Cơm chiên đặc biệt cùng thịt bò mềm.', 85000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/oh3vci/TIA/4d556919c3130ac4ffabd3916822b51b0f54c326/images/0722_dinner.png'),
+    (N'Cơm chiên gà', N'Cơm chiên thịt gà đậm đà.', 75000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/Kevin272-dot/odin-recipes/a64019be1aa53f609297fb1584db448b59120a71/images/chicken_fried_rice.webp'),
+    (N'Phở bò', N'Phở bò truyền thống Việt Nam.', 79000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/kinoss123/Food-Ordering/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-bo.jpg'),
+    (N'Phở gà', N'Phở dùng cùng thịt gà luộc.', 69000, 15, N'Cơm và phở', N'https://raw.githubusercontent.com/kinoss123/Food-Ordering/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-ga.jpg'),
+    (N'Tôm nướng tỏi', N'Tôm tươi nướng cùng tỏi.', 149000, 20, N'Hải sản', N'https://raw.githubusercontent.com/lemon7h3chick/odin-recipes/16b4ee306afc28f1af4be9dfdb9de4a674c8d782/images/spicy-grilled-shrimp.jpg'),
+    (N'Mực chiên giòn', N'Khoanh mực chiên vàng giòn.', 129000, 18, N'Hải sản', N'https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/fried_calamari-168241.jpg'),
+    (N'Cá hồi nướng', N'Cá hồi nướng dùng cùng sốt chanh.', 199000, 25, N'Hải sản', N'https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/grilled_salmon-3673579.jpg'),
+    (N'Lẩu hải sản', N'Lẩu hải sản dùng cùng rau tươi.', 249000, 30, N'Hải sản', N'https://raw.githubusercontent.com/quang-anh26/food-ordering-website/78d9584ec63cc4885a8ca8325702095c10eb430b/images/foods/f41-lau-thai-hai-san.jpg'),
+    (N'Tôm sốt bơ tỏi', N'Tôm áp chảo với sốt bơ tỏi.', 169000, 20, N'Hải sản', N'https://raw.githubusercontent.com/getprpd-sudo/getprpd-website-repo/e9ab215cc3dbb8f3821ddce32d4d611719e9376f/assets/images/garlic-butter-shrimp.jpg'),
+    (N'Nước ngọt Coca-Cola', N'Nước ngọt dùng lạnh.', 20000, 2, N'Đồ uống', N'https://raw.githubusercontent.com/Vinayak-E/Responsive-coca-cola-website/691f86ab839c04fc3ce80921c2026e4dc6383ed6/width1960%20%281%29.webp'),
+    (N'Nước cam ép', N'Nước cam tươi ép nguyên chất.', 35000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/SowjanyaAnanthasetty/Juice-Menu-Frontened/78398d48290c83347c8994204348b6c5478f502c/product%20app/Images/orange.jpg'),
+    (N'Trà chanh', N'Trà chanh đá thanh mát.', 30000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/lemon-Iced-Tea.jpg'),
+    (N'Cà phê sữa đá', N'Cà phê sữa đá kiểu Việt Nam.', 35000, 5, N'Đồ uống', N'https://raw.githubusercontent.com/babobi161504/Highlands-Coffee/c58c2f5872a78eb1c5d4dbcf1e6a310389177c7d/image/menu-PSD_3.png'),
+    (N'Nước khoáng', N'Nước khoáng đóng chai.', 15000, 1, N'Đồ uống', N'https://raw.githubusercontent.com/JonasMATHIEU/Landing-page-Evian/f6ca778eac2ea0e1de129c10a79efcf1a066ca1e/image/eviantrr.jpg'),
+    (N'Bánh phô mai', N'Bánh phô mai phủ quả mọng.', 55000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/EufranioDiogo/cheesecake-recipe/43a27ed0b1c8a0d48f40307cde9296f3dfaa57f9/IMG/photo1.png'),
+    (N'Bánh sô-cô-la', N'Bánh sô-cô-la mềm mịn.', 50000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/Shristi21/Dessert-Recipe-Website/df472c2568278210153e6c6f73d323d3181d8ebc/images/choco_cake.jpg'),
+    (N'Kem vani', N'Kem vani thơm ngọt.', 40000, 3, N'Tráng miệng', N'https://raw.githubusercontent.com/Daniel-Sha14/Assignment-1-Ice-Cream_Shop/40c08c516138b869f497c71aa203c25d0b782f89/vanilla.jpeg'),
+    (N'Trái cây theo mùa', N'Trái cây tươi tuyển chọn theo mùa.', 45000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/matinsoleymni/24Salad-Landing-Page/b16e00656f1a929d413d8cee34023afa1139b193/images/main/eat1.png'),
+    (N'Bánh tiramisu', N'Bánh cà phê tiramisu kiểu Ý.', 65000, 5, N'Tráng miệng', N'https://raw.githubusercontent.com/Shristi21/Dessert-Recipe-Website/df472c2568278210153e6c6f73d323d3181d8ebc/images/Tiramisu.jpeg');
     DECLARE @NewDishes TABLE (Id int, Name nvarchar(150));
     INSERT INTO dbo.Dishes (Name, Description, Price, PreparationTime, Status, CategoryId, CreatedAt)
     OUTPUT inserted.Id, inserted.Name INTO @NewDishes
@@ -126,9 +126,9 @@ BEGIN TRY
     -- 4. Suất ăn: tên bảng chính xác là Comboes theo migration main.
     DECLARE @ComboSeed TABLE (Name nvarchar(150), Description nvarchar(500), Price decimal(18,2), ImageUrl nvarchar(500));
     INSERT INTO @ComboSeed VALUES
-    (N'Suất gia đình (mẫu Yamy)',N'Gỏi cuốn, gà nướng, cơm chiên và nước ngọt.',299000,N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/combo01.jpg'),
-    (N'Suất gà (mẫu Yamy)',N'Gà nướng, khoai tây chiên và nước ngọt.',139000,N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/combo03.jpg'),
-    (N'Suất tráng miệng (mẫu Yamy)',N'Bánh phô mai, bánh sô-cô-la và nước cam.',99000,N'https://raw.githubusercontent.com/chipcao1/RestaurantWebsite/2447b85b446d447c5bd7c051271d5dcccce7b7f9/RestaurantWebsite/Resources/User/images/combo01.jpg');
+    (N'Suất gia đình (mẫu Yamy)',N'Gỏi cuốn, gà nướng, cơm chiên và nước ngọt.',299000,N'https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/nandos-butterfly-chicken-hero1.jpg'),
+    (N'Suất gà (mẫu Yamy)',N'Gà nướng, khoai tây chiên và nước ngọt.',139000,N'https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/nandos-butterfly-chicken-hero1.jpg'),
+    (N'Suất tráng miệng (mẫu Yamy)',N'Bánh phô mai, bánh sô-cô-la và nước cam.',99000,N'https://raw.githubusercontent.com/EufranioDiogo/cheesecake-recipe/43a27ed0b1c8a0d48f40307cde9296f3dfaa57f9/IMG/photo1.png');
     DECLARE @NewCombos TABLE (Id int, Name nvarchar(150));
     INSERT INTO dbo.Comboes (Name, Description, Price, ImageUrl, IsActive, StartDate, EndDate)
     OUTPUT inserted.Id, inserted.Name INTO @NewCombos

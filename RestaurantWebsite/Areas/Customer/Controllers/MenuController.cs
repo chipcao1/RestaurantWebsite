@@ -260,7 +260,7 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
                 var comboIds = comboCart.Keys.ToList();
 
                 combos = db.Combos
-                    .Include(c => c.ComboItems.Select(ci => ci.Dish.Category))
+                    .Include(c => c.ComboItems.Select(ci => ci.Dish.Category)).Include(c => c.ComboItems.Select(ci => ci.Dish.DishImages))
                     .Where(c => comboIds.Contains(c.Id))
                     .ToList();
 

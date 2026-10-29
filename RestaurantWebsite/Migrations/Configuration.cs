@@ -235,9 +235,9 @@ namespace RestaurantWebsite.Migrations
 
             var combos = new List<Combo>
             {
-                new Combo { Name = "Suất ăn gia đình", Description = "Suất ăn đầy đủ dành cho cả gia đình.", Price = 299000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
-                new Combo { Name = "Suất gà và nước uống", Description = "Suất gà dùng cùng khoai tây chiên và nước uống.", Price = 139000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo03.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
-                new Combo { Name = "Suất tráng miệng", Description = "Kết hợp các món tráng miệng ngọt ngào.", Price = 99000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) }
+                new Combo { Name = "Suất ăn gia đình", Description = "Suất ăn đầy đủ dành cho cả gia đình.", Price = 299000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Combo("Suất ăn gia đình"), IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất gà và nước uống", Description = "Suất gà dùng cùng khoai tây chiên và nước uống.", Price = 139000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Combo("Suất gà và nước uống"), IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất tráng miệng", Description = "Kết hợp các món tráng miệng ngọt ngào.", Price = 99000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Combo("Suất tráng miệng"), IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) }
             };
 
             foreach (var combo in combos)

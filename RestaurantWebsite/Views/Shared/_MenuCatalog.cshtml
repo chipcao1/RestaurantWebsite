@@ -39,7 +39,7 @@
                 var image = dish.DishImages.FirstOrDefault(i => i.IsPrimary) ?? dish.DishImages.FirstOrDefault();
                 <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="dish" data-category="@dish.CategoryId" data-search="@(dish.Name + " " + dish.Description)" hidden="@(!display ? "hidden" : null)">
                     <div class="box">
-                        <div class="img-box"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(image == null ? null : image.ImageUrl))" alt="@dish.Name" loading="lazy" /></div>
+                        <div class="img-box"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.ResolveDish(dish.Name, image == null ? null : image.ImageUrl))" alt="@dish.Name" loading="lazy" /></div>
                         <div class="detail-box">
                             <h5>@dish.Name</h5><p>@dish.Description</p>
                             <div class="options">
@@ -56,7 +56,7 @@
                 if (display) { shown++; }
                 <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="combo" data-category="" data-search="@(combo.Name + " " + combo.Description)" hidden="@(!display ? "hidden" : null)">
                     <div class="box">
-                        <div class="img-box"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(combo.ImageUrl))" alt="@combo.Name" loading="lazy" /></div>
+                        <div class="img-box combo-img-box">@Html.Partial("~/Views/Shared/_ComboPhoto.cshtml", combo)</div>
                         <div class="detail-box">
                             <h5>@combo.Name</h5><p>@(string.IsNullOrWhiteSpace(combo.Description) ? "Kết hợp những món ngon cho bữa ăn trọn vẹn." : combo.Description)</p>
                             <div class="options">

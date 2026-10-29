@@ -30,7 +30,7 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
             var now = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
 
             var combo = db.Combos
-                .Include(c => c.ComboItems.Select(ci => ci.Dish))
+                .Include(c => c.ComboItems.Select(ci => ci.Dish.DishImages))
                 .FirstOrDefault(c =>
                     c.Id == id.Value &&
                     c.IsActive &&

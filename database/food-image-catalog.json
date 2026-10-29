@@ -1,0 +1,482 @@
+[
+  {
+    "dish": "Gỏi cuốn tôm",
+    "aliases": [
+      "Gỏi cuốn tôm",
+      "Spring Rolls"
+    ],
+    "url": "https://raw.githubusercontent.com/jeamarie/odin-recipes/eef6c2e98df6b54b2fe71ccecc0ef0559e556876/recipes/images/spring-roll.png",
+    "source": "https://github.com/jeamarie/odin-recipes/blob/eef6c2e98df6b54b2fe71ccecc0ef0559e556876/recipes/vietnamese-spring-rolls.html",
+    "notes": "Fresh translucent rice-paper rolls showing pink-orange shrimp, white noodles and herbs, cut into pieces on wood tray with fish sauce. Clean no watermark.509x508.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/png",
+    "width": 509,
+    "height": 508
+  },
+  {
+    "dish": "Cánh gà chiên",
+    "aliases": [
+      "Cánh gà chiên",
+      "Fried Chicken Wings"
+    ],
+    "url": "https://raw.githubusercontent.com/achohan1/odin-recipes/4e17a42a03203e35a5c0f767b338cdf9c5b51eec/images/chickenwings.jpg",
+    "source": "https://github.com/achohan1/odin-recipes/blob/4e17a42a03203e35a5c0f767b338cdf9c5b51eec/recipes/chickenwings.html",
+    "notes": "Real photo of crisp fried wing flats and drumettes with light red-orange sauce on white plate, celery and dip; no watermark. 750x563. Recipe explicitly double dredging flour and deep frying375F10–12min.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 750,
+    "height": 563
+  },
+  {
+    "dish": "Khoai tây chiên",
+    "aliases": [
+      "Khoai tây chiên",
+      "French Fries"
+    ],
+    "url": "https://raw.githubusercontent.com/DarieldonMedeiros/odin-recipes/74a5597fc45c3ab1491457800251d1f82447af02/images/fries.jpg",
+    "source": "https://github.com/DarieldonMedeiros/odin-recipes/blob/74a5597fc45c3ab1491457800251d1f82447af02/images/fries.jpg",
+    "notes": "Clean photo of golden thin potato fries on dark teal plate with sauce alongside. 683x512.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 683,
+    "height": 512
+  },
+  {
+    "dish": "Há cảo chiên",
+    "aliases": [
+      "Há cảo chiên",
+      "Fried Dumplings"
+    ],
+    "url": "https://raw.githubusercontent.com/YunxiangDeng/odin-recipes/a341bd2adc2b648eedcf0ea47d8b39ce2caa7aad/recipes/imgs/pork-gyoza.webp",
+    "source": "https://github.com/YunxiangDeng/odin-recipes/blob/a341bd2adc2b648eedcf0ea47d8b39ce2caa7aad/recipes/imgs/pork-gyoza.webp",
+    "notes": "Clean photo cutout of a wooden platter of crescent dumplings with clearly golden panfried surfaces, scallions and sauce. Recipe explicitly pork gyoza. Transparent/cutout styling. 600x600.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/webp",
+    "width": 600,
+    "height": 600
+  },
+  {
+    "dish": "Bánh mì bơ tỏi",
+    "aliases": [
+      "Bánh mì bơ tỏi",
+      "Garlic Bread"
+    ],
+    "url": "https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/garlic_bread-1275456.jpg",
+    "source": "https://github.com/vionwinnie/food101samples/blob/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/garlic_bread-1275456.jpg",
+    "notes": "Baked sliced garlic herb butter bread.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "dish": "Bò nướng sốt nấm",
+    "aliases": [
+      "Bò nướng sốt nấm",
+      "Grilled Beef Steak"
+    ],
+    "url": "https://raw.githubusercontent.com/bragiarya/mtm_pos/61700be8ece5fd89c8ba80be995a13ed7dc31d2d/assets/img/MENTAHAN/steaks-with-tarragon-mushrooms-sq-024.jpg",
+    "source": "https://github.com/bragiarya/mtm_pos/blob/61700be8ece5fd89c8ba80be995a13ed7dc31d2d/assets/img/MENTAHAN/steaks-with-tarragon-mushrooms-sq-024.jpg",
+    "notes": "Real photo of thick seared beef fillet with abundant visible sliced brown mushrooms and glossy sauce; mashed potatoes and Brussels sprouts sides. No visible watermark; license not established.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1200,
+    "height": 1200
+  },
+  {
+    "dish": "Gà nướng thảo mộc",
+    "aliases": [
+      "Gà nướng thảo mộc",
+      "Grilled Chicken"
+    ],
+    "url": "https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/nandos-butterfly-chicken-hero1.jpg",
+    "source": "https://github.com/daddydeus/odin-recipes-redo/blob/308598099f158d8deecf07c05b821f232a66fc14/recipes/chicken.html",
+    "notes": "Visually inspected: real grilled butterfly chicken breast with parallel dark grill marks and herb flecks, salad and rice sides. Recipe includes oregano and garlic, describes peri-peri chicken. Faint watermark near bottom left; less suitable than unwatermarked source. License not established. HTTPS rechecked successfully.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1200,
+    "height": 1600
+  },
+  {
+    "dish": "Cơm sườn nướng",
+    "aliases": [
+      "Cơm sườn nướng",
+      "Pork Chop"
+    ],
+    "url": "https://raw.githubusercontent.com/Harly-1506/4VNfoods-Deep-learning/0c58b48ff644d1854703eae16b50f7fba7a567c6/datasets/dataset/Test/Com%20tam/108.jpg",
+    "source": "https://github.com/Harly-1506/4VNfoods-Deep-learning/blob/0c58b48ff644d1854703eae16b50f7fba7a567c6/datasets/dataset/Test/Com%20tam/108.jpg",
+    "notes": "Clearly visible chargrilled whole pork chop with scallion oil beside white rice mound, pickled carrot/daikon and fish sauce; no watermark. 576x330.",
+    "license": "Repository MIT by Minh-Hai Tran (2023); original individual photo rights not independently documented",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 576,
+    "height": 330
+  },
+  {
+    "dish": "Bánh mì kẹp bò",
+    "aliases": [
+      "Bánh mì kẹp bò",
+      "Beef Burger"
+    ],
+    "url": "https://raw.githubusercontent.com/its-krishnendu-dev/food-recipe-website/11c200e5885779c0a660e6915f5a8046e4b5bbbf/ClassicCheeseBurger_9.jpg",
+    "source": "https://github.com/its-krishnendu-dev/food-recipe-website/blob/11c200e5885779c0a660e6915f5a8046e4b5bbbf/ClassicCheeseBurger_9.jpg",
+    "notes": "Clear real photograph of grilled beef patty with melted cheddar, onions, tomato and lettuce in a bun.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 800,
+    "height": 1200
+  },
+  {
+    "dish": "Bánh mì kẹp gà",
+    "aliases": [
+      "Bánh mì kẹp gà",
+      "Chicken Burger"
+    ],
+    "url": "https://raw.githubusercontent.com/stefanthoss/chickenonabun.com/a343420da1f3b55b544fa317815f2a4ab5bae942/assets/images/original/gotts-roadside.jpg",
+    "source": "https://github.com/stefanthoss/chickenonabun.com/blob/a343420da1f3b55b544fa317815f2a4ab5bae942/assets/images/original/gotts-roadside.jpg",
+    "notes": "Real restaurant photograph of Gott's Chicken Schnitzel Sandwich: breaded fried chicken fillet in sesame bun with arugula and pickled onion.",
+    "license": "CC BY-NC-SA 4.0 repo",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 4032,
+    "height": 3024
+  },
+  {
+    "dish": "Cơm chiên trứng",
+    "aliases": [
+      "Cơm chiên trứng",
+      "Fried Rice"
+    ],
+    "url": "https://raw.githubusercontent.com/jszecz/odin-recipes/439fe2da83cfc56b75d89e79a135627e6b00f5bb/images/fried-rice.jpg",
+    "source": "https://github.com/jszecz/odin-recipes/blob/439fe2da83cfc56b75d89e79a135627e6b00f5bb/images/fried-rice.jpg",
+    "notes": "Separate fried rice grains with yellow scrambled egg, peas, diced carrot and scallions; no meat visible.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 683,
+    "height": 512
+  },
+  {
+    "dish": "Cơm chiên bò",
+    "aliases": [
+      "Cơm chiên bò",
+      "Beef Fried Rice"
+    ],
+    "url": "https://raw.githubusercontent.com/oh3vci/TIA/4d556919c3130ac4ffabd3916822b51b0f54c326/images/0722_dinner.png",
+    "source": "https://github.com/oh3vci/TIA/blob/4d556919c3130ac4ffabd3916822b51b0f54c326/images/0722_dinner.png",
+    "notes": "Fried rice with browned beef strips, chopped greens and soft egg on top. Only 320x240.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/png",
+    "width": 320,
+    "height": 240
+  },
+  {
+    "dish": "Cơm chiên gà",
+    "aliases": [
+      "Cơm chiên gà",
+      "Chicken Fried Rice"
+    ],
+    "url": "https://raw.githubusercontent.com/Kevin272-dot/odin-recipes/a64019be1aa53f609297fb1584db448b59120a71/images/chicken_fried_rice.webp",
+    "source": "https://github.com/Kevin272-dot/odin-recipes/blob/a64019be1aa53f609297fb1584db448b59120a71/images/chicken_fried_rice.webp",
+    "notes": "Fried rice with many distinct pale cooked chicken cubes, scrambled egg and scallions in red bowl; no visible watermark.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/webp",
+    "width": 683,
+    "height": 512
+  },
+  {
+    "dish": "Phở bò",
+    "aliases": [
+      "Phở bò",
+      "Beef Noodles"
+    ],
+    "url": "https://raw.githubusercontent.com/kinoss123/Food-Ordering/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-bo.jpg",
+    "source": "https://github.com/kinoss123/Food-Ordering/blob/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-bo.jpg",
+    "notes": "Clear broth, broad white rice noodles, sliced beef, scallions; no visible watermark.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1280,
+    "height": 960
+  },
+  {
+    "dish": "Phở gà",
+    "aliases": [
+      "Phở gà",
+      "Chicken Noodles"
+    ],
+    "url": "https://raw.githubusercontent.com/kinoss123/Food-Ordering/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-ga.jpg",
+    "source": "https://github.com/kinoss123/Food-Ordering/blob/5f543aaf7002f147a79a5531c4ad79a553a1bc53/client/assets/food/pho-ga.jpg",
+    "notes": "Clear broth, rice noodles, pale chicken shreds and yellow skin-on chicken pieces, herbs; no visible watermark.",
+    "license": "No explicit photo license found",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1432,
+    "height": 955
+  },
+  {
+    "dish": "Tôm nướng tỏi",
+    "aliases": [
+      "Tôm nướng tỏi",
+      "Grilled Shrimp"
+    ],
+    "url": "https://raw.githubusercontent.com/lemon7h3chick/odin-recipes/16b4ee306afc28f1af4be9dfdb9de4a674c8d782/images/spicy-grilled-shrimp.jpg",
+    "source": "https://github.com/lemon7h3chick/odin-recipes/blob/16b4ee306afc28f1af4be9dfdb9de4a674c8d782/recipes/spicy-grilled-shrimp.html",
+    "notes": "Visually inspected: real close-up photograph of orange shrimp with strong dark grill charring on white plate; no visible watermark. Recipe lists garlic and directs coating shrimp in garlic paste before grilling. License not established. HTTPS rechecked successfully.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 3600,
+    "height": 2400
+  },
+  {
+    "dish": "Mực chiên giòn",
+    "aliases": [
+      "Mực chiên giòn",
+      "Fried Calamari"
+    ],
+    "url": "https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/fried_calamari-168241.jpg",
+    "source": "https://github.com/vionwinnie/food101samples/blob/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/fried_calamari-168241.jpg",
+    "notes": "Golden fried calamari rings and tentacles with dipping sauce.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 382,
+    "height": 512
+  },
+  {
+    "dish": "Cá hồi nướng",
+    "aliases": [
+      "Cá hồi nướng",
+      "Grilled Salmon"
+    ],
+    "url": "https://raw.githubusercontent.com/vionwinnie/food101samples/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/grilled_salmon-3673579.jpg",
+    "source": "https://github.com/vionwinnie/food101samples/blob/470eb1bad85aa1d57e4ba5c2a14eb53b38eb4534/food101-sample/grilled_salmon-3673579.jpg",
+    "notes": "Grilled salmon fillet with lemon and sides.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 384,
+    "height": 512
+  },
+  {
+    "dish": "Lẩu hải sản",
+    "aliases": [
+      "Lẩu hải sản",
+      "Seafood Hotpot"
+    ],
+    "url": "https://raw.githubusercontent.com/quang-anh26/food-ordering-website/78d9584ec63cc4885a8ca8325702095c10eb430b/images/foods/f41-lau-thai-hai-san.jpg",
+    "source": "https://github.com/quang-anh26/food-ordering-website/blob/78d9584ec63cc4885a8ca8325702095c10eb430b/images/foods/f41-lau-thai-hai-san.jpg",
+    "notes": "Real photo of metal hotpot on portable burner, red broth, whole shrimp, scored squid, clams, vegetables. Distinct actual hotpot; no visible watermark. License not established.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 686,
+    "height": 386
+  },
+  {
+    "dish": "Tôm sốt bơ tỏi",
+    "aliases": [
+      "Tôm sốt bơ tỏi",
+      "Butter Garlic Prawns"
+    ],
+    "url": "https://raw.githubusercontent.com/getprpd-sudo/getprpd-website-repo/e9ab215cc3dbb8f3821ddce32d4d611719e9376f/assets/images/garlic-butter-shrimp.jpg",
+    "source": "https://github.com/getprpd-sudo/getprpd-website-repo/blob/e9ab215cc3dbb8f3821ddce32d4d611719e9376f/assets/images/garlic-butter-shrimp.jpg",
+    "notes": "Visually inspected real 900x1200 food photograph of peeled shrimp with glossy golden garlic-butter coating and fresh herbs, beside yellow rice in black meal-prep tray. Source asset explicitly named garlic-butter-shrimp; README instructs preserving real food photos and avoiding stock/AI replacements. Sauce is coating rather than deep pool; tray/rice are visible. No watermark. License not established.",
+    "license": "Image-specific rights not verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 900,
+    "height": 1200
+  },
+  {
+    "dish": "Nước ngọt Coca-Cola",
+    "aliases": [
+      "Nước ngọt Coca-Cola",
+      "Coca Cola"
+    ],
+    "url": "https://raw.githubusercontent.com/Vinayak-E/Responsive-coca-cola-website/691f86ab839c04fc3ce80921c2026e4dc6383ed6/width1960%20%281%29.webp",
+    "source": "https://github.com/Vinayak-E/Responsive-coca-cola-website/blob/691f86ab839c04fc3ce80921c2026e4dc6383ed6/width1960%20%281%29.webp",
+    "notes": "Three glass Coca-Cola bottles with personalized labels on red/black background; correct product, no visible ice or frost.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/webp",
+    "width": 573,
+    "height": 430
+  },
+  {
+    "dish": "Nước cam ép",
+    "aliases": [
+      "Nước cam ép",
+      "Orange Juice"
+    ],
+    "url": "https://raw.githubusercontent.com/SowjanyaAnanthasetty/Juice-Menu-Frontened/78398d48290c83347c8994204348b6c5478f502c/product%20app/Images/orange.jpg",
+    "source": "https://github.com/SowjanyaAnanthasetty/Juice-Menu-Frontened/blob/78398d48290c83347c8994204348b6c5478f502c/product%20app/Images/orange.jpg",
+    "notes": "Tall glass of opaque orange juice with orange slice and straw.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 3000,
+    "height": 4500
+  },
+  {
+    "dish": "Trà chanh",
+    "aliases": [
+      "Trà chanh",
+      "Lemon Tea"
+    ],
+    "url": "https://raw.githubusercontent.com/daddydeus/odin-recipes-redo/308598099f158d8deecf07c05b821f232a66fc14/images/lemon-Iced-Tea.jpg",
+    "source": "https://github.com/daddydeus/odin-recipes-redo/blob/308598099f158d8deecf07c05b821f232a66fc14/images/lemon-Iced-Tea.jpg",
+    "notes": "Real photograph of two glasses amber iced tea with ice cubes, lemon halves and straws.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1956,
+    "height": 1475
+  },
+  {
+    "dish": "Cà phê sữa đá",
+    "aliases": [
+      "Cà phê sữa đá",
+      "Milk Coffee"
+    ],
+    "url": "https://raw.githubusercontent.com/babobi161504/Highlands-Coffee/c58c2f5872a78eb1c5d4dbcf1e6a310389177c7d/image/menu-PSD_3.png",
+    "source": "https://github.com/babobi161504/Highlands-Coffee/blob/c58c2f5872a78eb1c5d4dbcf1e6a310389177c7d/image/menu-PSD_3.png",
+    "notes": "Highlands Coffee Phin Sua Da product photo: branded plastic cup with dark coffee, condensed milk and ice, transparent background.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/png",
+    "width": 435,
+    "height": 368
+  },
+  {
+    "dish": "Nước khoáng",
+    "aliases": [
+      "Nước khoáng",
+      "Mineral Water"
+    ],
+    "url": "https://raw.githubusercontent.com/JonasMATHIEU/Landing-page-Evian/f6ca778eac2ea0e1de129c10a79efcf1a066ca1e/image/eviantrr.jpg",
+    "source": "https://github.com/JonasMATHIEU/Landing-page-Evian/blob/f6ca778eac2ea0e1de129c10a79efcf1a066ca1e/image/eviantrr.jpg",
+    "notes": "Evian branded mineral water bottles, several sizes, recognizable real packaging on white background.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 2120,
+    "height": 1120
+  },
+  {
+    "dish": "Bánh phô mai",
+    "aliases": [
+      "Bánh phô mai",
+      "Cheesecake"
+    ],
+    "url": "https://raw.githubusercontent.com/EufranioDiogo/cheesecake-recipe/43a27ed0b1c8a0d48f40307cde9296f3dfaa57f9/IMG/photo1.png",
+    "source": "https://github.com/EufranioDiogo/cheesecake-recipe/blob/43a27ed0b1c8a0d48f40307cde9296f3dfaa57f9/IMG/photo1.png",
+    "notes": "Clear real photograph of cheesecake slice topped with raspberry and blueberry on dark plate.",
+    "license": "Repository MIT license; image-specific original provenance not confirmed",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/png",
+    "width": 1938,
+    "height": 940
+  },
+  {
+    "dish": "Bánh sô-cô-la",
+    "aliases": [
+      "Bánh sô-cô-la",
+      "Chocolate Cake"
+    ],
+    "url": "https://raw.githubusercontent.com/Shristi21/Dessert-Recipe-Website/df472c2568278210153e6c6f73d323d3181d8ebc/images/choco_cake.jpg",
+    "source": "https://github.com/Shristi21/Dessert-Recipe-Website/blob/df472c2568278210153e6c6f73d323d3181d8ebc/images/choco_cake.jpg",
+    "notes": "Slice of dark chocolate layer cake with chocolate frosting.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1024,
+    "height": 576
+  },
+  {
+    "dish": "Kem vani",
+    "aliases": [
+      "Kem vani",
+      "Ice Cream"
+    ],
+    "url": "https://raw.githubusercontent.com/Daniel-Sha14/Assignment-1-Ice-Cream_Shop/40c08c516138b869f497c71aa203c25d0b782f89/vanilla.jpeg",
+    "source": "https://github.com/Daniel-Sha14/Assignment-1-Ice-Cream_Shop/blob/40c08c516138b869f497c71aa203c25d0b782f89/vanilla.jpeg",
+    "notes": "Real close-up photograph of plain white vanilla ice cream scoop on waffle cone against blue background.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 1500,
+    "height": 1500
+  },
+  {
+    "dish": "Trái cây theo mùa",
+    "aliases": [
+      "Trái cây theo mùa",
+      "Fruit Salad"
+    ],
+    "url": "https://raw.githubusercontent.com/matinsoleymni/24Salad-Landing-Page/b16e00656f1a929d413d8cee34023afa1139b193/images/main/eat1.png",
+    "source": "https://github.com/matinsoleymni/24Salad-Landing-Page/blob/b16e00656f1a929d413d8cee34023afa1139b193/images/main/eat1.png",
+    "notes": "Overhead bowl of diced apple/orange/kiwi and grapes.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/png",
+    "width": 364,
+    "height": 520
+  },
+  {
+    "dish": "Bánh tiramisu",
+    "aliases": [
+      "Bánh tiramisu",
+      "Tiramisu"
+    ],
+    "url": "https://raw.githubusercontent.com/Shristi21/Dessert-Recipe-Website/df472c2568278210153e6c6f73d323d3181d8ebc/images/Tiramisu.jpeg",
+    "source": "https://github.com/Shristi21/Dessert-Recipe-Website/blob/df472c2568278210153e6c6f73d323d3181d8ebc/images/Tiramisu.jpeg",
+    "notes": "Layered coffee-soaked biscuit and mascarpone cake with cocoa and chocolate curls.",
+    "license": "No image-specific license verified",
+    "checkedAt": "2026-10-29",
+    "httpStatus": 200,
+    "contentType": "image/jpeg",
+    "width": 826,
+    "height": 620
+  }
+]

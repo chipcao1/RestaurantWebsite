@@ -208,3 +208,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .combo-preview { max-height: 220px; object-fit: contain; }
 .combo-quantity { width: 100px; }
 @media (max-width: 767px) { .catalog-filter { padding: 8px 14px; } .dashboard-kpis .small-box { min-height: 150px; } }
+
+/* A combo shows the dishes that are actually included in it. */
+.combo-photo { width: 100%; height: 100%; min-height: 110px; overflow: hidden; border-radius: inherit; background: #f5f1e9; }
+.combo-photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 3px; }
+.combo-photo-count-1 { grid-template-columns: 1fr; }
+.combo-photo-item { position: relative; margin: 0; min-width: 0; min-height: 0; overflow: hidden; }
+.combo-photo img, .food_section .box .img-box .combo-photo img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
+.combo-photo-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 6px; color: #fff; background: rgba(20, 28, 23, .78); font-size: 11px; line-height: 1.25; }
+.img-box > .combo-photo { height: 220px; }
+.combo-preview > .combo-photo { max-width: 420px; height: 260px; }
+.combo-thumbnail { width: 110px; height: 110px; }
+.combo-thumbnail > .combo-photo { width: 100%; height: 100%; }
+.combo-preview { max-height: none; }
+.combo-photo-cart { width: 120px; height: 120px; margin: auto; }
+.combo-photo-checkout { width: 110px; height: 110px; flex-shrink: 0; }
+.combo-photo-cart .combo-photo-item figcaption, .combo-photo-checkout .combo-photo-item figcaption, .combo-thumbnail .combo-photo-item figcaption { padding: 2px 3px; font-size: 9px; }
+
+.combo-photo-count-3 .combo-photo-item:last-child { grid-column: 1 / -1; }
+.food_section .box .combo-img-box { padding: 0; border-radius: 0; }

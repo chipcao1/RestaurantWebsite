@@ -188,7 +188,7 @@
                             <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
                                 <span class="mr-2 small text-muted">Xem trước:</span>
                                 <img data-food-image id="previewImg"
-                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(primaryImageUrl)))"
+                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(RestaurantWebsite.Infrastructure.MenuImages.ResolveDish(Model.Name, primaryImageUrl)))"
                                      alt="Xem trước"
                                      class="img-thumbnail rounded"
                                      style="width: 65px; height: 65px; object-fit: cover;" />
@@ -231,4 +231,4 @@
     </script>
 }
 
-<section class="surface"><h2>Ảnh món ăn</h2><div class="row">@foreach(var image in Model.DishImages){<div class="col-md-3 mb-3"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(image.ImageUrl))" class="img-fluid rounded mb-2" alt="@Model.Name" /><p>@(image.IsPrimary?"Ảnh đại diện":"Ảnh bổ sung")</p>@using(Html.BeginForm("PrimaryImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">Chọn đại diện</button>}@using(Html.BeginForm("RemoveImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-danger">Gỡ ảnh</button>}</div>}</div></section>
+<section class="surface"><h2>Ảnh món ăn</h2><div class="row">@foreach(var image in Model.DishImages){<div class="col-md-3 mb-3"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.ResolveDish(Model.Name, image.ImageUrl))" class="img-fluid rounded mb-2" alt="@Model.Name" /><p>@(image.IsPrimary?"Ảnh đại diện":"Ảnh bổ sung")</p>@using(Html.BeginForm("PrimaryImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">Chọn đại diện</button>}@using(Html.BeginForm("RemoveImage","Dishes",new{area=Convert.ToString(ViewContext.RouteData.DataTokens["area"]),id=Model.Id,imageId=image.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-danger">Gỡ ảnh</button>}</div>}</div></section>

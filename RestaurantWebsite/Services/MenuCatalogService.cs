@@ -22,7 +22,7 @@ namespace RestaurantWebsite.Services
                 Categories = categories,
                 Dishes = db.Dishes.AsNoTracking().Include(d => d.Category).Include(d => d.DishImages)
                     .Where(d => d.Status == "Available" && d.Category.IsActive).OrderBy(d => d.Name).ToList(),
-                Combos = db.Combos.AsNoTracking().Include(c => c.ComboItems.Select(i => i.Dish.Category))
+                Combos = db.Combos.AsNoTracking().Include(c => c.ComboItems.Select(i => i.Dish.Category)).Include(c => c.ComboItems.Select(i => i.Dish.DishImages))
                     .Where(c => c.IsActive && (!c.StartDate.HasValue || c.StartDate <= now) && (!c.EndDate.HasValue || c.EndDate >= now))
                     .OrderBy(c => c.Name).ToList().Where(c => CatalogRules.Purchasable(c, now)).ToList(),
                 Search = (search ?? "").Trim(),

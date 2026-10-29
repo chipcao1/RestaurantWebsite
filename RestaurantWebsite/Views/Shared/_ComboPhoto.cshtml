@@ -1,0 +1,38 @@
+@using System
+@using System.Linq
+@using RestaurantWebsite.Infrastructure
+@model RestaurantWebsite.Models.Combo
+@{
+    var supplied = Model == null ? null : Model.ImageUrl;
+    Uri customUri;
+    var custom = !string.IsNullOrWhiteSpace(supplied)
+        && Uri.TryCreate(supplied, UriKind.Absolute, out customUri)
+        && customUri.Scheme == Uri.UriSchemeHttps
+        && !MenuImages.IsDefault(supplied)
+        && !string.Equals(supplied, MenuImages.Combo(Model.Name), StringComparison.OrdinalIgnoreCase);
+    var components = Model == null || Model.ComboItems == null
+        ? new RestaurantWebsite.Models.ComboItem[0]
+        : Model.ComboItems.Where(i => i.Dish != null).OrderBy(i => i.Id).Take(4).ToArray();
+}
+@if (custom)
+{
+    <div class="combo-photo combo-photo-custom"><img data-food-image src="@supplied" alt="@Model.Name" loading="lazy" /></div>
+}
+else if (components.Length > 0)
+{
+    <div class="combo-photo combo-photo-grid combo-photo-count-@components.Length" role="group" aria-label="Các món trong @(Model.Name)">
+        @foreach (var component in components)
+        {
+            var dish = component.Dish;
+            var primary = dish.DishImages == null ? null : dish.DishImages.OrderByDescending(i => i.IsPrimary).FirstOrDefault();
+            <figure class="combo-photo-item">
+                <img data-food-image src="@Url.Content(MenuImages.ResolveDish(dish.Name, primary == null ? null : primary.ImageUrl))" alt="@dish.Name" loading="lazy" />
+                <figcaption>@dish.Name</figcaption>
+            </figure>
+        }
+    </div>
+}
+else
+{
+    <div class="combo-photo"><img data-food-image src="@Url.Content(MenuImages.Placeholder)" alt="@(Model == null ? "Suất ăn kết hợp" : Model.Name)" loading="lazy" /></div>
+}

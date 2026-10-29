@@ -14,7 +14,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         public ActionResult Index(string search, string status)
         {
             var now = RestaurantWebsite.Infrastructure.RestaurantClock.Now;
-            var combos = db.Combos.Include(c => c.ComboItems.Select(i => i.Dish.Category)).OrderBy(c => c.Name).ToList();
+            var combos = db.Combos.Include(c => c.ComboItems.Select(i => i.Dish.Category)).Include(c => c.ComboItems.Select(i => i.Dish.DishImages)).OrderBy(c => c.Name).ToList();
             ViewBag.TotalCombos = combos.Count;
             ViewBag.AvailableCombos = combos.Count(c => RestaurantWebsite.Services.CatalogRules.ComboStatus(c, now) == "Active");
             ViewBag.InactiveCombos = combos.Count(c => !c.IsActive);
@@ -29,7 +29,7 @@ namespace RestaurantWebsite.Areas.Admin.Controllers
         }
         public ActionResult Edit(int? id)
         {
-            var model = id.HasValue ? db.Combos.Include(c => c.ComboItems).SingleOrDefault(c => c.Id == id) : new Combo();
+            var model = id.HasValue ? db.Combos.Include(c => c.ComboItems.Select(i => i.Dish.DishImages)).SingleOrDefault(c => c.Id == id) : new Combo();
             if (model == null) return HttpNotFound();
             LoadDishes(); return View(model);
         }

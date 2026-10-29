@@ -229,7 +229,7 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
                 .ToList();
 
             var combos = db.Combos
-                .Include(c => c.ComboItems.Select(ci => ci.Dish))
+                .Include(c => c.ComboItems.Select(ci => ci.Dish.DishImages))
                 .Where(c => comboIds.Contains(c.Id))
                 .ToList();
 

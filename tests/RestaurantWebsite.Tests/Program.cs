@@ -93,11 +93,15 @@ class Program
         combo.StartDate=now.AddDays(-2);combo.EndDate=now.AddDays(-1);Check(CatalogRules.ComboStatus(combo,now)=="Expired","combo status reports ended schedule");
         combo.EndDate=now.AddDays(1);Check(CatalogRules.ComboStatus(combo,now)=="Active","combo status reports actually purchasable combo");
         dish.Status="Discontinued";Check(CatalogRules.ComboStatus(combo,now)=="Unavailable","combo with unavailable ingredients is not labelled on sale");
-        Check(MenuImages.Resolve("/Resources/User/images/dish01.jpg")==MenuImages.RemoteRoot+"dish01.jpg","removed dish asset resolves to immutable HTTPS image");
-        Check(MenuImages.Resolve("~/Resources/User/images/combo03.jpg")==MenuImages.RemoteRoot+"combo03.jpg","removed combo asset resolves to HTTPS image");
+        Check(MenuImages.Resolve("/Resources/User/images/dish01.jpg")==MenuImages.Dish("Gỏi cuốn tôm"),"removed dish asset resolves to immutable HTTPS image");
+        Check(MenuImages.Resolve("~/Resources/User/images/combo03.jpg")==MenuImages.Combo("Suất gà và nước uống"),"removed combo asset resolves to HTTPS image");
         Check(MenuImages.Resolve("https://example.test/food.jpg")=="https://example.test/food.jpg","custom internet photos remain unchanged");
         Check(MenuImages.Resolve(null)==MenuImages.Placeholder&&MenuImages.Resolve("javascript:alert(1)")==MenuImages.Placeholder,"missing or unsafe images use small local SVG");
         Check(MenuImages.Dish("Phở bò")==MenuImages.Dish("Beef Noodles"),"Vietnamese and main English dish names share image mapping");
+        Check(MenuImages.ResolveDish("Phở gà",MenuImages.RemoteRoot+"dish14.jpg")==MenuImages.Dish("Phở gà"),"old remote photos are corrected by dish name, not mismatched filename");
+        Check(MenuImages.ResolveDish("Phở gà","https://example.test/custom.jpg")=="https://example.test/custom.jpg","custom photos survive canonical correction");
+        Check(MenuImages.Dish("Phở bò")!=MenuImages.Dish("Phở gà")&&!MenuImages.Dish("Phở bò").StartsWith(MenuImages.RemoteRoot),"distinct new photos replace unrelated main photos");
+        Check(MenuImages.Combo("unrecognized")==MenuImages.Placeholder,"unknown combos never borrow unrelated family meal photo");
         Console.WriteLine(passed + " tests passed");
     }
 }
