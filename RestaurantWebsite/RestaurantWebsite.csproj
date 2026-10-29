@@ -399,6 +399,14 @@
     <Compile Include="Migrations\202609281435011_InitialCreate.Designer.cs" />
     <Compile Include="Migrations\202609281435011_InitialCreate.cs" />
     <Compile Include="Migrations\Configuration.cs" />
+    <EmbeddedResource Include="Database\Seed.sql">
+      <LogicalName>RestaurantWebsite.Database.Seed.sql</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Database\UpdateFoodImages.sql">
+      <LogicalName>RestaurantWebsite.Database.UpdateFoodImages.sql</LogicalName>
+    </EmbeddedResource>
+    <Content Include="Database\food-image-catalog.json" />
+    <Content Include="HUONG_DAN.md" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Combo.cs" />
