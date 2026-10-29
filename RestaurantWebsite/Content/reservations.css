@@ -1,0 +1,11 @@
+.staff-reservations .reservation-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; }
+.staff-reservations .reservation-change-table { min-width: 180px; max-width: 260px; margin-left: auto; margin-right: auto; }
+.staff-reservations .reservation-change-table summary { cursor: pointer; padding: .25rem; }
+.staff-reservations .table td { vertical-align: middle; }
+.staff-reservations .table th { white-space: nowrap; }
+.staff-reservations .table-responsive { overflow-x: auto; }
+@media (max-width: 767.98px) {
+    .staff-reservations .table { min-width: 1020px; }
+    .staff-reservations .form-inline > .form-group { width: 100%; margin-right: 0 !important; }
+    .staff-reservations .form-inline .form-control, .staff-reservations .form-inline .input-group { flex: 1; min-width: 0; }
+}

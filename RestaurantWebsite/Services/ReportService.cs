@@ -6,6 +6,17 @@ using RestaurantWebsite.Models;
 using RestaurantWebsite.Infrastructure;
 namespace RestaurantWebsite.Services
 {
+    public sealed class SalesTransaction
+    {
+        public int PaymentId { get; set; }
+        public int OrderId { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string PaymentMethod { get; set; }
+        public string Status { get; set; }
+        public decimal Collected { get; set; }
+        public decimal Refunded { get; set; }
+        public decimal Net { get { return Collected - Refunded; } }
+    }
     public sealed class SalesReport
     {
         public DateTime From { get; set; }
@@ -14,6 +25,7 @@ namespace RestaurantWebsite.Services
         public decimal Refunded { get; set; }
         public decimal Net { get { return Collected - Refunded; } }
         public IList<string> Lines { get; set; }
+        public IList<SalesTransaction> Transactions { get; set; }
     }
     public sealed class ReportService
     {
@@ -25,9 +37,9 @@ namespace RestaurantWebsite.Services
             if (to < from || (to - from).TotalDays > 366) throw new InvalidOperationException("Khoảng báo cáo phải hợp lệ và không quá 366 ngày.");
             var end = to.AddDays(1);
             var collected = db.Payments.Where(p => (p.Status == "Completed" || p.Status == "Refunded") && p.PaymentDate >= from && p.PaymentDate < end).ToList();
-            var refunded = db.Payments.Where(p => p.Status == "Refunded" && p.PaymentDate >= from && p.PaymentDate < end).ToList();
-            var totals = ReportMath.Calculate(collected.Concat(refunded).GroupBy(p => p.Id).Select(g => g.First()), from, end);
-            return new SalesReport { From = from, To = to, Collected = totals.Collected, Refunded = totals.Refunded, Lines = collected.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Thu đơn #" + p.OrderId + " | " + Vietnamese.Money(p.Amount) }).Concat(refunded.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Đã hoàn (ngày thanh toán gốc) đơn #" + p.OrderId + " | -" + Vietnamese.Money(p.Amount) })).OrderBy(x => x.At).Select(x => x.Text).ToList() };
+            var refunded = collected.Where(p => p.Status == "Refunded").ToList();
+            var totals = ReportMath.Calculate(collected, from, end);
+            return new SalesReport { From = from, To = to, Collected = totals.Collected, Refunded = totals.Refunded, Transactions = collected.OrderByDescending(p => p.PaymentDate).ThenByDescending(p => p.Id).Select(p => new SalesTransaction { PaymentId = p.Id, OrderId = p.OrderId, PaymentDate = p.PaymentDate, PaymentMethod = p.PaymentMethod, Status = p.Status, Collected = p.Amount, Refunded = p.Status == "Refunded" ? p.Amount : 0m }).ToList(), Lines = collected.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Thu đơn #" + p.OrderId + " | " + Vietnamese.Money(p.Amount) }).Concat(refunded.Select(p => new { At = p.PaymentDate, Text = p.PaymentDate.ToString("dd/MM/yyyy HH:mm") + " | Đã hoàn (ngày thanh toán gốc) đơn #" + p.OrderId + " | -" + Vietnamese.Money(p.Amount) })).OrderBy(x => x.At).Select(x => x.Text).ToList() };
         }
         public IList<string> Menu()
         {

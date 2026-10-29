@@ -24,7 +24,7 @@
     <title>@ViewBag.Title · Feane</title>
     <link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")" />
     <link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")" />
-    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css?v=20261029-4")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css?v=20261030-1")" />
     @RenderSection("Styles", false)
 </head>
 <body class="hold-transition sidebar-mini layout-fixed operations">
@@ -60,7 +60,7 @@
             </div>
             <nav class="mt-2" aria-label="Chức năng của khu vực">
                 <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
-                    @foreach (var item in links)
+                    @foreach (var item in links.Where(item => item.Controller != "Categories" || adminArea))
                     {
                         bool active = controller == item.Controller && (controller != "Staff" || action == item.Action);
                         <li class="nav-item"><a class="nav-link @(active ? "active" : "")" href="@Url.Action(item.Action, item.Controller, new { area })" aria-current="@(active ? "page" : null)"><i class="nav-icon fa fa-@item.Icon"></i><p>@item.Text</p></a></li>

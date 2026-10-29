@@ -1,48 +1,257 @@
 @using RestaurantWebsite.Models
 @using RestaurantWebsite.Services
 @using RestaurantWebsite.Infrastructure
-@model IEnumerable<Reservation>
-@{Layout="~/Views/Shared/_OperationsLayout.cshtml";ViewBag.Title="Lịch đặt bàn";var tables=(IEnumerable<RestaurantTable>)ViewBag.Tables;string role=Convert.ToString(Session["Role"]);}
-<div class="page-heading">
-<div>
-<p class="eyebrow">PHỤC VỤ TẠI NHÀ HÀNG</p>
-<h1>Lịch đặt bàn</h1>
-<p>Xác nhận lịch, kiểm tra chỗ ngồi và đổi bàn.</p>
+@model IEnumerable<RestaurantWebsite.Models.Reservation>
+
+@{
+    ViewBag.Title = "Quản lý đặt bàn";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+
+    var tables = ((IEnumerable<RestaurantTable>)ViewBag.Tables).Where(t => t.IsActive).ToList();
+    string role = Convert.ToString(Session["Role"]);
+    var now = RestaurantClock.Now;
+    int totalCount = Model.Count();
+    int pendingCount = Model.Count(r => r.Status == "Pending");
+    int confirmedCount = Model.Count(r => r.Status == "Confirmed");
+    int completedCount = Model.Count(r => r.Status == "Completed");
+    int cancelledCount = Model.Count(r => r.Status == "Cancelled");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/Content/reservations.css")" />
+}
+
+<div class="staff-reservations">
+<!-- Summary Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@pendingCount</h3>
+                <p>Chờ xác nhận</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-clock-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@confirmedCount</h3>
+                <p>Đặt bàn đã xác nhận</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-calendar-check-o"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@completedCount</h3>
+                <p>Lượt đã phục vụ</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-secondary">
+            <div class="inner">
+                <h3>@cancelledCount</h3>
+                <p>Đã hủy</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-times-circle"></i>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Main Content Card -->
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title text-bold"><i class="fa fa-calendar mr-2"></i>Danh sách đặt bàn</h3>
+        <div class="card-tools">
+            <span class="badge badge-primary">Tổng: @totalCount</span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Search & Filter Form -->
+        @using (Html.BeginForm("Reservations", "Staff", new { area = "Staff" }, FormMethod.Get, new { @class = "form-inline mb-4" }))
+        {
+            <div class="form-group mr-2 mb-2">
+                <label for="reservation-status" class="mr-2 font-weight-bold">Trạng thái:</label>
+                @Html.DropDownList("status", (SelectList)ViewBag.StatusList, "Tất cả trạng thái", new { @class = "form-control form-control-sm", id = "reservation-status" })
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <label for="reservation-date" class="mr-2 font-weight-bold">Ngày:</label>
+                <input type="date" id="reservation-date" name="date" class="form-control form-control-sm" value="@ViewBag.SelectedDate" />
+            </div>
+
+            <div class="form-group mr-2 mb-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Tên khách, điện thoại, số bàn..." aria-label="Tìm đặt bàn" value="@ViewBag.SearchTerm" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default" aria-label="Lọc đặt bàn">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || ViewBag.SelectedStatus != "All" || !string.IsNullOrEmpty(ViewBag.SelectedDate))
+            {
+                <a href="@Url.Action("Reservations", "Staff", new { area = "Staff" })" class="btn btn-outline-secondary btn-sm mb-2 ml-1">
+                    <i class="fa fa-times"></i> Xóa bộ lọc
+                </a>
+            }
+        }
+
+        <!-- Table -->
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center my-4">
+                <i class="fa fa-info-circle fa-2x d-block mb-2"></i>
+                <h5>Không tìm thấy đặt bàn phù hợp.</h5>
+                <p class="mb-0">Hãy xóa bộ lọc để xem tất cả lịch đặt bàn.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col" style="width: 50px;" class="text-center">Mã</th>
+                            <th scope="col">Khách hàng</th>
+                            <th scope="col">Bàn và khu vực</th>
+                            <th scope="col" class="text-center">Số khách</th>
+                            <th scope="col">Ngày giờ đặt bàn</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                            <th scope="col">Yêu cầu đặc biệt</th>
+                            <th scope="col" style="width: 210px;" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center font-weight-bold">#@item.Id</td>
+                                <td>
+                                    <div class="font-weight-bold">@(item.User != null ? item.User.FullName : "Khách")</div>
+                                    <small class="text-muted d-block"><i class="fa fa-envelope mr-1"></i>@(item.User != null ? item.User.Email : "Chưa có")</small>
+                                    @if (item.User != null && !string.IsNullOrEmpty(item.User.Phone))
+                                    {
+                                        <small class="text-muted d-block"><i class="fa fa-phone mr-1"></i>@item.User.Phone</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary font-weight-bold px-2 py-1">
+                                        <i class="fa fa-table mr-1"></i>Bàn @(item.Table != null ? item.Table.TableNumber : item.TableId.ToString())
+                                    </span>
+                                    @if (item.Table != null)
+                                    {
+                                        <small class="d-block text-muted mt-1">Khu vực: <strong>@Vietnamese.Label(item.Table.Zone)</strong> (@item.Table.Capacity chỗ)</small>
+                                    }
+                                </td>
+                                <td class="text-center font-weight-bold font-size-16">
+                                    <span class="badge badge-light border px-2 py-1"><i class="fa fa-users mr-1 text-info"></i>@item.PartySize</span>
+                                </td>
+                                <td>
+                                    <div class="font-weight-bold"><i class="fa fa-calendar text-primary mr-1"></i>@item.ReservationDate.ToString("dd/MM/yyyy")</div>
+                                    <div class="text-success"><i class="fa fa-clock-o mr-1"></i>@item.ReservationDate.ToString("HH:mm") <small class="text-muted">(khung hai giờ)</small></div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark"><i class="fa fa-hourglass-half mr-1"></i>Chờ xác nhận</span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge badge-info"><i class="fa fa-check mr-1"></i>Đã xác nhận</span>
+                                    }
+                                    else if (item.Status == "Completed")
+                                    {
+                                        <span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Hoàn tất</span>
+                                    }
+                                    else if (item.Status == "Cancelled")
+                                    {
+                                        <span class="badge badge-secondary"><i class="fa fa-times-circle mr-1"></i>Đã hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark">@(Vietnamese.Label(item.Status))</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.SpecialRequest))
+                                    {
+                                        <small class="font-italic text-dark d-block text-truncate" style="max-width: 200px;" title="@item.SpecialRequest">"@item.SpecialRequest"</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">Không có</small>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @{
+                                        bool hasOpenOrders = item.Orders.Any(o => o.Status != "Cancelled" && o.Status != "Delivered");
+                                        var replacementTables = tables.Where(t => t.Status == "Available" && t.Capacity >= item.PartySize && t.Id != item.TableId).ToList();
+                                    }
+                                    <div class="reservation-actions">
+                                        @foreach (var next in new[] { "Confirmed", "Completed", "Cancelled" })
+                                        {
+                                            if (WorkflowRules.ReservationTransition(item.Status, next, role, item.ReservationDate, now, hasOpenOrders))
+                                            {
+                                                using (Html.BeginForm("UpdateReservationStatus", "Staff", new { area = "Staff", id = item.Id, newStatus = next }, FormMethod.Post, new { @class = "d-inline" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm @(next == "Cancelled" ? "btn-outline-danger" : "btn-success")">@(next == "Confirmed" ? "Xác nhận" : next == "Completed" ? "Hoàn tất" : "Hủy đặt bàn")</button>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                    @if ((item.Status == "Pending" || item.Status == "Confirmed") && !hasOpenOrders && replacementTables.Any())
+                                    {
+                                        <details class="reservation-change-table mt-2">
+                                            <summary class="text-primary">Đổi bàn</summary>
+                                            @using (Html.BeginForm("ChangeTable", "Staff", new { area = "Staff", id = item.Id }, FormMethod.Post, new { @class = "mt-2 text-left" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <label for="replacement-table-@item.Id" class="small font-weight-bold">Bàn thay thế cho lịch #@item.Id</label>
+                                                <select id="replacement-table-@item.Id" name="newTableId" class="form-control form-control-sm" required>
+                                                    <option value="">Chọn bàn</option>
+                                                    @foreach (var table in replacementTables)
+                                                    {
+                                                        <option value="@table.Id">Bàn @table.TableNumber · @Vietnamese.Label(table.Zone) · @table.Capacity chỗ</option>
+                                                    }
+                                                </select>
+                                                <small class="text-muted d-block my-1">Hệ thống kiểm tra lịch trùng khi lưu.</small>
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">Lưu đổi bàn</button>
+                                            }
+                                        </details>
+                                    }
+                                    else if (item.Status == "Completed" || item.Status == "Cancelled")
+                                    {
+                                        <small class="text-muted">Đã kết thúc</small>
+                                    }
+                                    else if (hasOpenOrders)
+                                    {
+                                        <small class="text-muted">Có đơn đang xử lý</small>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
-<form class="filter-bar" method="get">
-<input type="date" name="date" class="form-control" aria-label="Ngày đặt bàn" value="@ViewBag.SelectedDate"/>
-<input name="search" class="form-control" placeholder="Tên khách, điện thoại, bàn..." value="@ViewBag.SearchTerm" aria-label="Tìm đặt bàn"/>@Html.DropDownList("status",(SelectList)ViewBag.StatusList,"Tất cả trạng thái",new{@class="form-control",aria_label="Trạng thái"})<button class="btn btn-warning">Lọc lịch</button>
-</form>
-<div class="table-responsive">
-<table class="table">
-<thead>
-<tr>
-<th>Khách hàng</th>
-<th>Lịch phục vụ</th>
-<th>Bàn / số khách</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-@foreach(var item in Model){<tr>
-<td>
-<strong>@item.User.FullName</strong>
-<br/>@item.User.Phone<br/>
-<small>@item.SpecialRequest</small>
-</td>
-<td>@item.ReservationDate.ToString("dd/MM/yyyy HH:mm")<br/>
-<small>Đến @item.ReservationDate.AddHours(2).ToString("HH:mm")</small>
-</td>
-<td>Bàn @item.Table.TableNumber<br/>@item.PartySize khách</td>
-<td>@Vietnamese.Label(item.Status)</td>
-<td>
-@foreach(var next in new[]{"Confirmed","Completed","Cancelled"}){if(WorkflowRules.ReservationTransition(item.Status,next,role,item.ReservationDate,RestaurantClock.Now,item.Orders.Any(o=>o.Status!="Cancelled"&&o.Status!="Delivered"))){using(Html.BeginForm("UpdateReservationStatus", "Staff",new{area="Staff",id=item.Id,newStatus=next},FormMethod.Post,new{@class="d-inline"})){@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary mb-1">@Vietnamese.Label(next)</button>}}}
-@if(item.Status=="Pending"||item.Status=="Confirmed"){using(Html.BeginForm("ChangeTable", "Staff",new{area="Staff",id=item.Id},FormMethod.Post,null)){@Html.AntiForgeryToken()<select name="newTableId" class="form-control form-control-sm" aria-label="Bàn thay thế">@foreach(var table in tables.Where(t=>t.Capacity>=item.PartySize)){<option value="@table.Id" @(table.Id==item.TableId?"selected":"")>Bàn @table.TableNumber (@table.Capacity chỗ)</option>}</select>
-<button class="btn btn-sm btn-outline-secondary mt-1">Đổi bàn</button>}}
-</td>
-</tr>}
-</tbody>
-</table>
-</div>@if(!Model.Any()){<p class="empty-state">Chưa có lịch đặt bàn phù hợp.</p>}
+
+</div>

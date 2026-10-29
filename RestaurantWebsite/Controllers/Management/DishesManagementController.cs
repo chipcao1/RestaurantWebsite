@@ -7,7 +7,7 @@ using RestaurantWebsite.Models;
 
 namespace RestaurantWebsite.Controllers.Management
 {
-    [RoleAuthorize("Staff", "Admin")]
+    [RoleAuthorize("Admin")]
     public abstract class DishesManagementController : Controller
     {
         private readonly AppDbContext db = new AppDbContext();

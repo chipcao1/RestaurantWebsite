@@ -1,38 +1,72 @@
+@using System.Linq
+@using RestaurantWebsite.Infrastructure
 @model RestaurantWebsite.Services.SalesReport
-@{ ViewBag.Title="Báo cáo doanh thu"; }
-<div class="page-heading">
-<div>
-<p class="eyebrow">HIỆU QUẢ KINH DOANH</p>
-<h1>Báo cáo doanh thu</h1>
-<p>Theo ngày thanh toán gốc. Khoản đã hoàn được điều chỉnh về ngày thanh toán vì dữ liệu hiện tại không lưu ngày hoàn riêng.</p>
+@{ ViewBag.Title = "Báo cáo doanh thu"; }
+@section Styles {
+<style>
+    .revenue-report .revenue-value { font-size: clamp(1.35rem, 2.2vw, 2rem); white-space: normal; overflow-wrap: anywhere; }
+    .revenue-report .small-box .inner { position: relative; z-index: 1; }
+    .revenue-report .small-box .icon { opacity: .35; }
+    .revenue-report .revenue-table { min-width: 820px; }
+    .revenue-report .revenue-table th, .revenue-report .revenue-table td { vertical-align: middle; }
+    .revenue-report .revenue-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+</style>
+}
+<div class="revenue-report">
+    <div class="content-header">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div><h1>Báo cáo doanh thu</h1><p class="text-muted mb-0">Theo dõi tiền đã thu, khoản hoàn và doanh thu ròng theo ngày thanh toán.</p></div>
+            <a class="btn btn-default mt-2" href="@Url.Action("Menu")"><i class="fa fa-file-pdf-o mr-1" aria-hidden="true"></i>Tải thực đơn PDF</a>
+        </div>
+    </div>
+    <div class="card card-primary card-outline">
+        <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-calendar mr-2" aria-hidden="true"></i>Khoảng báo cáo</h2></div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Index")" class="form-row align-items-end">
+                <div class="col-md-3 mb-2"><label for="from">Từ ngày</label><input type="date" name="from" id="from" class="form-control" value="@Model.From.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" required aria-describedby="reportRangeHelp" /></div>
+                <div class="col-md-3 mb-2"><label for="to">Đến ngày</label><input type="date" name="to" id="to" class="form-control" value="@Model.To.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" required aria-describedby="reportRangeHelp" /></div>
+                <div class="col-md-6 mb-2"><button type="submit" class="btn btn-primary"><i class="fa fa-search mr-1" aria-hidden="true"></i>Xem báo cáo</button><button type="submit" name="pdf" value="true" class="btn btn-outline-secondary ml-1"><i class="fa fa-download mr-1" aria-hidden="true"></i>Tải PDF</button></div>
+            </form>
+            <small id="reportRangeHelp" class="text-muted">Bao gồm cả ngày bắt đầu và ngày kết thúc. Khoảng cách giữa hai ngày tối đa 366 ngày.</small>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Tổng quan doanh thu</h2><span class="text-muted small">@Model.From.ToString("dd/MM/yyyy") – @Model.To.ToString("dd/MM/yyyy")</span></div>
+    <div class="row">
+        <div class="col-md-4"><div class="small-box bg-info"><div class="inner"><p>Tổng tiền đã thu</p><h3 class="revenue-value">@Vietnamese.Money(Model.Collected)</h3><small>Bao gồm các khoản đã hoàn</small></div><div class="icon"><i class="fa fa-money" aria-hidden="true"></i></div></div></div>
+        <div class="col-md-4"><div class="small-box bg-warning"><div class="inner"><p>Tiền đã hoàn</p><h3 class="revenue-value">@Vietnamese.Money(Model.Refunded)</h3><small>Điều chỉnh theo ngày thanh toán gốc</small></div><div class="icon"><i class="fa fa-undo" aria-hidden="true"></i></div></div></div>
+        <div class="col-md-4"><div class="small-box bg-success"><div class="inner"><p>Thu ròng</p><h3 class="revenue-value">@Vietnamese.Money(Model.Net)</h3><small>Tổng tiền đã thu trừ tiền đã hoàn</small></div><div class="icon"><i class="fa fa-line-chart" aria-hidden="true"></i></div></div></div>
+    </div>
+    <div class="callout callout-info"><p class="mb-0 small"><i class="fa fa-info-circle mr-1" aria-hidden="true"></i>Các khoản hoàn được điều chỉnh vào ngày thanh toán gốc. Báo cáo phản ánh trạng thái thanh toán hiện tại trong khoảng ngày đã chọn.</p></div>
+    <div class="card card-outline card-primary">
+        <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-list-alt mr-2" aria-hidden="true"></i>Chi tiết giao dịch</h2><span class="float-right badge badge-light">@Model.Transactions.Count giao dịch</span></div>
+        @if (!Model.Transactions.Any())
+        {
+            <div class="card-body text-center py-5"><i class="fa fa-file-text-o fa-3x text-muted mb-3" aria-hidden="true"></i><h3 class="h5">Chưa có giao dịch trong khoảng ngày này</h3><p class="text-muted mb-0">Chọn khoảng ngày khác để xem các khoản đã thu hoặc đã hoàn.</p></div>
+        }
+        else
+        {
+            <div class="table-responsive" role="region" aria-label="Chi tiết giao dịch doanh thu" tabindex="0">
+                <table class="table table-striped table-hover mb-0 revenue-table">
+                    <caption class="sr-only">Các khoản thanh toán đã thu hoặc đã hoàn, sắp xếp theo ngày thanh toán mới nhất. Mỗi khoản thanh toán xuất hiện một lần.</caption>
+                    <thead class="thead-light"><tr><th scope="col">Thanh toán / Đơn hàng</th><th scope="col">Ngày thanh toán gốc</th><th scope="col">Phương thức</th><th scope="col">Trạng thái</th><th scope="col" class="text-right">Đã thu</th><th scope="col" class="text-right">Đã hoàn</th><th scope="col" class="text-right">Thu ròng</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in Model.Transactions)
+                        {
+                            <tr>
+                                <td><strong>#@item.PaymentId</strong><small class="d-block text-muted">Đơn #@item.OrderId</small></td>
+                                <td class="text-nowrap">@item.PaymentDate.ToString("dd/MM/yyyy")<small class="d-block text-muted">@item.PaymentDate.ToString("HH:mm")</small></td>
+                                <td>@Vietnamese.Label(item.PaymentMethod)</td>
+                                <td><span class="badge @(item.Status == "Refunded" ? "badge-warning" : "badge-success")">@(item.Status == "Refunded" ? "Đã hoàn" : "Đã thu")</span></td>
+                                <td class="text-right revenue-amount">@Vietnamese.Money(item.Collected)</td>
+                                <td class="text-right revenue-amount">@Vietnamese.Money(item.Refunded)</td>
+                                <td class="text-right revenue-amount font-weight-bold">@Vietnamese.Money(item.Net)</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="thead-light"><tr><th scope="row" colspan="4">Tổng cộng</th><td class="text-right revenue-amount font-weight-bold">@Vietnamese.Money(Model.Collected)</td><td class="text-right revenue-amount font-weight-bold">@Vietnamese.Money(Model.Refunded)</td><td class="text-right revenue-amount font-weight-bold">@Vietnamese.Money(Model.Net)</td></tr></tfoot>
+                </table>
+            </div>
+            <div class="card-footer text-muted small">Mỗi dòng là một khoản thanh toán; một đơn hàng có thể có nhiều khoản thanh toán.</div>
+        }
+    </div>
 </div>
-<a class="btn btn-outline-secondary" href="@Url.Action("Menu")">Tải thực đơn PDF</a>
-</div>
-<form method="get" class="filter-bar">
-<div>
-<label for="from">Từ ngày</label>
-<input type="date" name="from" id="from" class="form-control" value="@Model.From.ToString("yyyy-MM-dd")" required/>
-</div>
-<div>
-<label for="to">Đến ngày</label>
-<input type="date" name="to" id="to" class="form-control" value="@Model.To.ToString("yyyy-MM-dd")" required/>
-</div>
-<button class="btn btn-warning">Xem báo cáo</button>
-<button name="pdf" value="true" class="btn btn-outline-dark">Tải PDF</button>
-</form>
-<div class="metric-grid">
-<div class="metric">
-<span>Tổng tiền đã thu</span>
-<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Collected)</strong>
-</div>
-<div class="metric">
-<span>Tiền đã hoàn</span>
-<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Refunded)</strong>
-</div>
-<div class="metric">
-<span>Thu ròng</span>
-<strong>@RestaurantWebsite.Infrastructure.Vietnamese.Money(Model.Net)</strong>
-</div>
-</div>
-<div class="surface">
-<h2>Chi tiết giao dịch</h2>@if(!Model.Lines.Any()){<p class="empty-state">Chưa có giao dịch trong khoảng ngày này.</p>}else{<ul class="transaction-list">@foreach(var line in Model.Lines){<li>@line</li>}</ul>}</div>

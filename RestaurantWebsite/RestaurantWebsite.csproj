@@ -278,6 +278,8 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Content\yamy.css" />
+    <Content Include="Content\reviews.css" />
+    <Content Include="Content\reservations.css" />
     <Content Include="Areas\Customer\Views\Web.config" />
     <Content Include="Areas\Staff\Views\Web.config" />
     <Content Include="Resources\**\*" />
@@ -372,7 +374,6 @@
     <Content Include="Areas\Customer\Views\Order\Success.cshtml" />
     <Content Include="Areas\Customer\Views\Reservation\Index.cshtml" />
     <Content Include="Areas\Customer\Views\_ViewStart.cshtml" />
-    <Compile Include="Areas\Staff\Controllers\CategoriesController.cs" />
     <Compile Include="Areas\Staff\Controllers\DishesController.cs" />
     <Compile Include="Areas\Staff\Controllers\ReportsController.cs" />
     <Compile Include="Areas\Staff\Controllers\ReviewsController.cs" />
@@ -406,7 +407,6 @@
       <LogicalName>RestaurantWebsite.Database.UpdateFoodImages.sql</LogicalName>
     </EmbeddedResource>
     <Content Include="Database\food-image-catalog.json" />
-    <Content Include="HUONG_DAN.md" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Combo.cs" />
@@ -426,6 +426,8 @@
     <Compile Include="Security\PasswordHasher.cs" />
     <Compile Include="Security\ReservationConflictValidator.cs" />
     <Compile Include="Services\CatalogRules.cs" />
+    <Compile Include="Services\DishAvailabilityRules.cs" />
+    <Compile Include="Services\DishAvailabilityService.cs" />
     <Compile Include="Services\CheckoutQuote.cs" />
     <Compile Include="Services\CheckoutService.cs" />
     <Compile Include="Services\MenuCatalogService.cs" />

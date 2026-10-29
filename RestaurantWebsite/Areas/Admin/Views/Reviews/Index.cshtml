@@ -1,43 +1,72 @@
+@using System.Linq
 @model IEnumerable<RestaurantWebsite.Models.Review>
-@{ ViewBag.Title = "Đánh giá của khách hàng"; Layout = "~/Views/Shared/_OperationsLayout.cshtml"; bool canModerate=Convert.ToString(Session["Role"])=="Admin"; }
-<div class="page-heading">
-<div>
-<p class="eyebrow">CHẤT LƯỢNG PHỤC VỤ</p>
-<h1>Đánh giá của khách hàng</h1>
-<p>Theo dõi phản hồi để cải thiện trải nghiệm tại nhà hàng.</p>
+@{
+    ViewBag.Title = "Đánh giá của khách hàng";
+    Layout = "~/Views/Shared/_OperationsLayout.cshtml";
+    bool adminArea = string.Equals(Convert.ToString(ViewContext.RouteData.DataTokens["area"]), "Admin", StringComparison.OrdinalIgnoreCase);
+    string area = adminArea ? "Admin" : "Staff";
+    bool canModerate = adminArea && Convert.ToString(Session["Role"]) == "Admin";
+    var reviews = Model.ToList();
+    int visibleCount = reviews.Count(r => r.IsApproved);
+    string approved = Convert.ToString(ViewBag.Approved);
+}
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/Content/reviews.css?v=20261030-1")" />
+}
+<div class="reviews-page">
+    <div class="content-header px-0"><h1>Đánh giá của khách hàng</h1><p class="text-muted mb-0">Theo dõi phản hồi để cải thiện trải nghiệm tại nhà hàng.</p></div>
+    <div class="row" aria-label="Thống kê trong kết quả lọc">
+        <div class="col-md-4"><div class="small-box bg-info"><div class="inner"><h3>@reviews.Count</h3><p>Đánh giá phù hợp bộ lọc</p></div><div class="icon" aria-hidden="true"><i class="fa fa-comments-o"></i></div></div></div>
+        <div class="col-md-4"><div class="small-box bg-success"><div class="inner"><h3>@visibleCount</h3><p>Đang hiển thị trong kết quả</p></div><div class="icon" aria-hidden="true"><i class="fa fa-eye"></i></div></div></div>
+        <div class="col-md-4"><div class="small-box bg-secondary"><div class="inner"><h3>@(reviews.Count - visibleCount)</h3><p>Đang ẩn trong kết quả</p></div><div class="icon" aria-hidden="true"><i class="fa fa-eye-slash"></i></div></div></div>
+    </div>
+    <div class="card card-primary card-outline">
+        <div class="card-header"><h2 class="card-title font-weight-bold"><i class="fa fa-star-o mr-2" aria-hidden="true"></i>Phản hồi của khách hàng</h2><span class="badge badge-light float-right">@reviews.Count kết quả</span></div>
+        <div class="card-body border-bottom">
+            @using (Html.BeginForm("Index", "Reviews", new { area }, FormMethod.Get, new { @class = "form-row align-items-end" }))
+            {
+                <div class="col-md-6 mb-2"><label for="reviewSearch">Tìm đánh giá</label><input id="reviewSearch" type="search" name="search" class="form-control" value="@ViewBag.Search" placeholder="Tên khách hàng, món ăn hoặc bình luận" /></div>
+                <div class="col-md-3 mb-2"><label for="reviewApproved">Trạng thái hiển thị</label><select id="reviewApproved" class="form-control" name="approved"><option value="">Tất cả trạng thái</option><option value="true" @(approved == "true" ? "selected" : "")>Đang hiển thị</option><option value="false" @(approved == "false" ? "selected" : "")>Đang ẩn</option></select></div>
+                <div class="col-md-3 mb-2 reviews-filter-actions"><button type="submit" class="btn btn-primary"><i class="fa fa-search mr-1" aria-hidden="true"></i>Lọc</button><a class="btn btn-default" href="@Url.Action("Index", "Reviews", new { area })">Đặt lại</a></div>
+            }
+            <p class="small text-muted mb-0 mt-2">@(canModerate ? "Duyệt hiển thị hoặc ẩn đánh giá trong danh sách bên dưới." : "Bạn có thể xem và tìm kiếm đánh giá của khách hàng tại đây.")</p>
+        </div>
+        @if (!reviews.Any())
+        {
+            <div class="card-body text-center py-5"><i class="fa fa-comments-o fa-3x text-muted mb-3" aria-hidden="true"></i><h3 class="h5">Chưa có đánh giá phù hợp</h3><p class="text-muted">Thử đổi từ khóa hoặc trạng thái hiển thị.</p><a class="btn btn-outline-primary" href="@Url.Action("Index", "Reviews", new { area })">Đặt lại bộ lọc</a></div>
+        }
+        else
+        {
+            <div class="table-responsive"><table class="table table-hover mb-0 reviews-table">
+                <caption class="sr-only">Danh sách đánh giá phù hợp bộ lọc, mới nhất trước</caption>
+                <thead class="thead-light"><tr><th scope="col">Khách hàng</th><th scope="col">Món ăn</th><th scope="col">Đánh giá</th><th scope="col">Bình luận</th><th scope="col">Trạng thái</th>@if (canModerate) { <th scope="col">Thao tác</th> }</tr></thead>
+                <tbody>
+                    @foreach (var review in reviews)
+                    {
+                        <tr>
+                            <td data-label="Khách hàng"><strong class="d-block">@(review.User == null ? "Khách hàng không còn tồn tại" : review.User.FullName)</strong><small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
+                            <td data-label="Món ăn">@(review.Dish == null ? "Món đã ngừng bán" : review.Dish.Name)</td>
+                            <td data-label="Đánh giá"><span class="reviews-rating"><span class="reviews-stars" aria-hidden="true">@for (int star = 1; star <= 5; star++) {<i class="fa @(star <= review.Rating ? "fa-star" : "fa-star-o")"></i>}</span><span class="d-block small">@review.Rating/5 sao</span></span></td>
+                            <td data-label="Bình luận"><div class="reviews-comment">@(string.IsNullOrWhiteSpace(review.Comment) ? "Không có bình luận." : review.Comment)</div></td>
+                            <td data-label="Trạng thái"><span class="badge badge-@(review.IsApproved ? "success" : "secondary")">@(review.IsApproved ? "Đang hiển thị" : "Đang ẩn")</span></td>
+                            @if (canModerate)
+                            {
+                                <td data-label="Thao tác">
+                                    @using (Html.BeginForm("Moderate", "Reviews", new { area = "Admin" }, FormMethod.Post, new { @class = "reviews-moderation" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@review.Id" />
+                                        <input type="hidden" name="approved" value="@(review.IsApproved ? "false" : "true")" />
+                                        <input type="hidden" name="filterApproved" value="@approved" />
+                                        <input type="hidden" name="search" value="@ViewBag.Search" />
+                                        <button type="submit" class="btn btn-sm btn-outline-@(review.IsApproved ? "secondary" : "success")">@(review.IsApproved ? "Ẩn đánh giá" : "Duyệt hiển thị")</button>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table></div>
+        }
+    </div>
 </div>
-</div>
-@if(canModerate) { <form method="get" class="filter-bar">
-<input class="form-control" name="search" value="@ViewBag.Search" placeholder="Tìm khách hàng, món ăn, bình luận" aria-label="Tìm đánh giá"/>
-<select class="form-control" name="approved" aria-label="Trạng thái duyệt">
-<option value="">Tất cả</option>
-<option value="false" @(Request.QueryString["approved"]=="false"?"selected":"")>Đang ẩn</option>
-<option value="true" @(Request.QueryString["approved"]=="true"?"selected":"")>Đang hiển thị</option>
-</select>
-<button class="btn btn-warning">Lọc đánh giá</button>
-</form> }
-<div class="table-responsive">
-<table class="table">
-<thead>
-<tr>
-<th>Khách hàng</th>
-<th>Món ăn</th>
-<th>Số sao</th>
-<th>Bình luận</th>
-<th>Hiển thị</th>@if(canModerate){<th>Thao tác</th>}</tr>
-</thead>
-<tbody>
-@foreach(var review in Model) { <tr>
-<td>@review.User.FullName<br/>
-<small>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
-</td>
-<td>@(review.Dish==null?"Món đã ngừng bán":review.Dish.Name)</td>
-<td>@review.Rating/5</td>
-<td>@review.Comment</td>
-<td>@(review.IsApproved?"Công khai":"Đang ẩn")</td>@if(canModerate){<td>@using(Html.BeginForm("Moderate", "Reviews",new{area="Admin"},FormMethod.Post,null)){@Html.AntiForgeryToken()<input type="hidden" name="id" value="@review.Id"/>
-<input type="hidden" name="approved" value="@(!review.IsApproved?"true":"false")"/>
-<button class="btn btn-sm btn-outline-secondary">@(review.IsApproved?"Ẩn đánh giá":"Duyệt hiển thị")</button>}</td>}</tr> }
-</tbody>
-</table>
-</div>
-@if(!Model.Any()){<p class="empty-state">Chưa có đánh giá phù hợp.</p>}

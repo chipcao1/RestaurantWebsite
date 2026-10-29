@@ -64,27 +64,7 @@ namespace RestaurantWebsite.Areas.Staff.Controllers
         [HttpGet]
         public ActionResult Dishes(string search, string categoryId)
         {
-            var query = db.Dishes.Include(d => d.Category).AsQueryable();
-
-            int catId;
-            if (!string.IsNullOrWhiteSpace(categoryId) && int.TryParse(categoryId, out catId))
-            {
-                query = query.Where(d => d.CategoryId == catId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                search = search.Trim().ToLower();
-                query = query.Where(d => d.Name.ToLower().Contains(search) || d.Category.Name.ToLower().Contains(search));
-            }
-
-            var dishes = query.OrderBy(d => d.Category.Name).ThenBy(d => d.Name).ToList();
-
-            ViewBag.Categories = new SelectList(db.Categories.Where(c => c.IsActive).OrderBy(c => c.Name), "Id", "Name", categoryId);
-            ViewBag.SearchTerm = search;
-            ViewBag.SelectedCategory = categoryId;
-
-            return View("~/Areas/Staff/Views/Staff/Dishes.cshtml", dishes);
+            return RedirectToAction("Index", "Dishes", new { area = "Staff", search, categoryId });
         }
 
         // =====================================================
@@ -94,19 +74,13 @@ namespace RestaurantWebsite.Areas.Staff.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ToggleDishStatus(int id)
         {
-            var dish = db.Dishes.Find(id);
-            if (dish == null)
+            try
             {
-                TempData["Error"] = "Không tìm thấy món ăn.";
-                return RedirectToAction("Dishes");
+                new RestaurantWebsite.Services.DishAvailabilityService(db).Toggle(id);
+                TempData["Success"] = "Đã cập nhật tình trạng phục vụ món ăn.";
             }
-
-            // Toggle Status between Available and Temporarily Unavailable
-            dish.Status = (dish.Status == "Available") ? "Temporarily Unavailable" : "Available";
-            db.SaveChanges();
-
-            TempData["Success"] = "Đã lưu thay đổi thành công.";
-            return RedirectToAction("Dishes");
+            catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
+            return RedirectToAction("Index", "Dishes", new { area = "Staff" });
         }
 
         // =====================================================
@@ -184,6 +158,7 @@ namespace RestaurantWebsite.Areas.Staff.Controllers
             var query = db.Reservations
                 .Include(r => r.User)
                 .Include(r => r.Table)
+                .Include(r => r.Orders)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(status) && status != "All")
