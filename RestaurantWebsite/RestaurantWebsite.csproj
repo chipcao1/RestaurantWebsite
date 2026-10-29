@@ -152,51 +152,8 @@
     <Content Include="Resources\User\images\about-img.png" />
     <Content Include="Resources\User\images\client1.jpg" />
     <Content Include="Resources\User\images\client2.jpg" />
-    <Content Include="Resources\User\images\combo01.jpg" />
-    <Content Include="Resources\User\images\combo03.jpg" />
-    <Content Include="Resources\User\images\dish01.jpg" />
-    <Content Include="Resources\User\images\dish02.jpg" />
-    <Content Include="Resources\User\images\dish03.jpg" />
-    <Content Include="Resources\User\images\dish04.jpg" />
-    <Content Include="Resources\User\images\dish05.jpg" />
-    <Content Include="Resources\User\images\dish06.jpg" />
-    <Content Include="Resources\User\images\dish07.jpg" />
-    <Content Include="Resources\User\images\dish08.jpg" />
-    <Content Include="Resources\User\images\dish09.jpg" />
-    <Content Include="Resources\User\images\dish10.jpg" />
-    <Content Include="Resources\User\images\dish11.jpg" />
-    <Content Include="Resources\User\images\dish12.jpg" />
-    <Content Include="Resources\User\images\dish13.jpg" />
-    <Content Include="Resources\User\images\dish14.jpg" />
-    <Content Include="Resources\User\images\dish15.jpg" />
-    <Content Include="Resources\User\images\dish16.jpg" />
-    <Content Include="Resources\User\images\dish17.jpg" />
-    <Content Include="Resources\User\images\dish18.jpg" />
-    <Content Include="Resources\User\images\dish19.jpg" />
-    <Content Include="Resources\User\images\dish20.jpg" />
-    <Content Include="Resources\User\images\dish21.jpg" />
-    <Content Include="Resources\User\images\dish22.jpg" />
-    <Content Include="Resources\User\images\dish23.jpg" />
-    <Content Include="Resources\User\images\dish24.jpg" />
-    <Content Include="Resources\User\images\dish25.jpg" />
-    <Content Include="Resources\User\images\dish26.jpg" />
-    <Content Include="Resources\User\images\dish27.jpg" />
-    <Content Include="Resources\User\images\dish28.jpg" />
-    <Content Include="Resources\User\images\dish29.jpg" />
-    <Content Include="Resources\User\images\dish30.jpg" />
-    <Content Include="Resources\User\images\f1.png" />
-    <Content Include="Resources\User\images\f2.png" />
-    <Content Include="Resources\User\images\f3.png" />
-    <Content Include="Resources\User\images\f4.png" />
-    <Content Include="Resources\User\images\f5.png" />
-    <Content Include="Resources\User\images\f6.png" />
-    <Content Include="Resources\User\images\f7.png" />
-    <Content Include="Resources\User\images\f8.png" />
-    <Content Include="Resources\User\images\f9.png" />
     <Content Include="Resources\User\images\favicon.png" />
     <Content Include="Resources\User\images\hero-bg.jpg" />
-    <Content Include="Resources\User\images\o1.jpg" />
-    <Content Include="Resources\User\images\o2.jpg" />
     <Content Include="Resources\User\js\bootstrap.js" />
     <Content Include="Resources\User\js\custom.js" />
     <Content Include="Resources\User\js\jquery-3.4.1.min.js" />
@@ -355,6 +312,11 @@
     <Content Include="Scripts\checkout.js" />
   </ItemGroup>
   <ItemGroup>
+    </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\menu-catalog.js" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -430,6 +392,7 @@
     <Compile Include="Filters\VietnameseValidationFilter.cs" />
     <Compile Include="Global.asax.cs" />
     <Compile Include="Infrastructure\DecimalModelBinder.cs" />
+    <Compile Include="Infrastructure\MenuImages.cs" />
     <Compile Include="Infrastructure\RestaurantClock.cs" />
     <Compile Include="Infrastructure\Vietnamese.cs" />
     <Compile Include="Infrastructure\ViewOptions.cs" />
@@ -493,6 +456,23 @@
     <Content Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\menu-catalog.js" />
+    <Content Include="Content\fonts\dancing-script-LICENSE.txt" />
+    <Content Include="Content\fonts\dancing-script-latin-400-normal.woff2" />
+    <Content Include="Content\fonts\dancing-script-latin-700-normal.woff2" />
+    <Content Include="Content\fonts\dancing-script-vietnamese-400-normal.woff2" />
+    <Content Include="Content\fonts\dancing-script-vietnamese-700-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-LICENSE.txt" />
+    <Content Include="Content\fonts\open-sans-latin-400-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-latin-600-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-latin-700-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-vietnamese-400-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-vietnamese-600-normal.woff2" />
+    <Content Include="Content\fonts\open-sans-vietnamese-700-normal.woff2" />
+    <Content Include="Content\images\feane-logo.svg" />
+    <Content Include="Content\images\food-placeholder.svg" />
+    <Content Include="Scripts\food-images.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\fonts\SOURCES.md" />
   </ItemGroup>
 </Project>

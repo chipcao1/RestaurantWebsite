@@ -43,6 +43,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Checkout preview checks failed' }
           node tests/menu-catalog.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Menu catalog checks failed' }
+          node tests/food-images.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Food image checks failed' }
       - name: Start isolated LocalDB
         shell: pwsh
         run: |

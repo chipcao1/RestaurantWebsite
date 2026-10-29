@@ -11,6 +11,7 @@ namespace RestaurantWebsite.ViewModels
         public IList<Combo> Combos { get; set; } = new List<Combo>();
         public string Search { get; set; }
         public int? SelectedCategoryId { get; set; }
+        public int PreviewLimit { get; set; }
 
         public bool Matches(string name, string description, int? categoryId, bool combo)
         {

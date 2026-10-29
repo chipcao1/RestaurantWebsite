@@ -39,7 +39,7 @@ class Program
         Check(!WorkflowRules.Overlaps(now, now.AddHours(2), now.AddHours(2), now.AddHours(3)), "adjacent table slots do not overlap");
         Check(WorkflowRules.Overlaps(now, now.AddHours(2), now.AddMinutes(30), now.AddHours(3)), "table slots overlap");
         Check(CatalogRules.ValidImageUrl("https://example.com/ảnh.jpg"), "HTTPS image accepted");
-        Check(CatalogRules.ValidImageUrl("~/Resources/User/images/f1.png"), "local image accepted");
+        Check(CatalogRules.ValidImageUrl("~/Content/images/food-placeholder.svg"), "local image accepted");
         Check(!CatalogRules.ValidImageUrl("javascript:alert(1)"), "script image rejected");
         Check(!CatalogRules.ValidImageUrl("//example.com/track"), "protocol relative image rejected");
         Check(!CatalogRules.ValidImageUrl("/../Web.config"), "traversal image rejected");
@@ -93,6 +93,11 @@ class Program
         combo.StartDate=now.AddDays(-2);combo.EndDate=now.AddDays(-1);Check(CatalogRules.ComboStatus(combo,now)=="Expired","combo status reports ended schedule");
         combo.EndDate=now.AddDays(1);Check(CatalogRules.ComboStatus(combo,now)=="Active","combo status reports actually purchasable combo");
         dish.Status="Discontinued";Check(CatalogRules.ComboStatus(combo,now)=="Unavailable","combo with unavailable ingredients is not labelled on sale");
+        Check(MenuImages.Resolve("/Resources/User/images/dish01.jpg")==MenuImages.RemoteRoot+"dish01.jpg","removed dish asset resolves to immutable HTTPS image");
+        Check(MenuImages.Resolve("~/Resources/User/images/combo03.jpg")==MenuImages.RemoteRoot+"combo03.jpg","removed combo asset resolves to HTTPS image");
+        Check(MenuImages.Resolve("https://example.test/food.jpg")=="https://example.test/food.jpg","custom internet photos remain unchanged");
+        Check(MenuImages.Resolve(null)==MenuImages.Placeholder&&MenuImages.Resolve("javascript:alert(1)")==MenuImages.Placeholder,"missing or unsafe images use small local SVG");
+        Check(MenuImages.Dish("Phở bò")==MenuImages.Dish("Beef Noodles"),"Vietnamese and main English dish names share image mapping");
         Console.WriteLine(passed + " tests passed");
     }
 }

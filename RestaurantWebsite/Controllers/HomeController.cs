@@ -15,7 +15,9 @@ namespace RestaurantWebsite.Controllers
         // =====================================================
         public ActionResult Index(string search, int? categoryId)
         {
-            return View(new RestaurantWebsite.Services.MenuCatalogService(db).Load(search, categoryId));
+            var catalog = new RestaurantWebsite.Services.MenuCatalogService(db).Load(search, categoryId);
+            catalog.PreviewLimit = 6;
+            return View(catalog);
         }
 
         // =====================================================

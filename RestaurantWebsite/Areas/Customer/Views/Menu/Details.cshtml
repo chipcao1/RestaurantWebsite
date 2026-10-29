@@ -42,7 +42,7 @@ else
                 @if (primaryImage != null &&
                      !string.IsNullOrEmpty(primaryImage.ImageUrl))
                 {
-                    <img src="@Url.Content(primaryImage.ImageUrl)"
+                    <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(primaryImage.ImageUrl))"
                          id="mainModalImg"
                          alt="@Model.Name"
                          class="img-fluid rounded"
@@ -50,7 +50,7 @@ else
                 }
                 else
                 {
-                    <img src="@Url.Content("~/Resources/User/images/f1.png")"
+                    <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Placeholder)"
                          id="mainModalImg"
                          alt="Ảnh mặc định"
                          class="img-fluid rounded"
@@ -72,7 +72,7 @@ else
                         {
                             <div class="col-3 p-1">
 
-                                <img src="@Url.Content(img.ImageUrl)"
+                                <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(img.ImageUrl))"
                                      class="img-thumbnail"
                                      style="height:50px;width:100%;object-fit:cover;cursor:pointer;"
                                      onclick="document.getElementById('mainModalImg').src=this.src"

@@ -113,7 +113,7 @@
 
 
                             string imageUrl =
-                                "~/Resources/User/images/f1.png";
+                                RestaurantWebsite.Infrastructure.MenuImages.Placeholder;
 
 
                             if (item.DishImages != null &&
@@ -139,7 +139,7 @@
 
                                     <div class="d-flex align-items-center">
 
-                                        <img src="@Url.Content(imageUrl)"
+                                        <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(imageUrl))"
                                              alt="@item.Name"
                                              style="width:70px;height:70px;object-fit:cover;border-radius:8px;"
                                              class="mr-3" />
@@ -329,13 +329,13 @@
                                     @if (!string.IsNullOrEmpty(
                                         combo.ImageUrl))
                                     {
-                                        <img src="@Url.Content(combo.ImageUrl)"
+                                        <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(combo.ImageUrl))"
                                              alt="@combo.Name"
                                              style="width:100px;height:100px;object-fit:cover;border-radius:10px;" />
                                     }
                                     else
                                     {
-                                        <img src="@Url.Content("~/Resources/User/images/o2.jpg")"
+                                        <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Placeholder)"
                                              alt="@combo.Name"
                                              style="width:100px;height:100px;object-fit:cover;border-radius:10px;" />
                                     }

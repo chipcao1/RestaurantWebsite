@@ -2,9 +2,10 @@
 @using RestaurantWebsite.Infrastructure
 @model RestaurantWebsite.ViewModels.MenuCatalogViewModel
 @{
+    int shown = 0;
     int visibleCount = Model.Dishes.Count(d => Model.Matches(d.Name, d.Description, d.CategoryId, false)) + Model.Combos.Count(c => Model.Matches(c.Name, c.Description, null, true));
 }
-<section class="food_section layout_padding menu-catalog" data-menu-catalog data-selected-category="@(Model.SelectedCategoryId.HasValue ? Model.SelectedCategoryId.Value.ToString() : "all")">
+<section class="food_section layout_padding menu-catalog" data-menu-catalog data-preview-limit="@Model.PreviewLimit" data-selected-category="@(Model.SelectedCategoryId.HasValue ? Model.SelectedCategoryId.Value.ToString() : "all")">
     <div class="container">
         <div class="heading_container heading_center mb-4">
             <h2>Thực đơn của nhà hàng</h2>
@@ -30,14 +31,15 @@
             }
             <button type="button" class="catalog-filter" data-menu-filter="combo" aria-pressed="false">Suất ăn kết hợp</button>
         </div>
-        <p class="text-muted small text-center mb-4" data-menu-count aria-live="polite">Hiển thị @visibleCount món / suất ăn</p>
         <div class="row catalog-grid">
             @foreach (var dish in Model.Dishes)
             {
+                bool display = Model.Matches(dish.Name, dish.Description, dish.CategoryId, false) && (Model.PreviewLimit <= 0 || shown < Model.PreviewLimit);
+                if (display) { shown++; }
                 var image = dish.DishImages.FirstOrDefault(i => i.IsPrimary) ?? dish.DishImages.FirstOrDefault();
-                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="dish" data-category="@dish.CategoryId" data-search="@(dish.Name + " " + dish.Description)" hidden="@(!Model.Matches(dish.Name, dish.Description, dish.CategoryId, false) ? "hidden" : null)">
+                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="dish" data-category="@dish.CategoryId" data-search="@(dish.Name + " " + dish.Description)" hidden="@(!display ? "hidden" : null)">
                     <div class="box">
-                        <div class="img-box"><img src="@Url.Content(image == null ? "~/Resources/User/images/f1.png" : image.ImageUrl)" alt="@dish.Name" loading="lazy" /></div>
+                        <div class="img-box"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(image == null ? null : image.ImageUrl))" alt="@dish.Name" loading="lazy" /></div>
                         <div class="detail-box">
                             <h5>@dish.Name</h5><p>@dish.Description</p>
                             <div class="options">
@@ -50,9 +52,11 @@
             }
             @foreach (var combo in Model.Combos)
             {
-                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="combo" data-category="" data-search="@(combo.Name + " " + combo.Description)" hidden="@(!Model.Matches(combo.Name, combo.Description, null, true) ? "hidden" : null)">
+                bool display = Model.Matches(combo.Name, combo.Description, null, true) && (Model.PreviewLimit <= 0 || shown < Model.PreviewLimit);
+                if (display) { shown++; }
+                <div class="col-sm-6 col-lg-4 mb-4" data-menu-item data-kind="combo" data-category="" data-search="@(combo.Name + " " + combo.Description)" hidden="@(!display ? "hidden" : null)">
                     <div class="box">
-                        <div class="img-box"><img src="@Url.Content(string.IsNullOrWhiteSpace(combo.ImageUrl) ? "~/Resources/User/images/o2.jpg" : combo.ImageUrl)" alt="@combo.Name" loading="lazy" /></div>
+                        <div class="img-box"><img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(combo.ImageUrl))" alt="@combo.Name" loading="lazy" /></div>
                         <div class="detail-box">
                             <h5>@combo.Name</h5><p>@(string.IsNullOrWhiteSpace(combo.Description) ? "Kết hợp những món ngon cho bữa ăn trọn vẹn." : combo.Description)</p>
                             <div class="options">
@@ -65,6 +69,10 @@
             }
         </div>
         <div class="empty-state" data-menu-empty hidden="@(visibleCount > 0 ? "hidden" : null)">Không tìm thấy món hoặc suất ăn phù hợp. Hãy chọn loại khác hoặc xóa từ khóa tìm kiếm.</div>
+        @if (Model.PreviewLimit > 0)
+        {
+            <div class="text-center mt-4"><a class="btn btn-warning rounded-pill px-4" href="@Url.Action("Index", "Menu", new { area = "Customer" })">Xem toàn bộ thực đơn <i class="fa fa-arrow-right ml-2"></i></a></div>
+        }
         <noscript><p class="text-muted">Bật JavaScript để lọc món ngay tại trang và xem chi tiết trong cửa sổ.</p></noscript>
     </div>
     <div class="modal fade" data-menu-modal tabindex="-1" role="dialog" aria-label="Chi tiết thực đơn" aria-hidden="true">

@@ -30,4 +30,15 @@ Mật khẩu chung **chỉ dùng thử nghiệm**: `YamyDemo@2026!`.
 
 Nếu email đã tồn tại, mật khẩu và trạng thái tài khoản cũ được giữ nguyên; nếu vai trò khác vai trò mẫu thì script dừng và rollback. Danh mục, món, bàn và khuyến mãi cùng khóa đã tồn tại cũng được giữ nguyên. Vì vậy số lượng thêm mới có thể thấp hơn bảng trên.
 
-Cú pháp được kiểm tra bằng Microsoft ScriptDom chế độ SQL Server 2012; cả bốn hash được kiểm chứng bằng `PasswordHasher` của ứng dụng. Các cột INSERT và ảnh được đối chiếu với migration main và file ảnh thực tế. WindowsChecks có kiểm tra thực thi script, tính đúng tổng tiền, đăng nhập mẫu, chạy hai lần không trùng và giữ giá/mật khẩu đã sửa trong database thử nghiệm riêng. Bộ SQL/LocalDB này chưa được thực thi trong môi trường Linux.
+Cú pháp được kiểm tra bằng Microsoft ScriptDom chế độ SQL Server 2012; cả bốn hash được kiểm chứng bằng `PasswordHasher` của ứng dụng. Các cột INSERT được đối chiếu với migration main. URL ảnh trỏ tới ảnh có trong commit main cố định, không đóng gói ảnh món/suất ăn trong Yamy. WindowsChecks có kiểm tra thực thi script, tính đúng tổng tiền, đăng nhập mẫu, chạy hai lần không trùng và giữ giá/mật khẩu đã sửa trong database thử nghiệm riêng. Bộ SQL/LocalDB này chưa được thực thi trong môi trường Linux.
+
+
+## Cập nhật ảnh trên database đang dùng
+
+Mở [update-food-image-urls.sql](update-food-image-urls.sql), chọn đúng database trong SSMS rồi Execute. Script chỉ cập nhật URL ảnh trong DishImages/Comboes và URL danh mục đang trỏ tới ảnh mẫu cũ; món chưa có ảnh được thêm một ảnh đại diện. Không đổi cấu trúc bảng, giá, tên, tài khoản, đơn hay thanh toán.
+
+URL mặc định dùng ảnh gốc đang có tại commit main `2447b85b446d447c5bd7c051271d5dcccce7b7f9` trên GitHub (raw.githubusercontent.com). Không tải bản sao ảnh về dự án. Các file nguồn đã được xác nhận tồn tại trong Git; môi trường hiện tại chặn truy cập HTTP máy chủ ảnh, nên chưa xác nhận tải ảnh qua internet từ môi trường này. Trình duyệt cần truy cập được URL; nếu không web dùng SVG giữ chỗ.
+
+Để dùng ảnh internet mới bạn chọn, sửa các URL trong hai bảng ánh xạ `@DishImages` và `@ComboImages` trong SQL. Có sẵn tên món tiếng Việt, tên tiếng Anh của main và tên suất ăn mẫu Yamy. Dùng URL HTTPS trực tiếp tới ảnh. Đổi `@ReplaceExistingExternal` từ **0** thành **1** khi muốn thay cả URL HTTPS đã có theo bảng ánh xạ. Mặc định **0** giữ ảnh HTTPS tùy chỉnh; chỉ đổi ảnh trống hoặc đường dẫn mẫu cục bộ.
+
+Script có transaction và chạy lại không thêm trùng ảnh. Schema/migration không thay đổi, không cần Update-Database. File SQL chưa được thực thi trên SQL Server trong môi trường Linux; WindowsChecks có bài kiểm tra trên database thử nghiệm riêng.

@@ -147,11 +147,10 @@
                                 <td class="text-center align-middle">
                                     @if (primaryImg != null && !string.IsNullOrWhiteSpace(primaryImg.ImageUrl))
                                     {
-                                        <img src="@Url.Content(primaryImg.ImageUrl)"
+                                        <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(primaryImg.ImageUrl))"
                                              alt="@item.Name"
                                              class="img-thumbnail rounded"
-                                             style="width: 48px; height: 48px; object-fit: cover;"
-                                             onerror="this.onerror=null; this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                                             style="width: 48px; height: 48px; object-fit: cover;" />
                                     }
                                     else
                                     {

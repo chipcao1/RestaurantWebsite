@@ -19,11 +19,12 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="@Url.Content("~/Content/images/feane-logo.svg")" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>@ViewBag.Title · Feane</title>
     <link rel="stylesheet" href="@Url.Content("~/Resources/User/css/font-awesome.min.css")" />
     <link rel="stylesheet" href="@Url.Content("~/Resources/Admin/css/adminlte.min.css")" />
-    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css?v=20261029-2")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/yamy.css?v=20261029-3")" />
     @RenderSection("Styles", false)
 </head>
 <body class="hold-transition sidebar-mini layout-fixed operations">
@@ -49,7 +50,7 @@
     </nav>
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="@Url.RouteUrl(adminArea ? "AdminHome" : "StaffHome")" class="brand-link">
-            <img src="@Url.Content("~/Resources/Admin/img/AdminLTELogo.png")" alt="" class="brand-image img-circle elevation-3" />
+            <img src="@Url.Content("~/Content/images/feane-logo.svg")" alt="" class="brand-image img-circle elevation-3" />
             <span class="brand-text font-weight-light"><strong>Feane</strong> · @(adminArea ? "Quản trị" : "Nhân viên")</span>
         </a>
         <div class="sidebar">
@@ -98,6 +99,7 @@
 <script src="@Url.Content("~/Resources/User/js/bootstrap.js")"></script>
 <script src="@Url.Content("~/Resources/Admin/js/adminlte.min.js")"></script>
 @RenderSection("scripts", false)
+<script id="food-image-support" data-placeholder="@Url.Content("~/Content/images/food-placeholder.svg")" src="@Url.Content("~/Scripts/food-images.js")"></script>
 <script src="@Url.Content("~/Scripts/yamy.js")"></script>
 </body>
 </html>

@@ -16,7 +16,9 @@ namespace RestaurantWebsite.Areas.Customer.Controllers
         [HttpGet]
         public ActionResult Index(string search, int? categoryId)
         {
-            return View("~/Views/Home/Index.cshtml", new RestaurantWebsite.Services.MenuCatalogService(db).Load(search, categoryId));
+            var catalog = new RestaurantWebsite.Services.MenuCatalogService(db).Load(search, categoryId);
+            catalog.PreviewLimit = 6;
+            return View("~/Views/Home/Index.cshtml", catalog);
         }
 
         // GET: /customer/about

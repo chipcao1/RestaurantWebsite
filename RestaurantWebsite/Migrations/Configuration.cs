@@ -101,12 +101,12 @@ namespace RestaurantWebsite.Migrations
             // =====================================================
             var categories = new List<Category>
             {
-                new Category { Name = "Khai vị", Description = "Các món khai vị tươi ngon.", ImageUrl = "/Content/images/categories/appetizers.jpg", IsActive = true },
-                new Category { Name = "Món chính", Description = "Món chính từ thịt bò, heo và gà.", ImageUrl = "/Content/images/categories/main-dishes.jpg", IsActive = true },
-                new Category { Name = "Cơm và phở", Description = "Các món cơm và phở truyền thống.", ImageUrl = "/Content/images/categories/rice-noodles.jpg", IsActive = true },
-                new Category { Name = "Hải sản", Description = "Hải sản tươi ngon từ biển.", ImageUrl = "/Content/images/categories/seafood.jpg", IsActive = true },
-                new Category { Name = "Đồ uống", Description = "Nước giải khát và nước ép trái cây.", ImageUrl = "/Content/images/categories/drinks.jpg", IsActive = true },
-                new Category { Name = "Tráng miệng", Description = "Bánh ngọt và các món tráng miệng mát lạnh.", ImageUrl = "/Content/images/categories/desserts.jpg", IsActive = true }
+                new Category { Name = "Khai vị", Description = "Các món khai vị tươi ngon.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Gỏi cuốn tôm"), IsActive = true },
+                new Category { Name = "Món chính", Description = "Món chính từ thịt bò, heo và gà.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Bò nướng sốt nấm"), IsActive = true },
+                new Category { Name = "Cơm và phở", Description = "Các món cơm và phở truyền thống.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Cơm chiên trứng"), IsActive = true },
+                new Category { Name = "Hải sản", Description = "Hải sản tươi ngon từ biển.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Tôm nướng tỏi"), IsActive = true },
+                new Category { Name = "Đồ uống", Description = "Nước giải khát và nước ép trái cây.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Nước ngọt Coca-Cola"), IsActive = true },
+                new Category { Name = "Tráng miệng", Description = "Bánh ngọt và các món tráng miệng mát lạnh.", ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish("Bánh phô mai"), IsActive = true }
             };
 
             foreach (var category in categories)
@@ -179,7 +179,7 @@ namespace RestaurantWebsite.Migrations
 
 
             // =====================================================
-            // 4. DISH IMAGES (At least 2 dish images per dish)
+            // 4. DISH IMAGES (One remote primary image per dish)
             // =====================================================
             var allDishes = context.Dishes.ToList();
             foreach (var dish in allDishes)
@@ -189,14 +189,8 @@ namespace RestaurantWebsite.Migrations
                     context.DishImages.Add(new DishImage
                     {
                         DishId = dish.Id,
-                        ImageUrl = $"/Resources/User/images/dish{((dish.Id % 30) + 1):D2}.jpg",
+                        ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.Dish(dish.Name),
                         IsPrimary = true
-                    });
-                    context.DishImages.Add(new DishImage
-                    {
-                        DishId = dish.Id,
-                        ImageUrl = $"/Resources/User/images/f{((dish.Id % 9) + 1)}.png",
-                        IsPrimary = false
                     });
                 }
             }
@@ -241,9 +235,9 @@ namespace RestaurantWebsite.Migrations
 
             var combos = new List<Combo>
             {
-                new Combo { Name = "Suất ăn gia đình", Description = "Suất ăn đầy đủ dành cho cả gia đình.", Price = 299000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
-                new Combo { Name = "Suất gà và nước uống", Description = "Suất gà dùng cùng khoai tây chiên và nước uống.", Price = 139000, ImageUrl = "/Resources/User/images/combo03.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
-                new Combo { Name = "Suất tráng miệng", Description = "Kết hợp các món tráng miệng ngọt ngào.", Price = 99000, ImageUrl = "/Resources/User/images/combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) }
+                new Combo { Name = "Suất ăn gia đình", Description = "Suất ăn đầy đủ dành cho cả gia đình.", Price = 299000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất gà và nước uống", Description = "Suất gà dùng cùng khoai tây chiên và nước uống.", Price = 139000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo03.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) },
+                new Combo { Name = "Suất tráng miệng", Description = "Kết hợp các món tráng miệng ngọt ngào.", Price = 99000, ImageUrl = RestaurantWebsite.Infrastructure.MenuImages.RemoteRoot + "combo01.jpg", IsActive = true, StartDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(-1), EndDate = RestaurantWebsite.Infrastructure.RestaurantClock.Now.AddMonths(6) }
             };
 
             foreach (var combo in combos)

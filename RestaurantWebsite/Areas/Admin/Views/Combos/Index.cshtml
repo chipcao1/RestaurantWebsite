@@ -34,7 +34,7 @@
                     var badge = state == "Active" ? "success" : state == "Inactive" ? "secondary" : state == "Upcoming" ? "info" : "warning";
                     var label = state == "Active" ? "Đang bán" : state == "Inactive" ? "Ngừng bán" : state == "Unavailable" ? "Chưa thể phục vụ" : Vietnamese.Label(state);
                     <tr>
-                        <td><div class="d-flex align-items-center"><img class="combo-thumbnail mr-3" src="@Url.Content(string.IsNullOrWhiteSpace(item.ImageUrl) ? "~/Resources/User/images/o2.jpg" : item.ImageUrl)" alt="@item.Name" /><div><strong>@item.Name</strong><small class="d-block text-muted combo-description">@item.Description</small></div></div></td>
+                        <td><div class="d-flex align-items-center"><img data-food-image class="combo-thumbnail mr-3" src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(item.ImageUrl))" alt="@item.Name" /><div><strong>@item.Name</strong><small class="d-block text-muted combo-description">@item.Description</small></div></div></td>
                         <td>@if (!item.ComboItems.Any()){<span class="text-muted">Chưa có món</span>}else{foreach (var line in item.ComboItems){<small class="d-block">@(line.Dish == null ? "Món không còn tồn tại" : line.Dish.Name) <strong>× @line.Quantity</strong></small>}}</td>
                         <td class="text-right text-success font-weight-bold text-nowrap">@Vietnamese.Money(item.Price)</td>
                         <td class="small"><span class="d-block">Từ: @(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")</span><span>Đến: @(item.EndDate.HasValue ? item.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")</span></td>

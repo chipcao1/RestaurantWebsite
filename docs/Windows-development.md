@@ -18,6 +18,7 @@ dotnet run --project tests/RestaurantWebsite.Tests
 node tests/frontend-smoke.cjs
 node tests/checkout-preview.cjs
 node tests/menu-catalog.cjs
+node tests/food-images.cjs
 sqllocaldb start MSSQLLocalDB
 dotnet build tests/WindowsChecks/WindowsChecks.csproj -c Release
 & tests/WindowsChecks/bin/Release/net48/WindowsChecks.exe
@@ -79,8 +80,14 @@ Không dùng Linux để tuyên bố đã chạy IIS Express, LocalDB hoặc ki�
 
 ## Nghiệm thu Home/Menu và tổng quan
 
-- Home, /customer và /customer/Menu/Index phải có cùng danh sách món/ suất ăn đang phục vụ, không giới hạn sáu món. Chọn loại, gõ/xóa tìm kiếm, chọn lại Tất cả không đổi trang và lấy lại đủ kết quả.
+- Home và /customer dùng chung nguồn thực đơn nhưng chỉ xem trước tối đa 6 kết quả mỗi bộ lọc; /customer/Menu/Index hiển thị đầy đủ. Chọn loại, gõ/xóa tìm kiếm và chọn lại Tất cả không đổi trang. Không hiện số đếm món/suất ăn.
 - Mở Menu với categoryId rồi chọn Tất cả: vẫn thấy món ở các danh mục khác. CategoryId không hợp lệ trở về toàn bộ dữ liệu hợp lệ.
 - Chi tiết món/suất ăn mở trong modal ngay tại Home hoặc Menu, đúng trạng thái đăng nhập; chuyển nhanh hai món không hiển thị nhầm phản hồi cũ.
 - Combos có ảnh, thành phần, giá, lịch bán, trạng thái và bộ lọc; thử thêm/sửa và gửi lại form lỗi giữ lựa chọn/số lượng.
 - Tổng quan Admin/Staff dùng khung small-box/card như main; kiểm tra số liệu với database thật, tooltip SVG và bảng ngày; hourly value không được nhầm thành tiền đã thu. Kiểm tra desktop nội dung không bị sidebar che và trên điện thoại bảng chỉ cuộn trong card.
+
+## Ảnh internet và font
+
+Chạy database/update-food-image-urls.sql trong SSMS trên đúng database nếu muốn lưu URL ảnh HTTPS thay đường dẫn mẫu cũ. Xem database/README.md để thay URL mới theo tên và chọn cờ ghi đè ảnh HTTPS. Không cần Update-Database. Web vẫn nhận đường dẫn cũ qua helper trước khi chạy SQL; khi không truy cập ảnh được sẽ hiện SVG giữ chỗ.
+
+Ảnh mặc định được phục vụ từ raw.githubusercontent.com tại commit main cố định. Cần xác minh trình duyệt Windows truy cập được nguồn này hoặc dùng URL ảnh HTTPS công khai bạn chọn. Font Dancing Script/Open Sans và logo đã nằm cục bộ nên không cần Google Fonts. Kiểm tra tiêu đề có dấu Việt, logo góc trái và favicon; IIS có MIME cho woff2/svg.

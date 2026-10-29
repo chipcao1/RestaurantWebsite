@@ -157,7 +157,7 @@
                                    name="primaryImageUrl"
                                    id="dishImageUrl"
                                    class="form-control"
-                                   placeholder="Ví dụ: /Resources/User/images/dish01.jpg hoặc https://..."
+                                   placeholder="Ví dụ: https://..."
                                    value="@primaryImageUrl"
                                    maxlength="500" />
                             <small class="form-text text-muted">Đường dẫn nội bộ (ví dụ: <code>/Resources/User/images/...</code>) hoặc địa chỉ HTTPS.</small>
@@ -165,12 +165,11 @@
                             <!-- Image Preview -->
                             <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
                                 <span class="mr-2 small text-muted">Xem trước:</span>
-                                <img id="previewImg"
-                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(primaryImageUrl))"
+                                <img data-food-image id="previewImg"
+                                     src="@(string.IsNullOrWhiteSpace(primaryImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(primaryImageUrl)))"
                                      alt="Xem trước"
                                      class="img-thumbnail rounded"
-                                     style="width: 65px; height: 65px; object-fit: cover;"
-                                     onerror="this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                                     style="width: 65px; height: 65px; object-fit: cover;" />
                             </div>
                         </div>
                     </div>

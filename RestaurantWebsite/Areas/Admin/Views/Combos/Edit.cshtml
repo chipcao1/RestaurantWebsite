@@ -20,7 +20,7 @@
                 <div class="form-group"><label for="Description">Mô tả</label>@Html.TextAreaFor(m=>m.Description,new { @class="form-control",maxlength=500,rows=4,placeholder="Giới thiệu ngắn về suất ăn..." })</div>
                 <div class="form-group"><label for="ImageUrl">Đường dẫn ảnh</label>@Html.TextBoxFor(m=>m.ImageUrl,new { @class="form-control",maxlength=500,placeholder="https://... hoặc /Resources/..." })<small class="form-text text-muted">Dùng ảnh HTTPS hoặc ảnh nội bộ của website.</small>@Html.ValidationMessageFor(m=>m.ImageUrl,"",new { @class="text-danger" })</div>
                 @if (!string.IsNullOrWhiteSpace(Model.ImageUrl) && RestaurantWebsite.Services.CatalogRules.ValidImageUrl(Model.ImageUrl))
-                { <img class="combo-preview img-fluid rounded" src="@Url.Content(Model.ImageUrl)" alt="Ảnh suất ăn" /> }
+                { <img data-food-image class="combo-preview img-fluid rounded" src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(Model.ImageUrl))" alt="Ảnh suất ăn" /> }
             </div>
         </div></div>
         <div class="col-lg-5"><div class="card card-info card-outline">

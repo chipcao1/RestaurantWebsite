@@ -254,7 +254,7 @@
                             dish.Price * quantity;
 
                         string imageUrl =
-                            "~/Resources/User/images/f1.png";
+                            RestaurantWebsite.Infrastructure.MenuImages.Placeholder;
 
                         if (dish.DishImages != null &&
                             dish.DishImages.Any())
@@ -271,7 +271,7 @@
                         }
 
                         <div class="d-flex align-items-center border-bottom pb-3 mb-3">
-                            <img src="@Url.Content(imageUrl)"
+                            <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(imageUrl))"
                                  alt="@dish.Name"
                                  style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
                                  class="mr-3" />
@@ -302,13 +302,13 @@
 
                         string imageUrl =
                             string.IsNullOrWhiteSpace(combo.ImageUrl)
-                                ? "~/Resources/User/images/o2.jpg"
+                                ? RestaurantWebsite.Infrastructure.MenuImages.Placeholder
                                 : combo.ImageUrl;
 
                         <div class="border-bottom pb-3 mb-3">
 
                             <div class="d-flex align-items-center">
-                                <img src="@Url.Content(imageUrl)"
+                                <img data-food-image src="@Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(imageUrl))"
                                      alt="@combo.Name"
                                      style="width:65px;height:65px;object-fit:cover;border-radius:8px;"
                                      class="mr-3" />

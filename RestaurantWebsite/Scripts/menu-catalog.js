@@ -5,14 +5,14 @@
         var form = root.querySelector('[data-menu-form]');
         var filters = root.querySelectorAll('[data-menu-filter]');
         var items = root.querySelectorAll('[data-menu-item]');
-        var count = root.querySelector('[data-menu-count]');
         var empty = root.querySelector('[data-menu-empty]');
         var selected = root.dataset.selectedCategory || 'all';
+        var limit = Number(root.dataset.previewLimit) || 0;
         function render() {
             var query = search.value.trim().toLocaleLowerCase('vi-VN'), visible = 0;
             items.forEach(function (item) {
                 var matchesCategory = selected === 'all' || (selected === 'combo' ? item.dataset.kind === 'combo' : item.dataset.kind === 'dish' && item.dataset.category === selected);
-                item.hidden = !matchesCategory || item.dataset.search.toLocaleLowerCase('vi-VN').indexOf(query) < 0;
+                item.hidden = !matchesCategory || item.dataset.search.toLocaleLowerCase('vi-VN').indexOf(query) < 0 || (limit > 0 && visible >= limit);
                 if (!item.hidden) visible++;
             });
             filters.forEach(function (filter) {
@@ -20,7 +20,6 @@
                 filter.classList.toggle('active', active);
                 filter.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
-            count.textContent = 'Hiển thị ' + visible + ' món / suất ăn';
             empty.hidden = visible > 0;
         }
         filters.forEach(function (filter) { filter.addEventListener('click', function () { selected = filter.dataset.menuFilter; render(); }); });

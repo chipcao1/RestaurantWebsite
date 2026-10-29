@@ -12,31 +12,31 @@ function element(dataset={}){
  setAttribute(name,value){this.attributes[name]=value;},
  querySelector(){return null;},querySelectorAll(){return [];}};
 }
-function catalog(selected='all'){
- const root=element({selectedCategory:selected});
+function catalog(selected='all',limit=0){
+ const root=element({selectedCategory:selected,previewLimit:String(limit)});
  const filters=['all','1','2','combo'].map(category=>element({menuFilter:category}));
  const cards=Array.from({length:9},(_,i)=>element({category:i<4?'1':'2',kind:'dish',search:i===8?'Phở gà thơm ngon':'Món '+i}));
  cards.push(element({category:'',kind:'combo',search:'Suất gia đình'}));
  const input=element(),form=element(),count=element(),empty=element(),modal=element(),body=element(),title=element();
  const details=[element({menuDetail:"/dish/1",detailTitle:"Chi tiết món ăn"}),element({menuDetail:"/dish/2",detailTitle:"Chi tiết món ăn"})];
- root.querySelector=selector=>({'[data-menu-search]':input,'[data-menu-form]':form,'[data-menu-count]':count,'[data-menu-empty]':empty,'[data-menu-modal]':modal,'[data-menu-modal-body]':body,'[data-menu-modal-title]':title}[selector]||null);
+ root.querySelector=selector=>({'[data-menu-search]':input,'[data-menu-form]':form,'[data-menu-empty]':empty,'[data-menu-modal]':modal,'[data-menu-modal-body]':body,'[data-menu-modal-title]':title}[selector]||null);
  root.querySelectorAll=selector=>selector==='[data-menu-filter]'?filters:selector==='[data-menu-item]'?cards:selector==='[data-menu-detail]'?details:[];
  return{root,filters,cards,input,form,count,empty,details,body,title};
 }
-const home=catalog(),menu=catalog('2');
+const home=catalog('all',6),menu=catalog('2');
 const requests=[];
 vm.runInNewContext(fs.readFileSync(filename,'utf8'),{document:{querySelectorAll:()=>[home.root,menu.root]},window:{jQuery:()=>({modal(){}})},fetch(url,options){return new Promise(resolve=>requests.push({url,options,resolve}));}});
 const visible=c=>c.cards.filter(item=>!item.hidden).length;
-assert.equal(visible(home),10,'home shows more than the former six-item subset');
+assert.equal(visible(home),6,'Home previews six matching cards rather than the full menu');
 assert.equal(visible(menu),5,'category URL initializes filter without removing other cards');
 home.filters[1].dispatch('click');assert.equal(visible(home),4);
 assert.equal(visible(menu),5,'filter events must stay within their catalog instance');
-home.filters[0].dispatch('click');assert.equal(visible(home),10,'All restores the full catalog');
+home.filters[0].dispatch('click');assert.equal(visible(home),6,'Home All restores a six-card preview');
 menu.filters[0].dispatch('click');assert.equal(visible(menu),10,'All after a category URL still has the complete catalog');
 home.filters[3].dispatch('click');assert.equal(visible(home),1);
 home.filters[0].dispatch('click');home.input.value='PHỞ';home.input.dispatch('input');assert.equal(visible(home),1);
 home.input.value='không tồn tại';home.input.dispatch('input');assert.equal(home.empty.hidden,false);assert.equal(visible(home),0);
-home.input.value='';home.input.dispatch('input');assert.equal(visible(home),10);assert.equal(home.empty.hidden,true);
+home.input.value='';home.input.dispatch('input');assert.equal(visible(home),6);assert.equal(home.empty.hidden,true);
 assert.equal(home.form.dispatch('submit').defaultPrevented,true,'search submits in place without leaving Home');
 assert.equal(home.filters[0].attributes['aria-pressed'],'true');
 assert.equal(requests.length,0,'filtering must never fetch a partial catalog');

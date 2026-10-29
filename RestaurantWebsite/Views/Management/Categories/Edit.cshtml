@@ -99,7 +99,7 @@
                             @Html.TextBoxFor(m => m.ImageUrl, new {
                                 @class = "form-control",
                                 id = "categoryImageUrl",
-                                placeholder = "Ví dụ: /Resources/User/images/f1.png hoặc https://...",
+                                placeholder = "Ví dụ: https://...",
                                 maxlength = "250"
                             })
                             @Html.ValidationMessageFor(m => m.ImageUrl, "", new { @class = "text-danger small" })
@@ -107,12 +107,11 @@
                             <!-- Live preview block -->
                             <div class="mt-2 d-flex align-items-center" id="imagePreviewContainer">
                                 <span class="mr-2 small text-muted">Xem trước:</span>
-                                <img id="previewImg"
-                                     src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(Model.ImageUrl))"
+                                <img data-food-image id="previewImg"
+                                     src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/Resources/Admin/img/default-150x150.png") : Url.Content(RestaurantWebsite.Infrastructure.MenuImages.Resolve(Model.ImageUrl)))"
                                      alt="Xem trước"
                                      class="img-thumbnail rounded"
-                                     style="width: 60px; height: 60px; object-fit: cover;"
-                                     onerror="this.src='@Url.Content("~/Resources/Admin/img/default-150x150.png")';" />
+                                     style="width: 60px; height: 60px; object-fit: cover;" />
                             </div>
                         </div>
                     </div>

@@ -125,7 +125,26 @@ class Program
                 var menuModel=(RestaurantWebsite.ViewModels.MenuCatalogViewModel)((ViewResult)menu.Index(category.Id,null)).Model;
                 Check(homeModel.Dishes.Select(d=>d.Id).SequenceEqual(menuModel.Dishes.Select(d=>d.Id))&&customerModel.Dishes.Select(d=>d.Id).SequenceEqual(menuModel.Dishes.Select(d=>d.Id)),"public Home, customer Home and Menu share the full catalog");
                 Check(homeModel.Combos.Select(c=>c.Id).SequenceEqual(menuModel.Combos.Select(c=>c.Id)),"Home and Menu share eligible combo data");
+                Check(homeModel.PreviewLimit==6&&customerModel.PreviewLimit==6&&menuModel.PreviewLimit==0,"Home previews six results while Menu remains unlimited");
             }
+        }
+    }
+    static void ImageUrlSql()
+    {
+        string sql=File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"update-food-image-urls.sql"));
+        using(var db=new AppDbContext())
+        {
+            var dish=db.Dishes.Single(d=>d.Name=="Cơm chiên bò");
+            var image=db.DishImages.Single(i=>i.DishId==dish.Id&&i.IsPrimary);image.ImageUrl="/Resources/User/images/dish13.jpg";
+            var customDish=db.Dishes.Single(d=>d.Name=="Phở bò");var custom=db.DishImages.Single(i=>i.DishId==customDish.Id&&i.IsPrimary);custom.ImageUrl="https://example.test/my-custom-photo.jpg";
+            var combo=db.Combos.Single(c=>c.Name=="Suất gà (mẫu Yamy)");combo.ImageUrl="~/Resources/User/images/combo01.jpg";
+            db.SaveChanges();decimal price=dish.Price;int imageCount=db.DishImages.Count();
+            db.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction,sql);
+            db.Entry(image).Reload();db.Entry(custom).Reload();db.Entry(combo).Reload();db.Entry(dish).Reload();
+            Check(image.ImageUrl==MenuImages.Dish(dish.Name)&&combo.ImageUrl==MenuImages.RemoteRoot+"combo03.jpg","SQL updates legacy dish and combo image URLs by name");
+            Check(custom.ImageUrl=="https://example.test/my-custom-photo.jpg"&&dish.Price==price,"SQL preserves custom HTTPS photos and dish prices");
+            db.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction,sql);
+            Check(db.DishImages.Count()==imageCount,"image URL SQL can run twice without duplicate image records");
         }
     }
     static void DemoSql()
@@ -215,6 +234,7 @@ class Program
             byte[] pdf=PdfService.Create("BÁO CÁO TIẾNG VIỆT",Enumerable.Range(1,180).Select(i=>"Dòng "+i+": Nguyễn Văn An — Thanh toán, hoàn tiền, đặt bàn."));
             Check(Encoding.ASCII.GetString(pdf,0,4)=="%PDF","PDF header");Check(Encoding.ASCII.GetString(pdf).Contains("/ToUnicode"),"PDF includes Unicode glyph map");using(var stream=new MemoryStream(pdf))using(var document=PdfReader.Open(stream,PdfDocumentOpenMode.Import))Check(document.PageCount>1,"PDF paginates long reports");
             DemoSql();
+            ImageUrlSql();
             CatalogAndDishPermissions();
             Console.WriteLine(passed+" Windows checks passed");
         }
